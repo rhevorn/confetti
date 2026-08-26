@@ -19,17 +19,17 @@ Confetti 用一个插件提供统一体验：
 
 ## 支持的格式
 
-| 格式               | 常见文件                                            |
-| ------------------ | --------------------------------------------------- |
-| Nginx              | `nginx.conf`，以及根据内容识别的 Nginx `.conf` 文件 |
-| SSH                | `~/.ssh/config`、`ssh_config`、`sshd_config`        |
-| 环境变量           | `.env`、`.env.local`、`.env.production`、`*.env`    |
-| INI / EditorConfig | `.ini`、`.cfg`、`.editorconfig`                     |
-| Java Properties    | `.properties`                                       |
-| TOML               | `.toml`，包括 `pyproject.toml`                      |
-| YAML               | `.yaml`、`.yml`                                     |
-| Git Config         | `.gitconfig`、`.gitmodules`、`.git/config`          |
-| npm Config         | `.npmrc`                                            |
+| 格式               | 场景文件                                            | 高亮 | 格式化 |
+| ------------------ | --------------------------------------------------- | :--: | :----: |
+| Nginx              | `nginx.conf`，以及根据内容识别的 Nginx `.conf` 文件 |  ✅  |   ✅   |
+| SSH                | `~/.ssh/config`、`ssh_config`、`sshd_config`        |  ✅  |   ✅   |
+| 环境变量           | `.env`、`.env.local`、`.env.production`、`*.env`    |  ✅  |   ✅   |
+| INI / EditorConfig | `.ini`、`.cfg`、`.editorconfig`                     |  ✅  |   ✅   |
+| Java Properties    | `.properties`                                       |  ✅  |   ✅   |
+| TOML               | `.toml`，包括 `pyproject.toml`                      |  ✅  |   ✅   |
+| YAML               | `.yaml`、`.yml`、Docker Compose 和工作流文件        |  ✅  |   ✅   |
+| Git Config         | `.gitconfig`、`.gitmodules`、`.git/config`          |  ✅  |   ✅   |
+| npm Config         | `.npmrc`                                            |  ✅  |   ✅   |
 
 ## 快速开始
 

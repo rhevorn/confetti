@@ -19,17 +19,17 @@ Confetti does not force a language mode when a file cannot be identified reliabl
 
 ## Supported formats
 
-| Format                | Common files                                            |
-| --------------------- | ------------------------------------------------------- |
-| Nginx                 | `nginx.conf`, Nginx `.conf` files detected from content |
-| SSH                   | `~/.ssh/config`, `ssh_config`, `sshd_config`            |
-| Environment variables | `.env`, `.env.local`, `.env.production`, `*.env`        |
-| INI / EditorConfig    | `.ini`, `.cfg`, `.editorconfig`                         |
-| Java Properties       | `.properties`                                           |
-| TOML                  | `.toml`, including `pyproject.toml`                     |
-| YAML                  | `.yaml`, `.yml`                                         |
-| Git Config            | `.gitconfig`, `.gitmodules`, `.git/config`              |
-| npm Config            | `.npmrc`                                                |
+| Format                | Typical files / scenarios                               | Highlighting | Formatting |
+| --------------------- | ------------------------------------------------------- | :----------: | :--------: |
+| Nginx                 | `nginx.conf`, Nginx `.conf` files detected from content |      ✅      |     ✅     |
+| SSH                   | `~/.ssh/config`, `ssh_config`, `sshd_config`            |      ✅      |     ✅     |
+| Environment variables | `.env`, `.env.local`, `.env.production`, `*.env`        |      ✅      |     ✅     |
+| INI / EditorConfig    | `.ini`, `.cfg`, `.editorconfig`                         |      ✅      |     ✅     |
+| Java Properties       | `.properties`                                           |      ✅      |     ✅     |
+| TOML                  | `.toml`, including `pyproject.toml`                     |      ✅      |     ✅     |
+| YAML                  | `.yaml`, `.yml`, Docker Compose and workflow files      |      ✅      |     ✅     |
+| Git Config            | `.gitconfig`, `.gitmodules`, `.git/config`              |      ✅      |     ✅     |
+| npm Config            | `.npmrc`                                                |      ✅      |     ✅     |
 
 ## Getting started
 
