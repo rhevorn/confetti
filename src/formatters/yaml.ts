@@ -31,7 +31,7 @@ function isBlockScalarHeader(line: string): boolean {
 }
 
 function indentation(line: string): number {
-  return line.match(/^ */)?.[0].length ?? 0
+  return line.search(/[^ ]|$/)
 }
 
 function formatStructuralWhitespace(line: string): string {
@@ -45,7 +45,7 @@ function formatStructuralWhitespace(line: string): string {
   const sequence = /^(\s*)-[ \t]+(.*)$/.exec(output)
   if (sequence) {
     const [, indent, value] = sequence
-    return `${indent}-${value === '' ? '' : ` ${value}`}`
+    return `${indent}- ${value}`
   }
 
   return output

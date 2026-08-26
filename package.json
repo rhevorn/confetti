@@ -26,11 +26,7 @@
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
-    "onStartupFinished",
-    "onCommand:confetti.detectConfigType",
-    "onCommand:confetti.formatConfig",
-    "onCommand:confetti.showDetectionInfo",
-    "onCommand:confetti.showOutput"
+    "onStartupFinished"
   ],
   "files": [
     "dist",
@@ -44,12 +40,13 @@
   "scripts": {
     "clean": "node scripts/clean.mjs",
     "build": "npm run clean && tsc -p tsconfig.json",
-    "check": "npm run typecheck && npm run lint && npm test",
+    "check": "npm run typecheck && npm run lint && npm run test:coverage",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "package": "npm run check && npm run build && vsce package --allow-missing-repository"
   },
@@ -244,6 +241,7 @@
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.3.0",
     "@types/vscode": "1.90.0",
+    "@vitest/coverage-v8": "^4.1.11",
     "@vscode/vsce": "^3.9.2",
     "eslint": "^10.9.1",
     "prettier": "^3.9.6",

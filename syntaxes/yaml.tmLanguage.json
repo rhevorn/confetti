@@ -40,7 +40,7 @@
     },
     {
       "name": "keyword.control.block-scalar.yaml",
-      "match": "[|>][+-]?[1-9]?(?=\\s*(?:#.*)?$)"
+      "match": "[|>](?:[+-][1-9]?|[1-9][+-]?)(?=\\s*(?:#.*)?$)|[|>](?=\\s*(?:#.*)?$)"
     },
     { "name": "entity.name.type.anchor.yaml", "match": "&[A-Za-z0-9_-]+" },
     { "name": "variable.other.alias.yaml", "match": "\\*[A-Za-z0-9_-]+" },
