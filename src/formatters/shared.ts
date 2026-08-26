@@ -25,37 +25,21 @@ export function splitAssignment(
   line: string,
   separators: readonly string[],
 ): Assignment | undefined {
-  let quote: string | undefined
-  let escaped = false
-
-  for (let index = 0; index < line.length; index += 1) {
-    const character = line[index]
-    if (escaped) {
-      escaped = false
-      continue
-    }
-    if (character === '\\') {
-      escaped = true
-      continue
-    }
-    if (quote) {
-      if (character === quote) quote = undefined
-      continue
-    }
-    if (character === '"' || character === "'") {
-      quote = character
-      continue
-    }
-    if (separators.includes(character)) {
-      const key = line.slice(0, index).trim()
-      if (key === '') return undefined
-      return {
-        key,
-        separator: character,
-        value: line.slice(index + 1).trim(),
-      }
-    }
+  const split = splitOnSymbol(
+    tokenizeLine(line, { symbols: separators }),
+    separators,
+  )
+  if (!split) return undefined
+  const key = tokenText(split.before)
+  if (key === '') return undefined
+  return {
+    key,
+    separator: split.symbol,
+    value: tokenText(split.after),
   }
-
-  return undefined
 }
+import {
+  splitOnSymbol,
+  tokenizeLine,
+  tokenText,
+} from '../tokenizers/scanner.js'

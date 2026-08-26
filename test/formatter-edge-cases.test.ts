@@ -7,7 +7,6 @@ import { formatNpmrc } from '../src/formatters/npmrc.js'
 import { formatProperties } from '../src/formatters/properties.js'
 import { formatSsh } from '../src/formatters/ssh.js'
 import { formatToml } from '../src/formatters/toml.js'
-import { formatYaml } from '../src/formatters/yaml.js'
 
 const formatters = [
   ['Nginx', formatNginx, 'events {\r\n}\r\n'],
@@ -18,7 +17,6 @@ const formatters = [
   ['npmrc', formatNpmrc, 'key=value\r\n'],
   ['SSH', formatSsh, 'Host work\r\nUser deploy\r\n'],
   ['TOML', formatToml, '[table]\r\nkey=value\r\n'],
-  ['YAML', formatYaml, 'key: value\r\n'],
 ] as const
 
 describe('formatter newline and empty-input contract', () => {
@@ -67,7 +65,7 @@ describe('formatIni edge cases', () => {
       formatIni(
         '  ; semicolon   \n # hash   \n [ section ] \npath : "a:b=c"\nempty =\n',
       ),
-    ).toBe('; semicolon\n# hash\n[ section ]\npath : "a:b=c"\nempty =\n')
+    ).toBe('; semicolon\n# hash\n[ section ]\npath: "a:b=c"\nempty =\n')
   })
 
   it('does not reinterpret a separator that only appears inside a string', () => {
@@ -85,7 +83,7 @@ describe('formatProperties edge cases', () => {
       '',
     ].join('\n')
     const expected = [
-      String.raw`escaped\:key:value`,
+      String.raw`escaped\:key=value`,
       'message=first ' + '\\',
       '  second ' + '\\\\',
       'next=done',
@@ -95,10 +93,16 @@ describe('formatProperties edge cases', () => {
     expect(formatProperties(input)).toBe(expected)
   })
 
-  it('preserves comment kinds and whitespace-separated properties', () => {
+  it('preserves comment kinds and normalizes whitespace-separated properties', () => {
     expect(
       formatProperties('  # hash\n  ! bang\nkey value with spaces\n'),
-    ).toBe('# hash\n! bang\nkey value with spaces\n')
+    ).toBe('# hash\n! bang\nkey=value with spaces\n')
+  })
+
+  it('leaves malformed and separator-free lines readable', () => {
+    expect(formatProperties('=missing-key\nbare-option\npath:   /tmp\n')).toBe(
+      '=missing-key\nbare-option\npath=/tmp\n',
+    )
   })
 })
 
@@ -121,6 +125,14 @@ describe('formatGitConfig edge cases', () => {
 
   it('leaves a root-level line without an assignment unindented', () => {
     expect(formatGitConfig('  bare-option  \n')).toBe('bare-option\n')
+  })
+
+  it('preserves every physical line in a continued value', () => {
+    const input =
+      '[alias]\ngraph = log --graph \\\n    --format=short \\\n      --all\n'
+    expect(formatGitConfig(input)).toBe(
+      '[alias]\n  graph = log --graph \\\n    --format=short \\\n      --all\n',
+    )
   })
 })
 
@@ -163,7 +175,7 @@ describe('formatNginx edge cases', () => {
     expect(
       formatNginx('http{\nserver{\nlisten 80 ;\n} server{\nlisten 81;\n}\n}\n'),
     ).toBe(
-      'http {\n  server {\n    listen 80;\n  } server {\n    listen 81;\n  }\n}\n',
+      'http {\n  server {\n    listen 80;\n  }\n  server {\n    listen 81;\n  }\n}\n',
     )
   })
 
@@ -174,6 +186,12 @@ describe('formatNginx edge cases', () => {
       ),
     ).toBe(
       'server {\n  set $value "{ # keep  spaces }";\n  set $escaped hello\\ world; # { comment\n}\n',
+    )
+  })
+
+  it('keeps a comment attached to an unterminated directive line', () => {
+    expect(formatNginx('log_format main $request # keep\n')).toBe(
+      'log_format main $request # keep\n',
     )
   })
 
@@ -189,6 +207,10 @@ describe('formatNginx edge cases', () => {
 
   it('handles an anonymous opening brace without adding leading space', () => {
     expect(formatNginx('{\n}\n')).toBe('{\n}\n')
+  })
+
+  it('collapses repeated blank lines without losing separation', () => {
+    expect(formatNginx('http {\n\n\n}\n')).toBe('http {\n\n}\n')
   })
 })
 
@@ -222,63 +244,92 @@ next = 2
 
   it('preserves an unterminated multiline string without corrupting it', () => {
     expect(formatToml('message="""\nkey    =    text\n')).toBe(
-      'message = """\nkey    =    text\n',
+      'message="""\nkey    =    text\n',
     )
   })
-})
 
-describe('formatYaml edge cases', () => {
-  it('formats safe mappings and sequences without changing flow values', () => {
+  it('formats container values before an inline comment', () => {
+    expect(formatToml('values=[ 1,  2 ]   # keep\n')).toBe(
+      'values = [1, 2] # keep\n',
+    )
+  })
+
+  it('preserves a comment-only value on malformed input', () => {
+    expect(formatToml('key = # keep\n')).toBe('key = # keep\n')
+  })
+
+  it('handles empty and unmatched container symbols without crashing', () => {
+    expect(formatToml('empty={}\nmalformed=}\n')).toBe(
+      'empty = {}\nmalformed=}\n',
+    )
+  })
+
+  it('preserves comments and blank lines inside multiline arrays', () => {
     expect(
-      formatYaml(
-        'enabled:    true\nitems:\n  -    one\nflow:    { left:  1, right: [2, 3] }\n"quoted key":    value\n',
+      formatToml(
+        'items=[\n # first group\n "a" , # trailing\n\n   # second group\n {name="b",meta={enabled=true}},\n]\n',
       ),
     ).toBe(
-      'enabled: true\nitems:\n  - one\nflow: { left:  1, right: [2, 3] }\n"quoted key":    value\n',
+      'items = [\n  # first group\n  "a", # trailing\n\n  # second group\n  { name = "b", meta = { enabled = true } },\n]\n',
     )
   })
 
-  it('preserves blank lines, comments, hashes, and quotes inside block scalars', () => {
-    const trailingSpaces = '  '
-    const input = `text:    |+ # header
-  first:    value${trailingSpaces}
-
-  "# not comment"
-# outside   
-next:    done
+  it('preserves all TOML string forms and hashes inside strings', () => {
+    const input = String.raw`basic = "a # b = c"
+literal = 'C:\Users\name # literal'
+multiline = """
+keep    spacing # and = signs
+"""
+multiline_literal = '''
+backslashes \\ stay literal
+'''
 `
-    expect(formatYaml(input)).toBe(`text: |+ # header
-  first:    value${trailingSpaces}
-
-  "# not comment"
-# outside
-next: done
-`)
+    expect(formatToml(input)).toBe(input)
   })
 
-  it('supports all valid block scalar indicator combinations', () => {
-    for (const indicator of [
-      '|',
-      '|-',
-      '|+',
-      '|2',
-      '|2-',
-      '|2+',
-      '|-2',
-      '|+2',
-    ]) {
-      const input = `value: ${indicator}\n  key:    untouched\nnext:    done\n`
-      expect(formatYaml(input)).toBe(
-        `value: ${indicator}\n  key:    untouched\nnext: done\n`,
-      )
-    }
+  it('preserves a space-delimited date-time value', () => {
+    expect(formatToml('updated=1979-05-27   07:32:00Z\n')).toBe(
+      'updated = 1979-05-27 07:32:00Z\n',
+    )
   })
 
-  it('scans escaped double quotes and closed single quotes safely', () => {
+  it('leaves malformed keys and unterminated single-line strings untouched', () => {
+    expect(formatToml('bad key=1\nvalue = "unterminated\nnext=2\n')).toBe(
+      'bad key=1\nvalue = "unterminated\nnext = 2\n',
+    )
+  })
+
+  it('leaves empty, invalid dotted, and separator-free keys untouched', () => {
+    expect(formatToml('=1\nkey..child=2\nkey.=3\n[]\nbare value\n')).toBe(
+      '=1\nkey..child=2\nkey.=3\n[]\nbare value\n',
+    )
+  })
+
+  it('formats decimal dots, empty containers, and multiline inline tables', () => {
     expect(
-      formatYaml(
-        'double:    "escaped \\" |"\nsingle:    \'closed |\'\nnext:    done\n',
+      formatToml(
+        'number=1.25\nempty_array = [ ]\nempty_table = { }\nrecord={\nname="demo",\nnested = {enabled=true}\n}\n',
       ),
-    ).toBe('double: "escaped \\" |"\nsingle: \'closed |\'\nnext: done\n')
+    ).toBe(
+      'number = 1.25\nempty_array = []\nempty_table = {}\nrecord = {\n  name = "demo",\n  nested = { enabled = true }\n}\n',
+    )
+  })
+
+  it('does not repair an invalid spaced decimal into a different value', () => {
+    expect(formatToml('number = 1 . 25\n')).toBe('number = 1 . 25\n')
+  })
+
+  it('keeps formatting stable for a representative nested document', () => {
+    const input = `[[products]]
+name="Hammer"
+sku=738594937
+colors = [
+  "red",
+  "blue", # popular
+]
+dimensions={width=10.5,height=5,metadata={unit="cm"}}
+`
+    const once = formatToml(input)
+    expect(formatToml(once)).toBe(once)
   })
 })

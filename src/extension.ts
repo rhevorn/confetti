@@ -157,9 +157,11 @@ export function activate(context: vscode.ExtensionContext): void {
       if (edits.length === 0) {
         const definition = definitionForDocument(editor.document)
         void vscode.window.showInformationMessage(
-          definition
+          definition?.formatter
             ? `${definition.displayName} is already formatted.`
-            : 'Confetti could not detect a supported configuration type.',
+            : definition
+              ? `Confetti does not provide a formatter for ${definition.displayName}.`
+              : 'Confetti could not detect a supported configuration type.',
         )
         return
       }
@@ -185,12 +187,13 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
     vscode.languages.registerDocumentFormattingEditProvider(
       [
-        ...registry.all().map((definition) => ({
-          language: definition.languageId,
+        ...registry
+          .all()
+          .filter((definition) => definition.formatter)
+          .map((definition) => ({ language: definition.languageId })),
+        ...['ini', 'properties', 'toml', 'dotenv'].map((language) => ({
+          language,
         })),
-        ...['ini', 'properties', 'yaml', 'dockercompose', 'toml', 'dotenv'].map(
-          (language) => ({ language }),
-        ),
       ],
       {
         provideDocumentFormattingEdits(document) {

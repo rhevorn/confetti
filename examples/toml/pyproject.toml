@@ -5,9 +5,9 @@ version = "0.1.0"
 requires-python = ">=3.12"
 keywords = ["config", "formatter", "highlighting"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Programming Language :: Python :: 3",
-  ]
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3", # supported runtime
+]
 
 [project.urls]
 Homepage = "https://example.test/confetti?a=b"
@@ -19,11 +19,14 @@ threshold = 70
 released_at = 2026-08-26T12:30:00Z
 hex_mask = 0xFF_A0
 dotted.key = "value"
-inline = { mode = "safe", retries = 3 }
+"quoted key" = 'literal # value'
+matrix = [[1, 2],[3, 4]]
+inline = { mode = "safe", retries = 3, metadata = { owner = "team", enabled = true } }
 description = """
-Confetti keeps multiline string content intact.
+Confetti keeps multiline  string content intact.
 The text may contain # signs and = characters.
 """
+windows_path = 'C:\Users\confetti\config'
 
 [[tool.confetti.rules]]
 pattern = "*.conf"

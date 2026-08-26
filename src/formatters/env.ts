@@ -1,4 +1,5 @@
 import { joinLines, normalizeLines, splitAssignment } from './shared.js'
+import { collapseTokenWhitespace, tokenizeLine } from '../tokenizers/scanner.js'
 
 export function formatEnv(content: string): string {
   const { lines, hasFinalNewline } = normalizeLines(content)
@@ -9,7 +10,8 @@ export function formatEnv(content: string): string {
     const assignment = splitAssignment(trimmed, ['='])
     if (!assignment) return trimmed
 
-    return `${assignment.key}=${assignment.value}`
+    const key = collapseTokenWhitespace(tokenizeLine(assignment.key))
+    return `${key}=${assignment.value}`
   })
   return joinLines(formatted, hasFinalNewline)
 }

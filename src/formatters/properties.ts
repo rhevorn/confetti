@@ -1,4 +1,34 @@
-import { joinLines, normalizeLines, splitAssignment } from './shared.js'
+import {
+  tokenizeLine,
+  tokenText,
+  trimTokenWhitespace,
+} from '../tokenizers/scanner.js'
+import { joinLines, normalizeLines } from './shared.js'
+
+function tokenizeProperty(
+  line: string,
+): { key: string; value: string } | undefined {
+  const tokens = trimTokenWhitespace(
+    tokenizeLine(line, { symbols: ['=', ':'] }),
+  )
+  const separatorIndex = tokens.findIndex(
+    ({ kind }) => kind === 'symbol' || kind === 'whitespace',
+  )
+  if (separatorIndex === -1) return undefined
+
+  const key = tokenText(trimTokenWhitespace(tokens.slice(0, separatorIndex)))
+  if (key === '') return undefined
+
+  let valueStart = separatorIndex + 1
+  while (tokens[valueStart]?.kind === 'whitespace') valueStart += 1
+  if (tokens[valueStart]?.kind === 'symbol') valueStart += 1
+  while (tokens[valueStart]?.kind === 'whitespace') valueStart += 1
+
+  return {
+    key,
+    value: tokenText(trimTokenWhitespace(tokens.slice(valueStart))),
+  }
+}
 
 function hasContinuation(line: string): boolean {
   let backslashes = 0
@@ -28,9 +58,9 @@ export function formatProperties(content: string): string {
       return trimmed
     }
 
-    const assignment = splitAssignment(trimmed, ['=', ':'])
-    if (!assignment) return trimmed
-    return `${assignment.key}${assignment.separator}${assignment.value}`
+    const property = tokenizeProperty(trimmed)
+    if (!property) return trimmed
+    return `${property.key}=${property.value}`
   })
 
   return joinLines(formatted, hasFinalNewline)

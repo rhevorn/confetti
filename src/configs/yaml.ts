@@ -1,6 +1,5 @@
 import path from 'node:path'
 import type { ConfigDefinition } from '../core/types.js'
-import { formatYaml } from '../formatters/yaml.js'
 
 export const yamlConfig: ConfigDefinition = {
   id: 'yaml',
@@ -15,5 +14,4 @@ export const yamlConfig: ConfigDefinition = {
     return Math.min(score, 100)
   },
   languageId: 'confetti-yaml',
-  formatter: formatYaml,
 }

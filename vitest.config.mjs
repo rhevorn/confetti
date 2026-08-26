@@ -14,6 +14,7 @@ export default defineConfig({
         'src/configs/**/*.ts',
         'src/core/**/*.ts',
         'src/formatters/**/*.ts',
+        'src/tokenizers/**/*.ts',
         'src/extension.ts',
         'src/language-compatibility.ts',
       ],
@@ -22,7 +23,7 @@ export default defineConfig({
       all: true,
       thresholds: {
         statements: 100,
-        branches: 99,
+        branches: 100,
         functions: 100,
         lines: 100,
       },

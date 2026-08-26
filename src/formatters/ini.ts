@@ -15,7 +15,8 @@ export function formatIni(content: string): string {
 
     const assignment = splitAssignment(trimmed, ['=', ':'])
     if (!assignment) return trimmed
-    return `${assignment.key} ${assignment.separator}${
+    const separator = assignment.separator === ':' ? ':' : ' ='
+    return `${assignment.key}${separator}${
       assignment.value === '' ? '' : ` ${assignment.value}`
     }`
   })

@@ -7,7 +7,6 @@ import { formatNpmrc } from '../src/formatters/npmrc.js'
 import { formatProperties } from '../src/formatters/properties.js'
 import { formatSsh } from '../src/formatters/ssh.js'
 import { formatToml } from '../src/formatters/toml.js'
-import { formatYaml } from '../src/formatters/yaml.js'
 
 describe('formatNginx', () => {
   const messy = `# keep this comment
@@ -46,12 +45,29 @@ return 200 "ok";# keep   comment
 }
 `)
   })
+
+  it('tokenizes compact blocks and emits one structural statement per line', () => {
+    expect(formatNginx('server{listen 80;location /{return 200 "ok";}}\n'))
+      .toBe(`server {
+  listen 80;
+  location / {
+    return 200 "ok";
+  }
+}
+`)
+  })
 })
 
 describe('formatEnv', () => {
   it('uses dotenv assignment spacing and preserves the value', () => {
     expect(formatEnv('  export API_URL   =   "https://x.test/a  b"  \n')).toBe(
       'export API_URL="https://x.test/a  b"\n',
+    )
+  })
+
+  it('normalizes whitespace between export and the key', () => {
+    expect(formatEnv('export   API_KEY   =   value\n')).toBe(
+      'export API_KEY=value\n',
     )
   })
 })
@@ -62,7 +78,7 @@ describe('formatIni', () => {
       formatIni(
         '  [*.ts]  \n  insert_final_newline   = true  \nurl: "https://x.test?a=b"\n',
       ),
-    ).toBe('[*.ts]\ninsert_final_newline = true\nurl : "https://x.test?a=b"\n')
+    ).toBe('[*.ts]\ninsert_final_newline = true\nurl: "https://x.test?a=b"\n')
   })
 })
 
@@ -72,6 +88,12 @@ describe('formatSsh', () => {
       formatSsh('  Host work\nHostName example.com\n  User deploy\n'),
     ).toBe('Host work\n  HostName example.com\n  User deploy\n')
   })
+
+  it('tokenizes directive spacing and inline comments', () => {
+    expect(
+      formatSsh('Host   work\nHostName    example.com   # primary\n'),
+    ).toBe('Host work\n  HostName example.com # primary\n')
+  })
 })
 
 describe('formatProperties', () => {
@@ -80,13 +102,19 @@ describe('formatProperties', () => {
     const expected = ['message=first \\', '    second part', ''].join('\n')
     expect(formatProperties(input)).toBe(expected)
   })
+
+  it('normalizes whitespace separators to an explicit equals sign', () => {
+    expect(formatProperties('host localhost\npath : /tmp\n')).toBe(
+      'host=localhost\npath=/tmp\n',
+    )
+  })
 })
 
 describe('formatToml', () => {
   it('normalizes assignments and preserves multiline value indentation', () => {
     const input = '[project]  \n  name   =   "a  b"\nvalues=[\n    1,\n]\n'
     expect(formatToml(input)).toBe(
-      '[project]\nname = "a  b"\nvalues = [\n    1,\n]\n',
+      '[project]\nname = "a  b"\nvalues = [\n  1,\n]\n',
     )
   })
 
@@ -111,6 +139,32 @@ key    =    untouched
 next = 1
 `)
   })
+
+  it('formats array and inline-table tokens', () => {
+    expect(
+      formatToml('[ section ]\nvalues=[  1,   2 ]\ninline={a=1,  b=2}\n'),
+    ).toBe('[section]\nvalues = [1, 2]\ninline = { a = 1, b = 2 }\n')
+  })
+
+  it('normalizes dotted and quoted keys without changing key content', () => {
+    expect(
+      formatToml(
+        '  physical . color . "bit depth" = 24\n[ fruit . "physical color" ] # table\n',
+      ),
+    ).toBe(
+      'physical.color."bit depth" = 24\n[fruit."physical color"] # table\n',
+    )
+  })
+
+  it('formats nested arrays and inline tables structurally', () => {
+    expect(
+      formatToml(
+        'matrix = [\n [1,2],\n [ 3, {x=1,y=[true,false]} ], # row\n]\n',
+      ),
+    ).toBe(
+      'matrix = [\n  [1, 2],\n  [3, { x = 1, y = [true, false] }], # row\n]\n',
+    )
+  })
 })
 
 describe('formatGitConfig', () => {
@@ -131,42 +185,6 @@ describe('formatNpmrc', () => {
   })
 })
 
-describe('formatYaml', () => {
-  it('formats safe structural whitespace and preserves block scalar content', () => {
-    const input =
-      'name:    app   \nitems:\n  -    one\ndescription: |  \n  keep me   \nnext: value   \n'
-    expect(formatYaml(input)).toBe(
-      'name: app\nitems:\n  - one\ndescription: |\n  keep me   \nnext: value\n',
-    )
-  })
-
-  it('preserves sequence block scalars and both indicator orders', () => {
-    const trailingSpaces = '   '
-    const input = `scripts:
-  -    |2-
-    key:    value${trailingSpaces}
-    left    =    right
-message:    >-2 # folded
-  keep:    every space${trailingSpaces}
-next:    value${trailingSpaces}
-`
-    expect(formatYaml(input)).toBe(`scripts:
-  - |2-
-    key:    value${trailingSpaces}
-    left    =    right
-message: >-2 # folded
-  keep:    every space${trailingSpaces}
-next: value
-`)
-  })
-
-  it('does not mistake a quoted pipe for a block scalar', () => {
-    expect(formatYaml('symbol:    "|"\nnext:    value\n')).toBe(
-      'symbol: "|"\nnext: value\n',
-    )
-  })
-})
-
 describe('formatter stability', () => {
   it.each([
     ['Nginx', formatNginx, 'server {\nlisten 80;\n}\n'],
@@ -177,7 +195,6 @@ describe('formatter stability', () => {
     ['TOML', formatToml, '[section]\n  key=value\n'],
     ['Git Config', formatGitConfig, '[core]\neditor=code\n'],
     ['npmrc', formatNpmrc, ' registry = https://registry.npmjs.org/ \n'],
-    ['YAML', formatYaml, 'items:\n  -    one\n'],
   ])('%s is idempotent', (_name, formatter, input) => {
     const once = formatter(input)
     expect(formatter(once)).toBe(once)

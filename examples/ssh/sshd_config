@@ -9,5 +9,5 @@
   ClientAliveCountMax 3
 
   Match User deploy
-  X11Forwarding no
+    X11Forwarding no
   AllowTcpForwarding yes

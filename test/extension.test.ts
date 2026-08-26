@@ -77,6 +77,16 @@ describe('VS Code extension adapter', () => {
       'confetti.showOutput',
     ])
     expect(mockState.formattingProvider).toBeDefined()
+    const selector = mockState.formattingSelector as Array<{
+      language: string
+    }>
+    expect(selector.map(({ language }) => language)).not.toContain(
+      'confetti-yaml',
+    )
+    expect(selector.map(({ language }) => language)).not.toContain('yaml')
+    expect(selector.map(({ language }) => language)).not.toContain(
+      'dockercompose',
+    )
     expect(mockState.openHandlers).toHaveLength(1)
     expect(mockState.saveHandlers).toHaveLength(1)
     expect(mockState.closeHandlers).toHaveLength(1)
@@ -212,6 +222,17 @@ describe('VS Code extension adapter', () => {
     await command('confetti.formatConfig')()
     expect(mockState.informationMessages.at(-1)).toBe(
       'Confetti could not detect a supported configuration type.',
+    )
+
+    const yaml = document(
+      '/app/config.yaml',
+      'items: [one, two]\n',
+      'confetti-yaml',
+    )
+    mockState.activeEditor = editor(yaml) as never
+    await command('confetti.formatConfig')()
+    expect(mockState.informationMessages.at(-1)).toBe(
+      'Confetti does not provide a formatter for YAML.',
     )
   })
 
