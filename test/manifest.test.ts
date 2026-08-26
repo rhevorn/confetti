@@ -103,6 +103,25 @@ describe('VS Code extension manifest', () => {
     }
   })
 
+  it('uses format-specific editor behavior for Nginx and SSH', () => {
+    const configurationFor = (languageId: string) => {
+      const language = manifest.contributes.languages.find(
+        ({ id }) => id === languageId,
+      )
+      if (!language) throw new Error(`Missing language: ${languageId}`)
+      return JSON.parse(
+        fs.readFileSync(contributedPath(language.configuration), 'utf8'),
+      ) as { brackets?: string[][]; comments?: { lineComment?: string } }
+    }
+
+    const nginx = configurationFor('confetti-nginx')
+    const ssh = configurationFor('confetti-ssh')
+    expect(nginx.comments?.lineComment).toBe('#')
+    expect(nginx.brackets).toContainEqual(['{', '}'])
+    expect(ssh.comments?.lineComment).toBe('#')
+    expect(ssh.brackets).toBeUndefined()
+  })
+
   it('contributes every syntax file exactly once and packages runtime assets', () => {
     const syntaxFiles = fs
       .readdirSync(path.join(root, 'syntaxes'))

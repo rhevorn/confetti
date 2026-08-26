@@ -32,7 +32,6 @@
     "dist",
     "syntaxes",
     "language-configurations",
-    "language-configuration.json",
     "README.md",
     "README.zh-CN.md",
     "LICENSE"
@@ -98,7 +97,7 @@
         "filenames": [
           "nginx.conf"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configurations/nginx.json"
       },
       {
         "id": "confetti-ssh",
@@ -110,7 +109,7 @@
           "ssh_config",
           "sshd_config"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configurations/ssh.json"
       },
       {
         "id": "confetti-env",
