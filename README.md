@@ -29,14 +29,14 @@ Core benchmark results for the generated Nginx sample:
 
 | Input  | Detection p95 | Formatting p95 |
 | ------ | ------------: | -------------: |
-| 100 KB |         ≤3 ms |          ≤5 ms |
-| 1 MB   |        ≤30 ms |         ≤70 ms |
+| 100 KB |         ≤3 ms |          ≤8 ms |
+| 1 MB   |        ≤30 ms |         ≤80 ms |
 
 Resource characteristics:
 
-- The 1.0.0 VSIX is approximately **107 KB** and has no runtime npm dependencies.
+- The 1.1.0 VSIX is approximately **115 KB** and has no runtime npm dependencies.
 - Detection retained about **0.04 MB** of additional heap for a 1 MB sample; after releasing the result and running GC, the measured delta was about **0.01 MB**.
-- Formatting a 1 MB Nginx sample temporarily increased heap usage by up to **35 MB** immediately after the operation. The measured delta returned to approximately zero after the result was released and GC ran. Formatting works on a complete document, so temporary allocation grows with file size.
+- Formatting a 1 MB Nginx sample temporarily increased heap usage by up to **75 MB** immediately after the operation. The measured delta returned to approximately zero after the result was released and GC ran. Tokenization and formatting work on a complete document, so temporary allocation grows with file size.
 - Detection cache entries are small and are removed when their documents close.
 - Confetti has no polling loop, background index, network client, telemetry client, Webview, or language server.
 
@@ -54,7 +54,7 @@ Method: Apple Silicon (`darwin arm64`), Node.js 24.14.1, 10 warm-up runs; 100 me
 | INI / EditorConfig    | `.ini`, `.cfg`, `.editorconfig`                         |      ✅      |     ✅     |
 | Java Properties       | `.properties`                                           |      ✅      |     ✅     |
 | TOML                  | `.toml`, including `pyproject.toml`                     |      ✅      |     ✅     |
-| YAML                  | `.yaml`, `.yml`, Docker Compose and workflow files      |      ✅      |     ✅     |
+| YAML                  | `.yaml`, `.yml`, Docker Compose and workflow files      |      ✅      |     —      |
 | Git Config            | `.gitconfig`, `.gitmodules`, `.git/config`              |      ✅      |     ✅     |
 | npm Config            | `.npmrc`                                                |      ✅      |     ✅     |
 
@@ -89,7 +89,9 @@ Use either of these methods:
 - Open the Command Palette and run **Confetti: Format Config**.
 - Run VS Code's standard **Format Document** command.
 
-Each format has its own formatter. Confetti normalizes indentation and safe structural whitespace while preserving comments, quoted content, escaped spaces, continuation lines, and YAML block scalar content where applicable.
+Formats marked as supported above have dedicated tokenizer-backed formatters. Confetti formats structural tokens instead of applying broad regular-expression replacements, while preserving comments, quoted content, escaped spaces, and continuation lines.
+
+Confetti intentionally does not register a YAML formatter, so it does not compete with dedicated tools such as Prettier. YAML detection and syntax highlighting remain available; use **Format Document With...** to select your preferred YAML formatter.
 
 Formatting is designed to be idempotent: running it a second time should produce no additional changes.
 

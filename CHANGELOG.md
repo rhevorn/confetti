@@ -2,6 +2,14 @@
 
 All notable changes to Confetti are documented in this file.
 
+## 1.1.0 - 2026-08-27
+
+- Replace broad formatter rewrites with tokenizer and state-machine based processing where syntax context matters.
+- Improve Nginx, TOML, Properties, SSH, Git Config, INI, dotenv, and npmrc formatting accuracy.
+- Preserve TOML multiline strings, continued values, quoted content, comments, and malformed input more safely.
+- Keep YAML detection and highlighting while leaving YAML formatting to dedicated tools such as Prettier.
+- Expand formatter, tokenizer, extension, example, and malformed-input tests with 100% configured coverage.
+
 ## 1.0.0 - 2026-08-27
 
 First stable release.

@@ -51,7 +51,7 @@ function contributedPath(relativePath: string): string {
 
 describe('VS Code extension manifest', () => {
   it('contains complete Marketplace metadata for the stable release', () => {
-    expect(manifest.version).toBe('1.0.0')
+    expect(manifest.version).toBe('1.1.0')
     expect(manifest.publisher).toBe('rhevorn')
     expect(manifest.repository).toEqual({
       type: 'git',
@@ -108,6 +108,15 @@ describe('VS Code extension manifest', () => {
       definitions.map(({ languageId }) => languageId).sort(),
     )
     expect(grammarLanguageIds.sort()).toEqual(languageIds.sort())
+  })
+
+  it('keeps YAML detection and highlighting without a Confetti formatter', () => {
+    const yaml = createDefaultRegistry()
+      .all()
+      .find(({ id }) => id === 'yaml')
+
+    expect(yaml?.languageId).toBe('confetti-yaml')
+    expect(yaml?.formatter).toBeUndefined()
   })
 
   it('keeps canonical YAML, INI, and Properties file associations available', () => {

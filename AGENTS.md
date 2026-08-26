@@ -36,11 +36,14 @@ Do not add AI features, accounts, cloud services, telemetry, Webviews, validatio
 
 Redis is intentionally not supported.
 
+YAML is detection and highlighting only. Confetti intentionally does not register a YAML formatter, avoiding conflicts with dedicated formatters such as Prettier.
+
 ## Repository layout
 
 - `src/core/`: editor-independent registry, detection, formatting, and shared types
 - `src/configs/`: one `ConfigDefinition` per supported format
-- `src/formatters/`: one formatter per supported format plus carefully scoped shared helpers
+- `src/formatters/`: one formatter per format with formatting support, plus carefully scoped shared helpers
+- `src/tokenizers/`: editor-independent token types and safe lexical scanning primitives
 - `src/extension.ts`: thin VS Code adapter, commands, providers, events, logging, and cache lifecycle
 - `syntaxes/`: self-contained TextMate grammar JSON files
 - `language-configurations/`: format-specific VS Code editor behavior
@@ -61,7 +64,7 @@ Detection:
 Formatting:
 
 - Preserve comments and quoted content.
-- Preserve escaped characters, continuation lines, TOML multiline strings, and YAML block scalar content.
+- Preserve escaped characters, continuation lines, and TOML multiline strings.
 - Do not modify configuration semantics.
 - Preserve whether the input has a final newline.
 - Normalize CRLF safely.
