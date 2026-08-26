@@ -204,6 +204,9 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.workspace.onDidSaveTextDocument(
       (document) => void autoDetect(document),
     ),
+    vscode.workspace.onDidCloseTextDocument((document) => {
+      detectionCache.delete(document.uri.toString())
+    }),
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) void autoDetect(editor.document)
     }),

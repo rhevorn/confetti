@@ -39,6 +39,7 @@
   "scripts": {
     "clean": "node scripts/clean.mjs",
     "build": "npm run clean && tsc -p tsconfig.json",
+    "benchmark": "npm run build && node --expose-gc scripts/benchmark.mjs",
     "check": "npm run typecheck && npm run lint && npm run test:coverage",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",

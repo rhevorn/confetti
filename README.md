@@ -17,6 +17,29 @@ Confetti provides one consistent experience:
 
 Confetti does not force a language mode when a file cannot be identified reliably.
 
+## Performance and resource use
+
+Confetti is designed to stay out of the typing path. It does not continuously rescan a document on every edit. Detection runs when a file is opened, activated, saved, or explicitly detected; formatting runs only when requested by VS Code or the user.
+
+Core benchmark results for the generated Nginx sample:
+
+| Input  | Detection p95 | Formatting p95 |
+| ------ | ------------: | -------------: |
+| 100 KB |         ≤3 ms |          ≤5 ms |
+| 1 MB   |        ≤30 ms |         ≤70 ms |
+
+Resource characteristics:
+
+- The packaged VSIX is **under 60 KB** and has no runtime npm dependencies.
+- Detection retained about **0.04 MB** of additional heap for a 1 MB sample; after releasing the result and running GC, the measured delta was about **0.01 MB**.
+- Formatting a 1 MB Nginx sample temporarily increased heap usage by up to **35 MB** immediately after the operation. The measured delta returned to approximately zero after the result was released and GC ran. Formatting works on a complete document, so temporary allocation grows with file size.
+- Detection cache entries are small and are removed when their documents close.
+- Confetti has no polling loop, background index, network client, telemetry client, Webview, or language server.
+
+These are core-library measurements, not total VS Code Extension Host memory. VS Code hosts multiple extensions in a shared process and manages TextMate grammar memory itself, so per-extension idle RSS cannot be isolated accurately. Results are indicative and vary by hardware and file content.
+
+Method: Apple Silicon (`darwin arm64`), Node.js 24.14.1, 10 warm-up runs; 100 measured iterations for 100 KB and 30 for 1 MB. The table rounds up the slower p95 values observed across repeated local runs, including a run immediately after the complete test and build pipeline. Reproduce it with `npm run benchmark`.
+
 ## Supported formats
 
 | Format                | Typical files / scenarios                               | Highlighting | Formatting |

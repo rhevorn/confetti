@@ -79,6 +79,7 @@ describe('VS Code extension adapter', () => {
     expect(mockState.formattingProvider).toBeDefined()
     expect(mockState.openHandlers).toHaveLength(1)
     expect(mockState.saveHandlers).toHaveLength(1)
+    expect(mockState.closeHandlers).toHaveLength(1)
     expect(mockState.activeEditorHandlers).toHaveLength(1)
     expect(mockState.outputLines[0]).toContain('Extension activated')
   })
@@ -267,6 +268,25 @@ describe('VS Code extension adapter', () => {
 
     await mockState.activeEditorHandlers[0]?.({ document: supported })
     expect(mockState.languageChanges.at(-1)?.languageId).toBe('confetti-env')
+  })
+
+  it('releases cached detection when a document is closed', async () => {
+    let content = 'events {\n}\n'
+    const testDocument = document('/etc/nginx/nginx.conf', content)
+    testDocument.getText = () => content
+    mockState.activeEditor = editor(testDocument) as never
+    activateExtension()
+
+    await command('confetti.detectConfigType')()
+    content = 'plain text\n'
+    testDocument.fileName = '/app/notes.txt'
+    testDocument.uri.fsPath = '/app/notes.txt'
+    mockState.closeHandlers[0]?.(testDocument)
+    command('confetti.showDetectionInfo')()
+
+    expect(mockState.informationMessages.at(-1)).toBe(
+      'No supported configuration type was detected.',
+    )
   })
 
   it('opens formatter output and handles missing active editors', async () => {
