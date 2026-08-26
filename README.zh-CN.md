@@ -2,7 +2,11 @@
 
 为 VS Code 提供配置文件的智能识别、语法高亮和格式化能力。
 
-English documentation: `README.md`
+[English documentation](https://github.com/rhevorn/confetti/blob/main/README.md)
+
+## 安装
+
+从 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=rhevorn.confetti) 安装 **Confetti**，也可以在 VS Code 扩展视图中搜索 `Confetti`。
 
 ## 为什么选择 Confetti？
 
@@ -30,7 +34,7 @@ Confetti 不会在每次输入时持续扫描整个文档。检测只发生在�
 
 资源占用情况：
 
-- 打包后的 VSIX **小于 60 KB**，没有运行时 npm 依赖。
+- 1.0.0 的 VSIX 约为 **107 KB**，没有运行时 npm 依赖。
 - 检测 1 MB 示例后，保留检测结果时堆内存增量约 **0.04 MB**；释放结果并执行 GC 后约为 **0.01 MB**。
 - 格式化 1 MB Nginx 示例后，立即测得的临时堆内存增量最高约 **35 MB**；释放结果并执行 GC 后，增量回到接近零。格式化会处理完整文档，因此临时内存会随文件大小增长。
 - 检测缓存只保存很小的结果对象，并在文档关闭时删除。
@@ -147,6 +151,13 @@ Confetti 完全在本地运行，不需要账号，不会上传配置文件，�
 ## 环境要求
 
 - VS Code 1.90 或更高版本
+
+## 相关链接
+
+- [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=rhevorn.confetti)
+- [源代码](https://github.com/rhevorn/confetti)
+- [反馈问题](https://github.com/rhevorn/confetti/issues)
+- [更新日志](https://github.com/rhevorn/confetti/blob/main/CHANGELOG.md)
 
 ## 开源协议
 

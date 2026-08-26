@@ -2,7 +2,11 @@
 
 Smart detection, syntax highlighting, and formatting for configuration files in VS Code.
 
-Chinese documentation: `README.zh-CN.md`
+[中文文档](https://github.com/rhevorn/confetti/blob/main/README.zh-CN.md)
+
+## Install
+
+Install **Confetti** from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=rhevorn.confetti), or search for `Confetti` in the VS Code Extensions view.
 
 ## Why Confetti?
 
@@ -30,7 +34,7 @@ Core benchmark results for the generated Nginx sample:
 
 Resource characteristics:
 
-- The packaged VSIX is **under 60 KB** and has no runtime npm dependencies.
+- The 1.0.0 VSIX is approximately **107 KB** and has no runtime npm dependencies.
 - Detection retained about **0.04 MB** of additional heap for a 1 MB sample; after releasing the result and running GC, the measured delta was about **0.01 MB**.
 - Formatting a 1 MB Nginx sample temporarily increased heap usage by up to **35 MB** immediately after the operation. The measured delta returned to approximately zero after the result was released and GC ran. Formatting works on a complete document, so temporary allocation grows with file size.
 - Detection cache entries are small and are removed when their documents close.
@@ -147,6 +151,13 @@ Confetti runs locally. It does not require an account, upload configuration file
 ## Requirements
 
 - VS Code 1.90 or later
+
+## Links
+
+- [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=rhevorn.confetti)
+- [Source code](https://github.com/rhevorn/confetti)
+- [Report an issue](https://github.com/rhevorn/confetti/issues)
+- [Change log](https://github.com/rhevorn/confetti/blob/main/CHANGELOG.md)
 
 ## License
 

@@ -21,6 +21,14 @@ interface CommandContribution {
 }
 
 interface ExtensionManifest {
+  version: string
+  publisher: string
+  icon: string
+  repository: { type: string; url: string }
+  homepage: string
+  bugs: { url: string }
+  galleryBanner: { color: string; theme: string }
+  pricing: string
   main: string
   activationEvents: string[]
   files: string[]
@@ -42,6 +50,33 @@ function contributedPath(relativePath: string): string {
 }
 
 describe('VS Code extension manifest', () => {
+  it('contains complete Marketplace metadata for the stable release', () => {
+    expect(manifest.version).toBe('1.0.0')
+    expect(manifest.publisher).toBe('rhevorn')
+    expect(manifest.repository).toEqual({
+      type: 'git',
+      url: 'https://github.com/rhevorn/confetti.git',
+    })
+    expect(manifest.homepage).toBe('https://github.com/rhevorn/confetti#readme')
+    expect(manifest.bugs.url).toBe('https://github.com/rhevorn/confetti/issues')
+    expect(manifest.galleryBanner).toEqual({
+      color: '#161B4F',
+      theme: 'dark',
+    })
+    expect(manifest.pricing).toBe('Free')
+  })
+
+  it('uses a valid 256 px PNG Marketplace icon', () => {
+    expect(manifest.icon).toBe('images/icon.png')
+    const icon = fs.readFileSync(contributedPath(manifest.icon))
+
+    expect(icon.subarray(0, 8)).toEqual(
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    )
+    expect(icon.readUInt32BE(16)).toBe(256)
+    expect(icon.readUInt32BE(20)).toBe(256)
+  })
+
   it('declares every command and relies on generated command activation events', () => {
     expect(
       manifest.contributes.commands.map(({ command }) => command).sort(),
@@ -135,7 +170,13 @@ describe('VS Code extension manifest', () => {
     ).toEqual(syntaxFiles)
     expect(manifest.main).toBe('./dist/extension.js')
     expect(manifest.files).toEqual(
-      expect.arrayContaining(['dist', 'syntaxes', 'language-configurations']),
+      expect.arrayContaining([
+        'dist',
+        'syntaxes',
+        'language-configurations',
+        'CHANGELOG.md',
+        'images/icon.png',
+      ]),
     )
   })
 })
