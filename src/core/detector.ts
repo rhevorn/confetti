@@ -25,7 +25,8 @@ function scoreDefinition(
   filename: string,
   content: string,
 ): number {
-  const basename = path.basename(filename)
+  const normalizedFilename = filename.replace(/\\/g, '/')
+  const basename = path.posix.basename(normalizedFilename)
   let structuralScore = 0
 
   if (definition.filenames?.some((item) => item === basename)) {
@@ -33,7 +34,8 @@ function scoreDefinition(
   } else if (
     definition.patterns?.some(
       (pattern) =>
-        matchesPattern(filename, pattern) || matchesPattern(basename, pattern),
+        matchesPattern(normalizedFilename, pattern) ||
+        matchesPattern(basename, pattern),
     )
   ) {
     structuralScore = 70
@@ -45,7 +47,7 @@ function scoreDefinition(
 
   let contentScore: number
   try {
-    contentScore = definition.detect?.(filename, content) ?? 0
+    contentScore = definition.detect?.(normalizedFilename, content) ?? 0
   } catch {
     contentScore = 0
   }

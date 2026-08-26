@@ -42,7 +42,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "clean": "node scripts/clean.mjs",
+    "build": "npm run clean && tsc -p tsconfig.json",
     "check": "npm run typecheck && npm run lint && npm test",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
@@ -50,7 +51,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "package": "npm run build && vsce package --allow-missing-repository"
+    "package": "npm run check && npm run build && vsce package --allow-missing-repository"
   },
   "contributes": {
     "commands": [
@@ -138,13 +139,6 @@
           "INI",
           "EditorConfig"
         ],
-        "extensions": [
-          ".ini",
-          ".cfg"
-        ],
-        "filenames": [
-          ".editorconfig"
-        ],
         "configuration": "./language-configurations/ini.json"
       },
       {
@@ -152,9 +146,6 @@
         "aliases": [
           "Java Properties",
           "properties"
-        ],
-        "extensions": [
-          ".properties"
         ],
         "configuration": "./language-configurations/properties.json"
       },
@@ -197,10 +188,6 @@
         "aliases": [
           "YAML",
           "yaml"
-        ],
-        "extensions": [
-          ".yaml",
-          ".yml"
         ],
         "configuration": "./language-configurations/yaml.json"
       }
@@ -262,6 +249,8 @@
     "prettier": "^3.9.6",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.68.0",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.3.2"
   }
 }

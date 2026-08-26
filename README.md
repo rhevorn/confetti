@@ -35,10 +35,12 @@ Confetti does not force a language mode when a file cannot be identified reliabl
 
 1. Install **Confetti** from the VS Code Extensions view.
 2. Open a supported configuration file.
-3. Confetti detects the type and applies its language mode when confidence reaches the built-in safety threshold.
+3. Confetti detects the type and applies a suitable language mode when confidence reaches the built-in safety threshold.
 4. Check the language name in the lower-right corner of the editor.
 
 For ambiguous files such as `production.conf`, Confetti examines both the path and content instead of relying only on the extension.
+
+For YAML, INI, and Java Properties, Confetti keeps VS Code's canonical language mode when it is already active. This preserves compatibility with validation, completion, and other language tooling from installed extensions.
 
 ## Syntax highlighting
 

@@ -3,6 +3,7 @@ import { createDefaultRegistry } from './configs/index.js'
 import { detectConfig } from './core/detector.js'
 import { formatConfig } from './core/formatter.js'
 import type { ConfigDefinition, DetectionResult } from './core/types.js'
+import { isCompatibleLanguageId } from './language-compatibility.js'
 
 const registry = createDefaultRegistry()
 const detectionCache = new Map<string, DetectionResult>()
@@ -91,7 +92,13 @@ async function detectAndApply(
     return undefined
   }
 
-  if (document.languageId !== result.definition.languageId) {
+  if (
+    !isCompatibleLanguageId(
+      result.definition.id,
+      result.definition.languageId,
+      document.languageId,
+    )
+  ) {
     await vscode.languages.setTextDocumentLanguage(
       document,
       result.definition.languageId,

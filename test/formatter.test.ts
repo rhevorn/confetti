@@ -89,6 +89,28 @@ describe('formatToml', () => {
       '[project]\nname = "a  b"\nvalues = [\n    1,\n]\n',
     )
   })
+
+  it('preserves multiline basic and literal string content exactly', () => {
+    const trailingSpaces = '   '
+    const input = `message   =   """
+  left    =    right
+  # this is string content${trailingSpaces}
+"""
+literal='''
+key    =    untouched
+'''
+next=1
+`
+    expect(formatToml(input)).toBe(`message = """
+  left    =    right
+  # this is string content${trailingSpaces}
+"""
+literal = '''
+key    =    untouched
+'''
+next = 1
+`)
+  })
 })
 
 describe('formatGitConfig', () => {
@@ -115,6 +137,32 @@ describe('formatYaml', () => {
       'name:    app   \nitems:\n  -    one\ndescription: |  \n  keep me   \nnext: value   \n'
     expect(formatYaml(input)).toBe(
       'name: app\nitems:\n  - one\ndescription: |\n  keep me   \nnext: value\n',
+    )
+  })
+
+  it('preserves sequence block scalars and both indicator orders', () => {
+    const trailingSpaces = '   '
+    const input = `scripts:
+  -    |2-
+    key:    value${trailingSpaces}
+    left    =    right
+message:    >-2 # folded
+  keep:    every space${trailingSpaces}
+next:    value${trailingSpaces}
+`
+    expect(formatYaml(input)).toBe(`scripts:
+  - |2-
+    key:    value${trailingSpaces}
+    left    =    right
+message: >-2 # folded
+  keep:    every space${trailingSpaces}
+next: value
+`)
+  })
+
+  it('does not mistake a quoted pipe for a block scalar', () => {
+    expect(formatYaml('symbol:    "|"\nnext:    value\n')).toBe(
+      'symbol: "|"\nnext: value\n',
     )
   })
 })

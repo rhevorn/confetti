@@ -25,6 +25,23 @@ describe('detectConfig', () => {
     expect(result?.definition.id).toBe('ssh')
   })
 
+  it('normalizes Windows paths before matching filenames and patterns', () => {
+    expect(
+      detectConfig(
+        registry,
+        String.raw`C:\Users\example\.ssh\config`,
+        'Host work\n',
+      )?.definition.id,
+    ).toBe('ssh')
+    expect(
+      detectConfig(
+        registry,
+        String.raw`C:\project\.git\config`,
+        '[core]\nrepositoryformatversion = 0\n',
+      )?.definition.id,
+    ).toBe('gitconfig')
+  })
+
   it.each([
     ['env', '/app/.env.local', 'DATABASE_URL=postgres://localhost/app\n'],
     ['ini', '/app/settings.ini', '[server]\nport = 8080\n'],
