@@ -1,0 +1,267 @@
+{
+  "name": "confetti",
+  "displayName": "Confetti",
+  "description": "Smart detection, highlighting and formatting for configuration files.",
+  "version": "0.1.0",
+  "private": true,
+  "publisher": "confetti",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Formatters"
+  ],
+  "keywords": [
+    "configuration",
+    "config",
+    "formatter",
+    "syntax highlighting",
+    "nginx",
+    "dotenv",
+    "toml",
+    "yaml",
+    "ini"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:confetti.detectConfigType",
+    "onCommand:confetti.formatConfig",
+    "onCommand:confetti.showDetectionInfo",
+    "onCommand:confetti.showOutput"
+  ],
+  "files": [
+    "dist",
+    "syntaxes",
+    "language-configurations",
+    "language-configuration.json",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "npm run typecheck && npm run lint && npm test",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "package": "npm run build && vsce package --allow-missing-repository"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "confetti.detectConfigType",
+        "title": "Detect Config Type",
+        "category": "Confetti"
+      },
+      {
+        "command": "confetti.formatConfig",
+        "title": "Format Config",
+        "category": "Confetti"
+      },
+      {
+        "command": "confetti.showDetectionInfo",
+        "title": "Show Detection Info",
+        "category": "Confetti"
+      },
+      {
+        "command": "confetti.showOutput",
+        "title": "Show Formatter Output",
+        "category": "Confetti"
+      }
+    ],
+    "configuration": {
+      "title": "Confetti",
+      "properties": {
+        "confetti.autoDetect": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically detect supported configuration files when they are opened, activated, or saved."
+        },
+        "confetti.format.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable document formatting for supported configuration files."
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "confetti-nginx",
+        "aliases": [
+          "Nginx",
+          "nginx"
+        ],
+        "filenames": [
+          "nginx.conf"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "confetti-ssh",
+        "aliases": [
+          "SSH Config",
+          "ssh-config"
+        ],
+        "filenames": [
+          "ssh_config",
+          "sshd_config"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "confetti-env",
+        "aliases": [
+          "Environment Variables",
+          "dotenv"
+        ],
+        "filenames": [
+          ".env"
+        ],
+        "extensions": [
+          ".env"
+        ],
+        "filenamePatterns": [
+          ".env.*",
+          "*.env"
+        ],
+        "configuration": "./language-configurations/key-value.json"
+      },
+      {
+        "id": "confetti-ini",
+        "aliases": [
+          "INI",
+          "EditorConfig"
+        ],
+        "extensions": [
+          ".ini",
+          ".cfg"
+        ],
+        "filenames": [
+          ".editorconfig"
+        ],
+        "configuration": "./language-configurations/ini.json"
+      },
+      {
+        "id": "confetti-properties",
+        "aliases": [
+          "Java Properties",
+          "properties"
+        ],
+        "extensions": [
+          ".properties"
+        ],
+        "configuration": "./language-configurations/properties.json"
+      },
+      {
+        "id": "confetti-toml",
+        "aliases": [
+          "TOML",
+          "toml"
+        ],
+        "extensions": [
+          ".toml"
+        ],
+        "configuration": "./language-configurations/toml.json"
+      },
+      {
+        "id": "confetti-gitconfig",
+        "aliases": [
+          "Git Config",
+          "gitconfig"
+        ],
+        "filenames": [
+          ".gitconfig",
+          ".gitmodules"
+        ],
+        "configuration": "./language-configurations/ini.json"
+      },
+      {
+        "id": "confetti-npmrc",
+        "aliases": [
+          "npm Config",
+          "npmrc"
+        ],
+        "filenames": [
+          ".npmrc"
+        ],
+        "configuration": "./language-configurations/key-value.json"
+      },
+      {
+        "id": "confetti-yaml",
+        "aliases": [
+          "YAML",
+          "yaml"
+        ],
+        "extensions": [
+          ".yaml",
+          ".yml"
+        ],
+        "configuration": "./language-configurations/yaml.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "confetti-nginx",
+        "scopeName": "source.confetti.nginx",
+        "path": "./syntaxes/nginx.tmLanguage.json"
+      },
+      {
+        "language": "confetti-ssh",
+        "scopeName": "source.confetti.ssh",
+        "path": "./syntaxes/ssh.tmLanguage.json"
+      },
+      {
+        "language": "confetti-env",
+        "scopeName": "source.confetti.env",
+        "path": "./syntaxes/env.tmLanguage.json"
+      },
+      {
+        "language": "confetti-ini",
+        "scopeName": "source.confetti.ini",
+        "path": "./syntaxes/ini.tmLanguage.json"
+      },
+      {
+        "language": "confetti-properties",
+        "scopeName": "source.confetti.properties",
+        "path": "./syntaxes/properties.tmLanguage.json"
+      },
+      {
+        "language": "confetti-toml",
+        "scopeName": "source.confetti.toml",
+        "path": "./syntaxes/toml.tmLanguage.json"
+      },
+      {
+        "language": "confetti-gitconfig",
+        "scopeName": "source.confetti.gitconfig",
+        "path": "./syntaxes/gitconfig.tmLanguage.json"
+      },
+      {
+        "language": "confetti-npmrc",
+        "scopeName": "source.confetti.npmrc",
+        "path": "./syntaxes/npmrc.tmLanguage.json"
+      },
+      {
+        "language": "confetti-yaml",
+        "scopeName": "source.confetti.yaml",
+        "path": "./syntaxes/yaml.tmLanguage.json"
+      }
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.3.0",
+    "@types/vscode": "1.90.0",
+    "@vscode/vsce": "^3.9.2",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.68.0",
+    "vitest": "^4.1.11"
+  }
+}

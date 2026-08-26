@@ -1,0 +1,37 @@
+{
+  "name": "Confetti SSH Config",
+  "scopeName": "source.confetti.ssh",
+  "patterns": [
+    { "name": "comment.line.number-sign.ssh-config", "match": "#.*$" },
+    {
+      "name": "string.quoted.double.ssh-config",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.ssh-config", "match": "\\\\." }
+      ]
+    },
+    { "name": "string.quoted.single.ssh-config", "begin": "'", "end": "'" },
+    {
+      "name": "variable.other.ssh-config",
+      "match": "%(?:%|C|d|f|h|i|j|k|L|l|n|p|r|T|t|u)"
+    },
+    {
+      "name": "constant.language.boolean.ssh-config",
+      "match": "\\b(?:yes|no|ask|auto)\\b"
+    },
+    { "name": "constant.numeric.ssh-config", "match": "\\b\\d+\\b" },
+    {
+      "match": "^\\s*(Host|Match)\\b(?:\\s+(.+))?",
+      "captures": {
+        "1": { "name": "keyword.control.ssh-config" },
+        "2": { "name": "entity.name.section.ssh-config" }
+      }
+    },
+    {
+      "match": "^\\s*([A-Za-z][A-Za-z0-9]*)",
+      "captures": { "1": { "name": "keyword.other.directive.ssh-config" } }
+    },
+    { "name": "string.unquoted.path.ssh-config", "match": "(?:~|/)[^\\s#]+" }
+  ]
+}

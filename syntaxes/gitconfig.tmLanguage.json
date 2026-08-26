@@ -1,0 +1,44 @@
+{
+  "name": "Confetti Git Config",
+  "scopeName": "source.confetti.gitconfig",
+  "patterns": [
+    { "name": "comment.line.gitconfig", "match": "^\\s*[#;].*$" },
+    {
+      "name": "meta.section.gitconfig",
+      "match": "^\\s*(\\[)([A-Za-z0-9.-]+)(?:\\s+(\"(?:\\\\.|[^\"])*\"))?(\\])",
+      "captures": {
+        "1": { "name": "punctuation.definition.section.begin.gitconfig" },
+        "2": { "name": "entity.name.section.gitconfig" },
+        "3": { "name": "entity.name.section.subsection.gitconfig" },
+        "4": { "name": "punctuation.definition.section.end.gitconfig" }
+      }
+    },
+    {
+      "match": "^\\s*([A-Za-z][A-Za-z0-9-]*)(\\s*=)?",
+      "captures": {
+        "1": { "name": "variable.other.assignment.gitconfig" },
+        "2": { "name": "keyword.operator.assignment.gitconfig" }
+      }
+    },
+    {
+      "name": "string.quoted.double.gitconfig",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.gitconfig", "match": "\\\\." }
+      ]
+    },
+    {
+      "name": "constant.language.boolean.gitconfig",
+      "match": "(?i)\\b(?:true|false|yes|no|on|off)\\b"
+    },
+    {
+      "name": "constant.numeric.gitconfig",
+      "match": "(?<![A-Za-z0-9_.-])[-+]?\\d+(?:\\.\\d+)?[kKmMgG]?\\b"
+    },
+    {
+      "name": "string.unquoted.path.gitconfig",
+      "match": "(?:~|\\.?\\.?/)[^\\s#;]+"
+    }
+  ]
+}

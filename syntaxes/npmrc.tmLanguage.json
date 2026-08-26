@@ -1,0 +1,36 @@
+{
+  "name": "Confetti npm Config",
+  "scopeName": "source.confetti.npmrc",
+  "patterns": [
+    { "name": "comment.line.npmrc", "match": "^\\s*[#;].*$" },
+    {
+      "match": "^\\s*((?:@[^:\\s=]+:)?[A-Za-z0-9_.-]+)(\\s*=)",
+      "captures": {
+        "1": { "name": "variable.other.assignment.npmrc" },
+        "2": { "name": "keyword.operator.assignment.npmrc" }
+      }
+    },
+    {
+      "name": "variable.other.npmrc",
+      "match": "\\$\\{[A-Za-z_][A-Za-z0-9_]*\\}"
+    },
+    {
+      "name": "constant.language.boolean.npmrc",
+      "match": "(?i)\\b(?:true|false|null)\\b"
+    },
+    {
+      "name": "constant.numeric.npmrc",
+      "match": "(?<![A-Za-z0-9_.-])[-+]?\\d+(?:\\.\\d+)?\\b"
+    },
+    { "name": "string.unquoted.url.npmrc", "match": "https?://[^\\s#;]+" },
+    {
+      "name": "string.quoted.double.npmrc",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.npmrc", "match": "\\\\." }
+      ]
+    },
+    { "name": "string.quoted.single.npmrc", "begin": "'", "end": "'" }
+  ]
+}

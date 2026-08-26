@@ -1,0 +1,75 @@
+{
+  "name": "Confetti Nginx",
+  "scopeName": "source.confetti.nginx",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#variables" },
+    { "include": "#numbers" },
+    { "include": "#booleans" },
+    { "include": "#blocks" },
+    { "include": "#directives" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        { "name": "comment.line.number-sign.nginx", "match": "#.*$" }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.nginx",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            { "name": "constant.character.escape.nginx", "match": "\\\\." }
+          ]
+        },
+        {
+          "name": "string.quoted.single.nginx",
+          "begin": "'",
+          "end": "'"
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        { "name": "variable.other.nginx", "match": "\\$[A-Za-z_][A-Za-z0-9_]*" }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.nginx",
+          "match": "\\b\\d+(?:\\.\\d+)?(?:k|m|g|ms|s|m|h|d)?\\b"
+        }
+      ]
+    },
+    "booleans": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.nginx",
+          "match": "\\b(?:on|off|yes|no)\\b"
+        }
+      ]
+    },
+    "blocks": {
+      "patterns": [
+        {
+          "name": "keyword.control.nginx",
+          "match": "\\b(?:http|events|server|location|upstream|map|if)\\b(?=\\s|\\{)"
+        }
+      ]
+    },
+    "directives": {
+      "patterns": [
+        {
+          "name": "keyword.other.directive.nginx",
+          "match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": { "1": { "name": "keyword.other.directive.nginx" } }
+        }
+      ]
+    }
+  }
+}

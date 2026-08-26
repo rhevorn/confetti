@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+*.vsix
+*.log
+.DS_Store
+confetti-.*.vsix

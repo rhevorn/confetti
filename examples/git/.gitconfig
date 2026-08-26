@@ -1,0 +1,28 @@
+# Exact filename detection
+[user]
+  name = Confetti Tester
+  email = tester@example.test
+  signingkey = ~/.ssh/id_ed25519.pub
+
+[core]
+  editor = code --wait
+  autocrlf = false
+  excludesfile = ~/.config/git/ignore
+
+[credential]
+  helper = cache --timeout=3600
+
+[color]
+  ui = auto
+
+[alias]
+  co = checkout
+  last = log -1 --stat
+  visual = !gitk
+
+[remote "origin"]
+  url = https://example.test/confetti.git
+  fetch = +refs/heads/*:refs/remotes/origin/*
+
+[includeIf "gitdir:~/work/"]
+  path = ~/.config/git/work.inc

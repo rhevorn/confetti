@@ -1,0 +1,44 @@
+# Maps, sequences, strings, numbers, booleans, null, anchors, and aliases
+name: confetti-demo
+
+x-common-env: &common-env
+  APP_ENV: development
+  FEATURE_ENABLED: true
+  RETRY_COUNT: 3
+  OPTIONAL_VALUE: null
+  HASH_STRING: "this # is not a comment"
+
+services:
+  web:
+    image: nginx:1.27
+    ports:
+      - "8080:80"
+      - "8443:443"
+    environment: *common-env
+    volumes:
+      - type: bind
+        source: ./nginx
+        target: /etc/nginx/conf.d
+        read_only: true
+    labels: { app: confetti, tier: frontend }
+    command: |
+      nginx -g "daemon off;"
+      echo "block scalar # and = content must stay intact"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health?a=b"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  worker:
+    image: example/worker:latest
+    environment:
+      <<: *common-env
+      WORKER_MODE: background
+    command: >-
+      ./worker
+      --queue default
+
+networks:
+  default:
+    name: confetti-network

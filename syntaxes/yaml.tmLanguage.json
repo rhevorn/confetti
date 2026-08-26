@@ -1,0 +1,66 @@
+{
+  "name": "Confetti YAML",
+  "scopeName": "source.confetti.yaml",
+  "patterns": [
+    { "name": "comment.line.number-sign.yaml", "match": "#.*$" },
+    { "name": "keyword.control.directive.yaml", "match": "^%[A-Z]+\\b.*$" },
+    {
+      "name": "keyword.control.document.yaml",
+      "match": "^\\s*(?:---|\\.\\.\\.)\\s*$"
+    },
+    {
+      "match": "^([ ]*)(-)(?=\\s|$)",
+      "captures": {
+        "2": { "name": "punctuation.definition.sequence.item.yaml" }
+      }
+    },
+    {
+      "match": "^\\s*((?:[^#\\[\\]{},&*!|>'\"%@`:\\s]|:(?!\\s))+|\"(?:\\\\.|[^\"])*\"|'(?:''|[^'])*')(\\s*:)(?=\\s|$)",
+      "captures": {
+        "1": { "name": "entity.name.tag.yaml" },
+        "2": { "name": "punctuation.separator.key-value.yaml" }
+      }
+    },
+    {
+      "name": "string.quoted.double.yaml",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.yaml",
+          "match": "\\\\(?:.|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
+        }
+      ]
+    },
+    {
+      "name": "string.quoted.single.yaml",
+      "begin": "'",
+      "end": "'",
+      "patterns": [{ "name": "constant.character.escape.yaml", "match": "''" }]
+    },
+    {
+      "name": "keyword.control.block-scalar.yaml",
+      "match": "[|>][+-]?[1-9]?(?=\\s*(?:#.*)?$)"
+    },
+    { "name": "entity.name.type.anchor.yaml", "match": "&[A-Za-z0-9_-]+" },
+    { "name": "variable.other.alias.yaml", "match": "\\*[A-Za-z0-9_-]+" },
+    { "name": "storage.type.tag-handle.yaml", "match": "!!?[A-Za-z0-9_:/.-]+" },
+    {
+      "name": "constant.language.null.yaml",
+      "match": "(?i)(?<![A-Za-z0-9_-])(?:null|~)(?![A-Za-z0-9_-])"
+    },
+    {
+      "name": "constant.language.boolean.yaml",
+      "match": "(?i)\\b(?:true|false)\\b"
+    },
+    {
+      "name": "constant.numeric.datetime.yaml",
+      "match": "\\b\\d{4}-\\d{2}-\\d{2}(?:[Tt ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:[Zz]|[-+]\\d{2}:?\\d{2})?)?\\b"
+    },
+    {
+      "name": "constant.numeric.yaml",
+      "match": "(?<![A-Za-z0-9_.-])[-+]?(?:0x[0-9A-Fa-f_]+|0o[0-7_]+|0b[01_]+|(?:\\d[\\d_]*)(?:\\.[\\d_]+)?(?:[eE][-+]?\\d+)?)\\b"
+    },
+    { "name": "punctuation.definition.flow.yaml", "match": "[\\[\\]{},]" }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "Confetti INI",
+  "scopeName": "source.confetti.ini",
+  "patterns": [
+    { "name": "comment.line.semicolon.ini", "match": "^\\s*[;#].*$" },
+    {
+      "name": "meta.section.ini",
+      "match": "^\\s*(\\[)([^]\\r\\n]+)(\\])",
+      "captures": {
+        "1": { "name": "punctuation.definition.section.begin.ini" },
+        "2": { "name": "entity.name.section.ini" },
+        "3": { "name": "punctuation.definition.section.end.ini" }
+      }
+    },
+    {
+      "match": "^\\s*([^;#=:\\s][^=:\\r\\n]*?)(\\s*[=:])",
+      "captures": {
+        "1": { "name": "variable.other.assignment.ini" },
+        "2": { "name": "keyword.operator.assignment.ini" }
+      }
+    },
+    {
+      "name": "string.quoted.double.ini",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.ini", "match": "\\\\." }
+      ]
+    },
+    { "name": "string.quoted.single.ini", "begin": "'", "end": "'" },
+    {
+      "name": "constant.language.boolean.ini",
+      "match": "(?i)\\b(?:true|false|yes|no|on|off|null|none)\\b"
+    },
+    {
+      "name": "constant.numeric.ini",
+      "match": "(?<![A-Za-z0-9_.-])[-+]?\\d+(?:\\.\\d+)?\\b"
+    }
+  ]
+}

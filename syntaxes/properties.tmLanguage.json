@@ -1,0 +1,51 @@
+{
+  "name": "Confetti Java Properties",
+  "scopeName": "source.confetti.properties",
+  "patterns": [
+    { "name": "comment.line.properties", "match": "^\\s*[#!].*$" },
+    {
+      "name": "meta.assignment.properties",
+      "begin": "^\\s*((?:\\\\.|[^\\s=:])(?:\\\\.|[^=:])*?)(\\s*[=:]\\s*|\\s+)(?=\\S|$)",
+      "beginCaptures": {
+        "1": { "name": "variable.other.assignment.properties" },
+        "2": { "name": "keyword.operator.assignment.properties" }
+      },
+      "end": "$",
+      "contentName": "string.unquoted.properties",
+      "patterns": [{ "include": "#value-tokens" }]
+    },
+    {
+      "name": "meta.continuation.properties",
+      "begin": "^\\s+",
+      "end": "$",
+      "contentName": "string.unquoted.continuation.properties",
+      "patterns": [{ "include": "#value-tokens" }]
+    }
+  ],
+  "repository": {
+    "value-tokens": {
+      "patterns": [
+        {
+          "name": "constant.character.escape.unicode.properties",
+          "match": "\\\\u[0-9A-Fa-f]{4}"
+        },
+        {
+          "name": "constant.character.escape.properties",
+          "match": "\\\\(?:[trnf\\\\ :=#!]|$)"
+        },
+        {
+          "name": "variable.other.properties",
+          "match": "\\$\\{[A-Za-z_][A-Za-z0-9_.-]*\\}"
+        },
+        {
+          "name": "constant.language.boolean.properties",
+          "match": "(?i)\\b(?:true|false|yes|no|on|off)\\b"
+        },
+        {
+          "name": "constant.numeric.properties",
+          "match": "(?<![A-Za-z0-9_.-])[-+]?\\d+(?:\\.\\d+)?\\b"
+        }
+      ]
+    }
+  }
+}

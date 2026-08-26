@@ -1,0 +1,128 @@
+# Confetti
+
+Smart detection, syntax highlighting, and formatting for configuration files in VS Code.
+
+Chinese documentation: `README.zh-CN.md`
+
+## Why Confetti?
+
+Configuration-file support is fragmented. A project may contain `nginx.conf`, `.env.local`, `.npmrc`, `.gitconfig`, `ssh_config`, `pyproject.toml`, and several ambiguous `.conf` files, each requiring a different extension.
+
+Confetti provides one consistent experience:
+
+- Content-aware configuration type detection
+- Theme-compatible TextMate syntax highlighting
+- Format Document support with format-specific rules
+- No account, AI service, cloud service, or network connection required
+
+Confetti does not force a language mode when a file cannot be identified reliably.
+
+## Supported formats
+
+| Format                | Common files                                            |
+| --------------------- | ------------------------------------------------------- |
+| Nginx                 | `nginx.conf`, Nginx `.conf` files detected from content |
+| SSH                   | `~/.ssh/config`, `ssh_config`, `sshd_config`            |
+| Environment variables | `.env`, `.env.local`, `.env.production`, `*.env`        |
+| INI / EditorConfig    | `.ini`, `.cfg`, `.editorconfig`                         |
+| Java Properties       | `.properties`                                           |
+| TOML                  | `.toml`, including `pyproject.toml`                     |
+| YAML                  | `.yaml`, `.yml`                                         |
+| Git Config            | `.gitconfig`, `.gitmodules`, `.git/config`              |
+| npm Config            | `.npmrc`                                                |
+
+## Getting started
+
+1. Install **Confetti** from the VS Code Extensions view.
+2. Open a supported configuration file.
+3. Confetti detects the type and applies its language mode when confidence reaches the built-in safety threshold.
+4. Check the language name in the lower-right corner of the editor.
+
+For ambiguous files such as `production.conf`, Confetti examines both the path and content instead of relying only on the extension.
+
+## Syntax highlighting
+
+Confetti highlights format-specific elements such as:
+
+- Comments and directives
+- Keys and values
+- Sections and subsections
+- Strings, numbers, and booleans
+- Variables and environment interpolation
+- Paths, blocks, anchors, aliases, and tags where applicable
+
+The grammars use standard TextMate scopes, so colors follow your active VS Code theme. Confetti does not hard-code colors.
+
+## Formatting
+
+Use either of these methods:
+
+- Open the Command Palette and run **Confetti: Format Config**.
+- Run VS Code's standard **Format Document** command.
+
+Each format has its own formatter. Confetti normalizes indentation and safe structural whitespace while preserving comments, quoted content, escaped spaces, continuation lines, and YAML block scalar content where applicable.
+
+Formatting is designed to be idempotent: running it a second time should produce no additional changes.
+
+If multiple formatters are installed, run **Format Document With...** and select Confetti, or use **Confetti: Format Config** to invoke Confetti directly.
+
+## Commands
+
+Open the Command Palette with `Ctrl+Shift+P` or `Cmd+Shift+P` and search for:
+
+| Command                             | Description                                                 |
+| ----------------------------------- | ----------------------------------------------------------- |
+| **Confetti: Detect Config Type**    | Detect the active file and apply the detected language mode |
+| **Confetti: Format Config**         | Format the active file directly with Confetti               |
+| **Confetti: Show Detection Info**   | Show the detected type and confidence                       |
+| **Confetti: Show Formatter Output** | Open logs showing when the Confetti formatter was invoked   |
+
+## Settings
+
+Open VS Code Settings and search for `Confetti`.
+
+| Setting                  | Default | Description                                                      |
+| ------------------------ | ------- | ---------------------------------------------------------------- |
+| `confetti.autoDetect`    | `true`  | Detect supported files when they are opened, activated, or saved |
+| `confetti.format.enable` | `true`  | Enable Confetti document formatting                              |
+
+Both settings are available as checkboxes in the VS Code Settings UI.
+
+## Confirm which formatter ran
+
+Run **Confetti: Show Formatter Output**. Every Confetti formatting invocation records the trigger, detected format, result, elapsed time, and file path.
+
+Example:
+
+```text
+Format Document provider | Nginx | edit produced | 0.23ms | /path/nginx.conf
+Confetti: Format Config | Nginx | edit applied
+```
+
+If no new Confetti entry appears, another formatter handled the document.
+
+## Troubleshooting
+
+### The file was not detected
+
+Run **Confetti: Detect Config Type**, then **Confetti: Show Detection Info**. Confetti intentionally leaves low-confidence files unchanged.
+
+### Format Document does nothing
+
+Make sure `confetti.format.enable` is enabled. Run **Confetti: Format Config** directly and check **Confetti: Show Formatter Output**.
+
+### Highlighting looks different between themes
+
+This is expected. Confetti defines semantic TextMate scopes, while the active theme chooses their colors.
+
+## Privacy
+
+Confetti runs locally. It does not require an account, upload configuration files, or send telemetry.
+
+## Requirements
+
+- VS Code 1.90 or later
+
+## License
+
+MIT
