@@ -51,7 +51,7 @@ function contributedPath(relativePath: string): string {
 
 describe('VS Code extension manifest', () => {
   it('contains complete Marketplace metadata for the stable release', () => {
-    expect(manifest.version).toBe('1.1.0')
+    expect(manifest.version).toBe('1.2.0')
     expect(manifest.publisher).toBe('rhevorn')
     expect(manifest.repository).toEqual({
       type: 'git',
@@ -64,6 +64,24 @@ describe('VS Code extension manifest', () => {
       theme: 'dark',
     })
     expect(manifest.pricing).toBe('Free')
+  })
+
+  it('uses Marketplace keywords that cover common config-file searches', () => {
+    const keywords = (manifest as ExtensionManifest & { keywords: string[] })
+      .keywords
+
+    for (const keyword of [
+      'config files',
+      'gitignore',
+      'dotenv',
+      'nginx',
+      'hosts',
+      'fstab',
+      'crontab',
+      'format document',
+    ]) {
+      expect(keywords).toContain(keyword)
+    }
   })
 
   it('uses a valid 256 px PNG Marketplace icon', () => {

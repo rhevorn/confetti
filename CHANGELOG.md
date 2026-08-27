@@ -2,11 +2,12 @@
 
 All notable changes to Confetti are documented in this file.
 
-## Unreleased
+## 1.2.0 - 2026-08-27
 
 - Add detection and TextMate highlighting for Ignore files and tool version files.
 - Add detection, highlighting, and conservative formatting for Git Attributes, Browserslist, hosts, fstab, and crontab.
 - Add realistic examples and tokenizer-backed tests for all newly supported formats.
+- Expand Marketplace description and keywords so Confetti is easier to find for common config-file searches.
 
 ## 1.1.0 - 2026-08-27
 
