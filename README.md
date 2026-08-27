@@ -34,8 +34,8 @@ Core benchmark results for the generated Nginx sample:
 
 Resource characteristics:
 
-- The 1.1.0 VSIX is approximately **115 KB** and has no runtime npm dependencies.
-- Detection retained about **0.04 MB** of additional heap for a 1 MB sample; after releasing the result and running GC, the measured delta was about **0.01 MB**.
+- The 1.1.0 VSIX is approximately **137 KB** and has no runtime npm dependencies.
+- Detection retained about **0.06 MB** of additional heap for a 1 MB sample; after releasing the result and running GC, the measured delta was about **0.02 MB**.
 - Formatting a 1 MB Nginx sample temporarily increased heap usage by up to **75 MB** immediately after the operation. The measured delta returned to approximately zero after the result was released and GC ran. Tokenization and formatting work on a complete document, so temporary allocation grows with file size.
 - Detection cache entries are small and are removed when their documents close.
 - Confetti has no polling loop, background index, network client, telemetry client, Webview, or language server.
@@ -57,6 +57,13 @@ Method: Apple Silicon (`darwin arm64`), Node.js 24.14.1, 10 warm-up runs; 100 me
 | YAML                  | `.yaml`, `.yml`, Docker Compose and workflow files      |      ✅      |     —      |
 | Git Config            | `.gitconfig`, `.gitmodules`, `.git/config`              |      ✅      |     ✅     |
 | npm Config            | `.npmrc`                                                |      ✅      |     ✅     |
+| Ignore files          | `.gitignore`, `.dockerignore`, `.npmignore`, and others |      ✅      |     —      |
+| Git Attributes        | `.gitattributes`, `.git/info/attributes`                |      ✅      |     ✅     |
+| Browserslist          | `.browserslistrc`, `browserslist`                       |      ✅      |     ✅     |
+| Tool versions         | `.nvmrc`, `.node-version`, `.tool-versions`, and others |      ✅      |     —      |
+| Hosts                 | `hosts`, including `/etc/hosts`                         |      ✅      |     ✅     |
+| Filesystem table      | `fstab`, including `/etc/fstab`                         |      ✅      |     ✅     |
+| Crontab               | `crontab`, `/etc/cron.d/*`, spool cron files            |      ✅      |     ✅     |
 
 ## Getting started
 
@@ -91,7 +98,7 @@ Use either of these methods:
 
 Formats marked as supported above have dedicated tokenizer-backed formatters. Confetti formats structural tokens instead of applying broad regular-expression replacements, while preserving comments, quoted content, escaped spaces, and continuation lines.
 
-Confetti intentionally does not register a YAML formatter, so it does not compete with dedicated tools such as Prettier. YAML detection and syntax highlighting remain available; use **Format Document With...** to select your preferred YAML formatter.
+Confetti intentionally does not register formatters for YAML, Ignore files, or tool version files. YAML is left to dedicated tools such as Prettier; Ignore rules remain byte-sensitive and order-sensitive; version files do not benefit from structural rewriting. Detection and syntax highlighting remain available for all three.
 
 Formatting is designed to be idempotent: running it a second time should produce no additional changes.
 

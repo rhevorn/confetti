@@ -33,10 +33,17 @@ Do not add AI features, accounts, cloud services, telemetry, Webviews, validatio
 - YAML
 - Git Config
 - npm config / npmrc
+- Ignore files (`.gitignore`, `.dockerignore`, `.npmignore`, and related files)
+- Git Attributes
+- Browserslist
+- Tool version files (`.nvmrc`, `.node-version`, `.python-version`, `.ruby-version`, `.tool-versions`)
+- Hosts
+- Filesystem table / fstab
+- Crontab
 
 Redis is intentionally not supported.
 
-YAML is detection and highlighting only. Confetti intentionally does not register a YAML formatter, avoiding conflicts with dedicated formatters such as Prettier.
+YAML, Ignore files, and tool version files are detection and highlighting only. Confetti intentionally does not register formatters where a dedicated formatter is preferable or formatting could change semantics.
 
 ## Repository layout
 

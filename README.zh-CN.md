@@ -34,8 +34,8 @@ Confetti 不会在每次输入时持续扫描整个文档。检测只发生在�
 
 资源占用情况：
 
-- 1.1.0 的 VSIX 约为 **115 KB**，没有运行时 npm 依赖。
-- 检测 1 MB 示例后，保留检测结果时堆内存增量约 **0.04 MB**；释放结果并执行 GC 后约为 **0.01 MB**。
+- 1.1.0 的 VSIX 约为 **137 KB**，没有运行时 npm 依赖。
+- 检测 1 MB 示例后，保留检测结果时堆内存增量约 **0.06 MB**；释放结果并执行 GC 后约为 **0.02 MB**。
 - 格式化 1 MB Nginx 示例后，立即测得的临时堆内存增量最高约 **75 MB**；释放结果并执行 GC 后，增量回到接近零。Tokenization 和格式化会处理完整文档，因此临时内存会随文件大小增长。
 - 检测缓存只保存很小的结果对象，并在文档关闭时删除。
 - 没有轮询任务、后台索引、网络客户端、遥测客户端、Webview 或 Language Server。
@@ -57,6 +57,13 @@ Confetti 不会在每次输入时持续扫描整个文档。检测只发生在�
 | YAML               | `.yaml`、`.yml`、Docker Compose 和工作流文件        |  ✅  |   —    |
 | Git Config         | `.gitconfig`、`.gitmodules`、`.git/config`          |  ✅  |   ✅   |
 | npm Config         | `.npmrc`                                            |  ✅  |   ✅   |
+| Ignore 文件        | `.gitignore`、`.dockerignore`、`.npmignore` 等      |  ✅  |   —    |
+| Git Attributes     | `.gitattributes`、`.git/info/attributes`            |  ✅  |   ✅   |
+| Browserslist       | `.browserslistrc`、`browserslist`                   |  ✅  |   ✅   |
+| 工具版本文件       | `.nvmrc`、`.node-version`、`.tool-versions` 等      |  ✅  |   —    |
+| Hosts              | `hosts`，包括 `/etc/hosts`                          |  ✅  |   ✅   |
+| 文件系统挂载表     | `fstab`，包括 `/etc/fstab`                          |  ✅  |   ✅   |
+| Crontab            | `crontab`、`/etc/cron.d/*`、cron spool 文件         |  ✅  |   ✅   |
 
 ## 快速开始
 
@@ -91,7 +98,7 @@ Grammar 使用标准 TextMate scope，最终颜色由当前 VS Code 主题决定
 
 上表中支持格式化的类型都有独立的 tokenizer formatter。Confetti 根据结构 token 进行格式化，而不是执行大范围正则替换，同时保留注释、字符串内容、转义空格和续行内容。
 
-Confetti 有意不注册 YAML formatter，避免与 Prettier 等专用工具竞争。YAML 的自动识别和语法高亮仍然可用；格式化时请通过 **Format Document With...** 选择你常用的 YAML formatter。
+Confetti 有意不为 YAML、Ignore 文件和工具版本文件注册 formatter。YAML 交给 Prettier 等专用工具；Ignore 规则对字节内容和顺序敏感；工具版本文件也不需要结构化改写。这三类文件仍然支持自动识别和语法高亮。
 
 格式化满足幂等性：连续执行两次，第二次不应产生新的修改。
 

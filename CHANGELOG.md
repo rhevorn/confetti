@@ -2,6 +2,12 @@
 
 All notable changes to Confetti are documented in this file.
 
+## Unreleased
+
+- Add detection and TextMate highlighting for Ignore files and tool version files.
+- Add detection, highlighting, and conservative formatting for Git Attributes, Browserslist, hosts, fstab, and crontab.
+- Add realistic examples and tokenizer-backed tests for all newly supported formats.
+
 ## 1.1.0 - 2026-08-27
 
 - Replace broad formatter rewrites with tokenizer and state-machine based processing where syntax context matters.
