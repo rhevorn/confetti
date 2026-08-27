@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
+import { formatBrowserslist } from '../src/formatters/browserslist.js'
+import { formatCrontab } from '../src/formatters/crontab.js'
 import { formatEnv } from '../src/formatters/env.js'
+import { formatFstab } from '../src/formatters/fstab.js'
 import { formatGitConfig } from '../src/formatters/gitconfig.js'
+import { formatGitAttributes } from '../src/formatters/gitattributes.js'
+import { formatHosts } from '../src/formatters/hosts.js'
 import { formatIni } from '../src/formatters/ini.js'
 import { formatNginx } from '../src/formatters/nginx.js'
 import { formatNpmrc } from '../src/formatters/npmrc.js'
@@ -17,6 +22,11 @@ const formatters = [
   ['npmrc', formatNpmrc, 'key=value\r\n'],
   ['SSH', formatSsh, 'Host work\r\nUser deploy\r\n'],
   ['TOML', formatToml, '[table]\r\nkey=value\r\n'],
+  ['Git Attributes', formatGitAttributes, '*.ts text\r\n'],
+  ['Browserslist', formatBrowserslist, 'defaults\r\n'],
+  ['Hosts', formatHosts, '127.0.0.1 localhost\r\n'],
+  ['fstab', formatFstab, 'UUID=x / ext4 defaults 0 1\r\n'],
+  ['Crontab', formatCrontab, '0 2 * * * /usr/bin/task\r\n'],
 ] as const
 
 describe('formatter newline and empty-input contract', () => {
@@ -211,6 +221,40 @@ describe('formatNginx edge cases', () => {
 
   it('collapses repeated blank lines without losing separation', () => {
     expect(formatNginx('http {\n\n\n}\n')).toBe('http {\n\n}\n')
+  })
+})
+
+describe('new line-oriented formatter edge cases', () => {
+  it('preserves blank lines, comment text, and literal hashes', () => {
+    expect(formatGitAttributes('  # keep   \n\nfile#name   text\n')).toBe(
+      '# keep\n\nfile#name text\n',
+    )
+    expect(formatBrowserslist('  # keep   \nChrome   >= 120\n')).toBe(
+      '# keep\nChrome >= 120\n',
+    )
+  })
+
+  it('preserves escaped host and mount fields', () => {
+    expect(formatHosts('192.0.2.1 host\\ name    alias\n')).toBe(
+      '192.0.2.1 host\\ name alias\n',
+    )
+    expect(
+      formatFstab('/srv/a\\040b   /mnt/a\\040b none bind 0 0 # keep\n'),
+    ).toBe('/srv/a\\040b /mnt/a\\040b none bind 0 0 # keep\n')
+  })
+
+  it('handles comments, short, macro-only, and system crontab lines safely', () => {
+    expect(
+      formatCrontab(
+        '  # keep   \n\nBROKEN-NAME=value\n@daily\n0 2 * * 1-5 root   /usr/bin/task --arg "a  b"\n',
+      ),
+    ).toBe(
+      '# keep\n\nBROKEN-NAME=value\n@daily\n0 2 * * 1-5 root   /usr/bin/task --arg "a  b"\n',
+    )
+  })
+
+  it('handles a schedule with no command without crashing', () => {
+    expect(formatCrontab('0 2 * * *\n')).toBe('0 2 * * *\n')
   })
 })
 

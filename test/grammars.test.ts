@@ -235,4 +235,97 @@ describe('TextMate grammars', () => {
     expect(aliasScopes).toContain('variable.other.alias.yaml')
     expect(blockScopes).toContain('keyword.control.block-scalar.yaml')
   })
+
+  it('tokenizes ignore patterns, negation, wildcards, and paths', async () => {
+    const scopes = await scopesForLine(
+      'ignore.tmLanguage.json',
+      '!docs/**/generated?.log',
+    )
+    expect(scopes).toContain('keyword.operator.negation.ignore')
+    expect(scopes).toContain('string.unquoted.pattern.ignore')
+    expect(scopes).toContain('keyword.operator.wildcard.ignore')
+    expect(scopes).toContain('punctuation.separator.path.ignore')
+  })
+
+  it('tokenizes Git Attributes patterns, attributes, operators, and values', async () => {
+    const scopes = await scopesForLine(
+      'gitattributes.tmLanguage.json',
+      '*.ts text eol=lf',
+    )
+    expect(scopes).toContain('string.unquoted.pattern.gitattributes')
+    expect(scopes).toContain('variable.other.attribute.gitattributes')
+    expect(scopes).toContain('keyword.operator.assignment.gitattributes')
+    expect(scopes).toContain('string.unquoted.value.gitattributes')
+  })
+
+  it('tokenizes Browserslist browsers, queries, comparisons, and versions', async () => {
+    const scopes = await scopesForLine(
+      'browserslist.tmLanguage.json',
+      'last 2 Chrome versions and Firefox >= 120',
+    )
+    expect(scopes).toContain('keyword.control.query.browserslist')
+    expect(scopes).toContain('entity.name.browser.browserslist')
+    expect(scopes).toContain('keyword.operator.logical.browserslist')
+    expect(scopes).toContain('keyword.operator.comparison.browserslist')
+    expect(scopes).toContain('constant.numeric.version.browserslist')
+  })
+
+  it('tokenizes tool names, versions, aliases, and comments', async () => {
+    const versionScopes = await scopesForLine(
+      'versions.tmLanguage.json',
+      'nodejs 22.18.0 # runtime',
+    )
+    const aliasScopes = await scopesForLine(
+      'versions.tmLanguage.json',
+      'nodejs lts/jod',
+    )
+    expect(versionScopes).toContain('entity.name.tool.versions')
+    expect(versionScopes).toContain('constant.numeric.version.versions')
+    expect(versionScopes).toContain('comment.line.number-sign.versions')
+    expect(aliasScopes).toContain('constant.language.version-alias.versions')
+  })
+
+  it('tokenizes hosts addresses, names, and comments', async () => {
+    const scopes = await scopesForLine(
+      'hosts.tmLanguage.json',
+      '127.0.0.1 localhost alias # local',
+    )
+    expect(scopes).toContain('constant.numeric.address.ip.hosts')
+    expect(scopes).toContain('entity.name.host.hosts')
+    expect(scopes).toContain('comment.line.number-sign.hosts')
+  })
+
+  it('tokenizes fstab devices, mounts, types, options, and pass values', async () => {
+    const scopes = await scopesForLine(
+      'fstab.tmLanguage.json',
+      'UUID=x / ext4 defaults 0 1',
+    )
+    expect(scopes).toContain('string.unquoted.device.fstab')
+    expect(scopes).toContain('string.unquoted.path.fstab')
+    expect(scopes).toContain('entity.name.type.filesystem.fstab')
+    expect(scopes).toContain('variable.other.options.fstab')
+    expect(scopes).toContain('constant.numeric.pass.fstab')
+  })
+
+  it('tokenizes crontab variables, schedules, ranges, and quoted strings', async () => {
+    const assignmentScopes = await scopesForLine(
+      'crontab.tmLanguage.json',
+      'SHELL=/bin/bash',
+    )
+    const scheduleScopes = await scopesForLine(
+      'crontab.tmLanguage.json',
+      '@daily echo "hello"',
+    )
+    const rangeScopes = await scopesForLine(
+      'crontab.tmLanguage.json',
+      '0 2 * * mon-fri /usr/bin/task',
+    )
+    expect(assignmentScopes).toContain('variable.other.assignment.crontab')
+    expect(assignmentScopes).toContain('keyword.operator.assignment.crontab')
+    expect(scheduleScopes).toContain('keyword.control.schedule.crontab')
+    expect(scheduleScopes).toContain('string.quoted.double.crontab')
+    expect(rangeScopes).toContain('constant.language.weekday.crontab')
+    expect(rangeScopes).toContain('punctuation.separator.range.crontab')
+    expect(rangeScopes).toContain('string.unquoted.path.crontab')
+  })
 })

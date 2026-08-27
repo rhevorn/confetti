@@ -52,9 +52,61 @@ describe('detectConfig', () => {
     ['gitconfig', '/app/.git/config', '[core]\neditor = code\n'],
     ['npmrc', '/app/.npmrc', 'registry=https://registry.npmjs.org/\n'],
     ['yaml', '/app/compose.yaml', 'services:\n  web:\n    image: nginx\n'],
+    ['ignore', '/app/.gitignore', 'node_modules/\n!important.log\n'],
+    ['gitattributes', '/app/.gitattributes', '*.ts text eol=lf\n'],
+    ['browserslist', '/app/.browserslistrc', 'defaults\nnot dead\n'],
+    ['versions', '/app/.tool-versions', 'nodejs 22.18.0\n'],
+    ['versions', '/app/.nvmrc', 'v22.18.0\n'],
+    ['hosts', '/etc/hosts', '127.0.0.1 localhost\n'],
+    ['fstab', '/etc/fstab', 'UUID=demo / ext4 defaults 0 1\n'],
+    ['crontab', '/etc/crontab', '0 2 * * * /usr/bin/backup\n'],
   ])('detects %s configuration', (expected, filename, content) => {
     expect(detectConfig(registry, filename, content)?.definition.id).toBe(
       expected,
+    )
+  })
+
+  it('detects path-based Git and cron files from content', () => {
+    expect(
+      detectConfig(
+        registry,
+        '/repo/.git/info/attributes',
+        '*.md diff=markdown\n',
+      )?.definition.id,
+    ).toBe('gitattributes')
+    expect(
+      detectConfig(
+        registry,
+        '/etc/cron.d/confetti',
+        'SHELL=/bin/sh\n0 * * * * root /usr/bin/task\n',
+      )?.definition.id,
+    ).toBe('crontab')
+  })
+
+  it.each([
+    '.gitignore',
+    '.dockerignore',
+    '.npmignore',
+    '.prettierignore',
+    '.eslintignore',
+    '.stylelintignore',
+    '.helmignore',
+    '.ignore',
+  ])('recognizes the %s ignore filename', (filename) => {
+    expect(detectConfig(registry, `/app/${filename}`, '')?.definition.id).toBe(
+      'ignore',
+    )
+  })
+
+  it.each([
+    '.nvmrc',
+    '.node-version',
+    '.python-version',
+    '.ruby-version',
+    '.tool-versions',
+  ])('recognizes the %s tool version filename', (filename) => {
+    expect(detectConfig(registry, `/app/${filename}`, '')?.definition.id).toBe(
+      'versions',
     )
   })
 

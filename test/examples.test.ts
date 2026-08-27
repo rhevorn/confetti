@@ -80,6 +80,46 @@ const examples: ExampleCase[] = [
     expectedType: 'yaml',
     preservedText: 'block scalar # and = content must stay intact',
   },
+  {
+    relativePath: 'ignore/.gitignore',
+    expectedType: 'ignore',
+    preservedText: 'docs/generated\\ files/',
+  },
+  {
+    relativePath: 'git/.gitattributes',
+    expectedType: 'gitattributes',
+    preservedText: 'docs/generated\\ files/**',
+  },
+  {
+    relativePath: 'browserslist/.browserslistrc',
+    expectedType: 'browserslist',
+    preservedText: 'iOS_saf >= 16.4',
+  },
+  {
+    relativePath: 'versions/.tool-versions',
+    expectedType: 'versions',
+    preservedText: 'nodejs 22.18.0',
+  },
+  {
+    relativePath: 'versions/.nvmrc',
+    expectedType: 'versions',
+    preservedText: 'v22.18.0',
+  },
+  {
+    relativePath: 'system/hosts',
+    expectedType: 'hosts',
+    preservedText: 'api.confetti.test',
+  },
+  {
+    relativePath: 'system/fstab',
+    expectedType: 'fstab',
+    preservedText: '/mnt/source\\040files',
+  },
+  {
+    relativePath: 'system/crontab',
+    expectedType: 'crontab',
+    preservedText: '"keep  two spaces"',
+  },
   { relativePath: 'unknown/application.conf' },
 ]
 

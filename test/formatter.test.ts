@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
+import { formatBrowserslist } from '../src/formatters/browserslist.js'
+import { formatCrontab } from '../src/formatters/crontab.js'
 import { formatEnv } from '../src/formatters/env.js'
+import { formatFstab } from '../src/formatters/fstab.js'
 import { formatGitConfig } from '../src/formatters/gitconfig.js'
+import { formatGitAttributes } from '../src/formatters/gitattributes.js'
+import { formatHosts } from '../src/formatters/hosts.js'
 import { formatIni } from '../src/formatters/ini.js'
 import { formatNginx } from '../src/formatters/nginx.js'
 import { formatNpmrc } from '../src/formatters/npmrc.js'
@@ -185,6 +190,43 @@ describe('formatNpmrc', () => {
   })
 })
 
+describe('line-oriented formatters', () => {
+  it('formats Git Attributes without changing escaped spaces', () => {
+    expect(
+      formatGitAttributes(
+        '# keep\n*.ts    text    eol=lf\ndocs/generated\\ files/**   linguist-generated=true\n',
+      ),
+    ).toBe(
+      '# keep\n*.ts text eol=lf\ndocs/generated\\ files/** linguist-generated=true\n',
+    )
+  })
+
+  it('formats Browserslist queries', () => {
+    expect(formatBrowserslist('defaults\nlast    2   versions\n')).toBe(
+      'defaults\nlast 2 versions\n',
+    )
+  })
+
+  it('formats hosts and fstab columns plus inline comments', () => {
+    expect(formatHosts('127.0.0.1    localhost   alias # local\n')).toBe(
+      '127.0.0.1 localhost alias # local\n',
+    )
+    expect(formatFstab('UUID=x   /mnt/a\\040b  ext4  defaults  0  2\n')).toBe(
+      'UUID=x /mnt/a\\040b ext4 defaults 0 2\n',
+    )
+  })
+
+  it('formats only the structural portion of crontab entries', () => {
+    expect(
+      formatCrontab(
+        'SHELL = /bin/bash\n*/5   * *  * *    echo "keep  two spaces"\n@daily     run --name "daily  job"\n',
+      ),
+    ).toBe(
+      'SHELL=/bin/bash\n*/5 * * * * echo "keep  two spaces"\n@daily run --name "daily  job"\n',
+    )
+  })
+})
+
 describe('formatter stability', () => {
   it.each([
     ['Nginx', formatNginx, 'server {\nlisten 80;\n}\n'],
@@ -195,6 +237,11 @@ describe('formatter stability', () => {
     ['TOML', formatToml, '[section]\n  key=value\n'],
     ['Git Config', formatGitConfig, '[core]\neditor=code\n'],
     ['npmrc', formatNpmrc, ' registry = https://registry.npmjs.org/ \n'],
+    ['Git Attributes', formatGitAttributes, '*.ts   text  eol=lf\n'],
+    ['Browserslist', formatBrowserslist, 'last   2 versions\n'],
+    ['Hosts', formatHosts, '127.0.0.1   localhost\n'],
+    ['fstab', formatFstab, 'UUID=x   / ext4 defaults 0 1\n'],
+    ['Crontab', formatCrontab, '0  2 * * *  /usr/bin/task\n'],
   ])('%s is idempotent', (_name, formatter, input) => {
     const once = formatter(input)
     expect(formatter(once)).toBe(once)

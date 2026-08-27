@@ -80,12 +80,27 @@ describe('VS Code extension adapter', () => {
     const selector = mockState.formattingSelector as Array<{
       language: string
     }>
+    for (const language of [
+      'confetti-gitattributes',
+      'confetti-browserslist',
+      'confetti-hosts',
+      'confetti-fstab',
+      'confetti-crontab',
+    ]) {
+      expect(selector.map((item) => item.language)).toContain(language)
+    }
     expect(selector.map(({ language }) => language)).not.toContain(
       'confetti-yaml',
     )
     expect(selector.map(({ language }) => language)).not.toContain('yaml')
     expect(selector.map(({ language }) => language)).not.toContain(
       'dockercompose',
+    )
+    expect(selector.map(({ language }) => language)).not.toContain(
+      'confetti-ignore',
+    )
+    expect(selector.map(({ language }) => language)).not.toContain(
+      'confetti-versions',
     )
     expect(mockState.openHandlers).toHaveLength(1)
     expect(mockState.saveHandlers).toHaveLength(1)

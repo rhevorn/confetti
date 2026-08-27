@@ -110,13 +110,14 @@ describe('VS Code extension manifest', () => {
     expect(grammarLanguageIds.sort()).toEqual(languageIds.sort())
   })
 
-  it('keeps YAML detection and highlighting without a Confetti formatter', () => {
-    const yaml = createDefaultRegistry()
-      .all()
-      .find(({ id }) => id === 'yaml')
+  it('keeps highlighting-only formats without Confetti formatters', () => {
+    const definitions = createDefaultRegistry().all()
 
-    expect(yaml?.languageId).toBe('confetti-yaml')
-    expect(yaml?.formatter).toBeUndefined()
+    for (const id of ['yaml', 'ignore', 'versions']) {
+      const definition = definitions.find((item) => item.id === id)
+      expect(definition?.languageId).toBe(`confetti-${id}`)
+      expect(definition?.formatter).toBeUndefined()
+    }
   })
 
   it('keeps canonical YAML, INI, and Properties file associations available', () => {
@@ -127,6 +128,29 @@ describe('VS Code extension manifest', () => {
       expect(language?.filenames).toBeUndefined()
       expect(language?.extensions).toBeUndefined()
     }
+  })
+
+  it('contributes the complete Ignore and tool-version filename families', () => {
+    const filenamesFor = (id: string) =>
+      manifest.contributes.languages.find((item) => item.id === id)?.filenames
+
+    expect(filenamesFor('confetti-ignore')).toEqual([
+      '.gitignore',
+      '.dockerignore',
+      '.npmignore',
+      '.prettierignore',
+      '.eslintignore',
+      '.stylelintignore',
+      '.helmignore',
+      '.ignore',
+    ])
+    expect(filenamesFor('confetti-versions')).toEqual([
+      '.nvmrc',
+      '.node-version',
+      '.python-version',
+      '.ruby-version',
+      '.tool-versions',
+    ])
   })
 
   it('references valid language configurations and matching grammars', () => {
