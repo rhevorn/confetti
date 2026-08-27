@@ -1,0 +1,14 @@
+{
+  "name": "Confetti Hosts",
+  "scopeName": "source.confetti.hosts",
+  "patterns": [
+    { "name": "comment.line.number-sign.hosts", "match": "#.*$" },
+    {
+      "match": "^\\s*(\\S+)(?:\\s+(.+?))?\\s*(?=#|$)",
+      "captures": {
+        "1": { "name": "constant.numeric.address.ip.hosts" },
+        "2": { "name": "entity.name.host.hosts" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "name": "Confetti Browserslist",
+  "scopeName": "source.confetti.browserslist",
+  "patterns": [
+    { "name": "comment.line.number-sign.browserslist", "match": "^\\s*#.*$" },
+    {
+      "name": "keyword.operator.logical.browserslist",
+      "match": "(?i)\\b(?:not|and|or)\\b"
+    },
+    {
+      "name": "keyword.control.query.browserslist",
+      "match": "(?i)\\b(?:defaults|last|since|dead|maintained node versions|cover)\\b"
+    },
+    {
+      "name": "entity.name.browser.browserslist",
+      "match": "(?i)\\b(?:chrome|firefox|safari|edge|ie|ios_saf|opera|op_mini|android|and_chr|node|electron)\\b"
+    },
+    {
+      "name": "keyword.operator.comparison.browserslist",
+      "match": ">=|<=|>|<|="
+    },
+    {
+      "name": "constant.numeric.percentage.browserslist",
+      "match": "\\b\\d+(?:\\.\\d+)?%"
+    },
+    {
+      "name": "constant.numeric.version.browserslist",
+      "match": "\\b\\d+(?:\\.\\d+)*(?:-\\d+(?:\\.\\d+)*)?\\b"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Confetti Ignore File",
+  "scopeName": "source.confetti.ignore",
+  "patterns": [
+    { "name": "comment.line.number-sign.ignore", "match": "^\\s*#.*$" },
+    {
+      "begin": "^(\\s*)(!?)",
+      "beginCaptures": {
+        "2": { "name": "keyword.operator.negation.ignore" }
+      },
+      "end": "$",
+      "contentName": "string.unquoted.pattern.ignore",
+      "patterns": [
+        { "name": "constant.character.escape.ignore", "match": "\\\\." },
+        {
+          "name": "keyword.operator.wildcard.ignore",
+          "match": "\\*\\*|\\*|\\?|\\[[^]]*\\]"
+        },
+        { "name": "punctuation.separator.path.ignore", "match": "/" }
+      ]
+    }
+  ]
+}

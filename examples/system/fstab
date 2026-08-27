@@ -1,0 +1,5 @@
+# <file system> <mount point> <type> <options> <dump> <pass>
+UUID=1111-2222      /          ext4     defaults,noatime       0  1
+UUID=3333-4444    /home      ext4    defaults,nodev       0     2
+server:/exports/shared    /mnt/shared     nfs4    rw,_netdev,nofail   0 0
+/srv/source\040files   /mnt/source\040files    none   bind     0 0 # escaped spaces

@@ -1,0 +1,46 @@
+{
+  "name": "Confetti Crontab",
+  "scopeName": "source.confetti.crontab",
+  "patterns": [
+    { "name": "comment.line.number-sign.crontab", "match": "^\\s*#.*$" },
+    {
+      "match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)(\\s*=)",
+      "captures": {
+        "1": { "name": "variable.other.assignment.crontab" },
+        "2": { "name": "keyword.operator.assignment.crontab" }
+      }
+    },
+    {
+      "name": "keyword.control.schedule.crontab",
+      "match": "(?i)@(?:reboot|yearly|annually|monthly|weekly|daily|midnight|hourly)\\b"
+    },
+    {
+      "name": "constant.language.month.crontab",
+      "match": "(?i)\\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\b"
+    },
+    {
+      "name": "constant.language.weekday.crontab",
+      "match": "(?i)\\b(?:sun|mon|tue|wed|thu|fri|sat)\\b"
+    },
+    {
+      "name": "string.unquoted.path.crontab",
+      "match": "(?:~|/)[^\\s#]+"
+    },
+    { "name": "keyword.operator.wildcard.crontab", "match": "\\*" },
+    { "name": "punctuation.separator.range.crontab", "match": "[,/-]" },
+    { "name": "constant.numeric.crontab", "match": "\\b\\d+\\b" },
+    {
+      "name": "variable.other.environment.crontab",
+      "match": "\\$\\{?[A-Za-z_][A-Za-z0-9_]*\\}?"
+    },
+    {
+      "name": "string.quoted.double.crontab",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.crontab", "match": "\\\\." }
+      ]
+    },
+    { "name": "string.quoted.single.crontab", "begin": "'", "end": "'" }
+  ]
+}

@@ -1,0 +1,12 @@
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+
+# Keep an otherwise ignored fixture
+*.log
+!important.log
+
+# Escaped spaces are part of the pattern
+docs/generated\ files/
+**/.cache/

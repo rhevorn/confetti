@@ -1,0 +1,9 @@
+# Environment assignments
+SHELL = /bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+
+# Schedule fields are normalized; command spacing stays intact
+*/15    *   *   *    *      /usr/local/bin/health-check --label "keep  two spaces"
+0  2   * * 1-5   deploy    /srv/app/bin/backup --mode incremental
+@daily       /usr/local/bin/report --title "Daily  report"
+@reboot   /usr/local/bin/start-workers

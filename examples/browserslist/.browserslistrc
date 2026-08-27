@@ -1,0 +1,10 @@
+# Production targets
+defaults
+not     dead
+not   op_mini all
+last      2 versions
+
+# Explicit compatibility floor
+Chrome   >=   120
+Firefox ESR
+iOS_saf >= 16.4

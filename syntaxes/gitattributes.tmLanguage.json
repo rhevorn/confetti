@@ -1,0 +1,24 @@
+{
+  "name": "Confetti Git Attributes",
+  "scopeName": "source.confetti.gitattributes",
+  "patterns": [
+    { "name": "comment.line.number-sign.gitattributes", "match": "^\\s*#.*$" },
+    {
+      "match": "^\\s*(\\S+)",
+      "captures": { "1": { "name": "string.unquoted.pattern.gitattributes" } }
+    },
+    {
+      "match": "(?<!\\S)([-!]?[A-Za-z][A-Za-z0-9-]*)(=)(\\S+)",
+      "captures": {
+        "1": { "name": "variable.other.attribute.gitattributes" },
+        "2": { "name": "keyword.operator.assignment.gitattributes" },
+        "3": { "name": "string.unquoted.value.gitattributes" }
+      }
+    },
+    {
+      "name": "variable.other.attribute.gitattributes",
+      "match": "(?<!\\S)[-!]?[A-Za-z][A-Za-z0-9-]*(?!\\S)"
+    },
+    { "name": "constant.character.escape.gitattributes", "match": "\\\\." }
+  ]
+}

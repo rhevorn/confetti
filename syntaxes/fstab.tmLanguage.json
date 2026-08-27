@@ -1,0 +1,19 @@
+{
+  "name": "Confetti Filesystem Table",
+  "scopeName": "source.confetti.fstab",
+  "patterns": [
+    { "name": "comment.line.number-sign.fstab", "match": "#.*$" },
+    {
+      "match": "^\\s*(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)(?:\\s+(\\d+))?(?:\\s+(\\d+))?",
+      "captures": {
+        "1": { "name": "string.unquoted.device.fstab" },
+        "2": { "name": "string.unquoted.path.fstab" },
+        "3": { "name": "entity.name.type.filesystem.fstab" },
+        "4": { "name": "variable.other.options.fstab" },
+        "5": { "name": "constant.numeric.dump.fstab" },
+        "6": { "name": "constant.numeric.pass.fstab" }
+      }
+    },
+    { "name": "constant.character.escape.fstab", "match": "\\\\[0-7]{3}" }
+  ]
+}

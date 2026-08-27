@@ -36,7 +36,11 @@
     "dotenv",
     "toml",
     "yaml",
-    "ini"
+    "ini",
+    "gitignore",
+    "gitattributes",
+    "crontab",
+    "hosts"
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
@@ -204,6 +208,106 @@
           "yaml"
         ],
         "configuration": "./language-configurations/yaml.json"
+      },
+      {
+        "id": "confetti-ignore",
+        "aliases": [
+          "Ignore File",
+          "ignore"
+        ],
+        "filenames": [
+          ".gitignore",
+          ".dockerignore",
+          ".npmignore",
+          ".prettierignore",
+          ".eslintignore",
+          ".stylelintignore",
+          ".helmignore",
+          ".ignore"
+        ],
+        "filenamePatterns": [
+          "*.gitignore",
+          "**/.git/info/exclude"
+        ],
+        "configuration": "./language-configurations/line-based.json"
+      },
+      {
+        "id": "confetti-gitattributes",
+        "aliases": [
+          "Git Attributes",
+          "gitattributes"
+        ],
+        "filenames": [
+          ".gitattributes"
+        ],
+        "filenamePatterns": [
+          "**/.git/info/attributes"
+        ],
+        "configuration": "./language-configurations/line-based.json"
+      },
+      {
+        "id": "confetti-browserslist",
+        "aliases": [
+          "Browserslist",
+          "browserslist"
+        ],
+        "filenames": [
+          ".browserslistrc",
+          "browserslist"
+        ],
+        "configuration": "./language-configurations/line-based.json"
+      },
+      {
+        "id": "confetti-versions",
+        "aliases": [
+          "Tool Versions",
+          "tool-versions"
+        ],
+        "filenames": [
+          ".nvmrc",
+          ".node-version",
+          ".python-version",
+          ".ruby-version",
+          ".tool-versions"
+        ],
+        "configuration": "./language-configurations/line-based.json"
+      },
+      {
+        "id": "confetti-hosts",
+        "aliases": [
+          "Hosts",
+          "hosts"
+        ],
+        "filenames": [
+          "hosts"
+        ],
+        "configuration": "./language-configurations/line-based.json"
+      },
+      {
+        "id": "confetti-fstab",
+        "aliases": [
+          "Filesystem Table",
+          "fstab"
+        ],
+        "filenames": [
+          "fstab"
+        ],
+        "configuration": "./language-configurations/line-based.json"
+      },
+      {
+        "id": "confetti-crontab",
+        "aliases": [
+          "Crontab",
+          "crontab"
+        ],
+        "filenames": [
+          "crontab"
+        ],
+        "filenamePatterns": [
+          "**/cron.d/*",
+          "**/crontabs/*"
+        ],
+        "configuration": "./language-configurations/line-based.json"
       }
     ],
     "grammars": [
@@ -251,6 +355,41 @@
         "language": "confetti-yaml",
         "scopeName": "source.confetti.yaml",
         "path": "./syntaxes/yaml.tmLanguage.json"
+      },
+      {
+        "language": "confetti-ignore",
+        "scopeName": "source.confetti.ignore",
+        "path": "./syntaxes/ignore.tmLanguage.json"
+      },
+      {
+        "language": "confetti-gitattributes",
+        "scopeName": "source.confetti.gitattributes",
+        "path": "./syntaxes/gitattributes.tmLanguage.json"
+      },
+      {
+        "language": "confetti-browserslist",
+        "scopeName": "source.confetti.browserslist",
+        "path": "./syntaxes/browserslist.tmLanguage.json"
+      },
+      {
+        "language": "confetti-versions",
+        "scopeName": "source.confetti.versions",
+        "path": "./syntaxes/versions.tmLanguage.json"
+      },
+      {
+        "language": "confetti-hosts",
+        "scopeName": "source.confetti.hosts",
+        "path": "./syntaxes/hosts.tmLanguage.json"
+      },
+      {
+        "language": "confetti-fstab",
+        "scopeName": "source.confetti.fstab",
+        "path": "./syntaxes/fstab.tmLanguage.json"
+      },
+      {
+        "language": "confetti-crontab",
+        "scopeName": "source.confetti.crontab",
+        "path": "./syntaxes/crontab.tmLanguage.json"
       }
     ]
   },

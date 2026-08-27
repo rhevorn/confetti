@@ -1,0 +1,6 @@
+# Normalize source files
+*    text=auto
+*.ts      text   eol=lf
+*.png       -text binary
+docs/generated\ files/**    linguist-generated=true
+*.md    diff=markdown

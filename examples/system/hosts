@@ -1,0 +1,5 @@
+# Local development aliases
+127.0.0.1       localhost
+127.0.0.1          api.confetti.test   web.confetti.test # local services
+::1       localhost ip6-localhost
+192.0.2.10        staging.confetti.test
