@@ -79,6 +79,8 @@ describe('VS Code extension manifest', () => {
       'fstab',
       'crontab',
       'format document',
+      'yarnrc',
+      'cursorignore',
     ]) {
       expect(keywords).toContain(keyword)
     }
@@ -161,6 +163,13 @@ describe('VS Code extension manifest', () => {
       '.stylelintignore',
       '.helmignore',
       '.ignore',
+      '.cursorignore',
+      '.cursorindexingignore',
+      '.vscodeignore',
+      '.vercelignore',
+      '.netlifyignore',
+      '.gcloudignore',
+      '.terraformignore',
     ])
     expect(filenamesFor('confetti-versions')).toEqual([
       '.nvmrc',

@@ -14,6 +14,7 @@ import { propertiesConfig } from './properties.js'
 import { sshConfig } from './ssh.js'
 import { tomlConfig } from './toml.js'
 import { versionsConfig } from './versions.js'
+import { yarnrcConfig } from './yarnrc.js'
 import { yamlConfig } from './yaml.js'
 
 export function createDefaultRegistry(): ConfigRegistry {
@@ -26,6 +27,7 @@ export function createDefaultRegistry(): ConfigRegistry {
   registry.register(tomlConfig)
   registry.register(gitConfig)
   registry.register(npmrcConfig)
+  registry.register(yarnrcConfig)
   registry.register(yamlConfig)
   registry.register(ignoreConfig)
   registry.register(gitAttributesConfig)

@@ -51,6 +51,11 @@ describe('detectConfig', () => {
     ['toml', '/app/pyproject.toml', '[project]\nname = "confetti"\n'],
     ['gitconfig', '/app/.git/config', '[core]\neditor = code\n'],
     ['npmrc', '/app/.npmrc', 'registry=https://registry.npmjs.org/\n'],
+    [
+      'yarnrc',
+      '/app/.yarnrc',
+      'registry "https://registry.yarnpkg.com"\nyarn-offline-mirror "./cache"\n',
+    ],
     ['yaml', '/app/compose.yaml', 'services:\n  web:\n    image: nginx\n'],
     ['ignore', '/app/.gitignore', 'node_modules/\n!important.log\n'],
     ['gitattributes', '/app/.gitattributes', '*.ts text eol=lf\n'],
@@ -92,10 +97,47 @@ describe('detectConfig', () => {
     '.stylelintignore',
     '.helmignore',
     '.ignore',
+    '.cursorignore',
+    '.cursorindexingignore',
+    '.vscodeignore',
+    '.vercelignore',
+    '.netlifyignore',
+    '.gcloudignore',
+    '.terraformignore',
   ])('recognizes the %s ignore filename', (filename) => {
     expect(detectConfig(registry, `/app/${filename}`, '')?.definition.id).toBe(
       'ignore',
     )
+  })
+
+  it('recognizes classic Yarn config files', () => {
+    expect(detectConfig(registry, '/app/.yarnrc', '')?.definition.id).toBe(
+      'yarnrc',
+    )
+    expect(
+      detectConfig(
+        registry,
+        '/app/project/.yarnrc',
+        'registry "https://registry.yarnpkg.com"\nyarn-offline-mirror "./cache"\n',
+      )?.definition.id,
+    ).toBe('yarnrc')
+  })
+
+  it('does not treat Yarn Berry YAML configs as classic yarnrc', () => {
+    expect(
+      detectConfig(registry, '/app/.yarnrc.yml', 'nodeLinker: node-modules\n')
+        ?.definition.id,
+    ).not.toBe('yarnrc')
+  })
+
+  it('recognizes arbitrary .*ignore filenames', () => {
+    expect(
+      detectConfig(registry, '/app/.customignore', '')?.definition.id,
+    ).toBe('ignore')
+    expect(
+      detectConfig(registry, '/app/project/.buildignore', 'dist/\n')?.definition
+        .id,
+    ).toBe('ignore')
   })
 
   it.each([

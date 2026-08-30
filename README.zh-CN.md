@@ -57,7 +57,8 @@ Confetti 不会在每次输入时持续扫描整个文档。检测只发生在�
 | YAML               | `.yaml`、`.yml`、Docker Compose 和工作流文件        |  ✅  |   —    |
 | Git Config         | `.gitconfig`、`.gitmodules`、`.git/config`          |  ✅  |   ✅   |
 | npm Config         | `.npmrc`                                            |  ✅  |   ✅   |
-| Ignore 文件        | `.gitignore`、`.dockerignore`、`.npmignore` 等      |  ✅  |   —    |
+| Yarn Config        | 经典 `.yarnrc`（不含 `.yarnrc.yml`）                |  ✅  |   ✅   |
+| Ignore 文件        | `.gitignore`、`.cursorignore`、`.*ignore` 等        |  ✅  |   —    |
 | Git Attributes     | `.gitattributes`、`.git/info/attributes`            |  ✅  |   ✅   |
 | Browserslist       | `.browserslistrc`、`browserslist`                   |  ✅  |   ✅   |
 | 工具版本文件       | `.nvmrc`、`.node-version`、`.tool-versions` 等      |  ✅  |   —    |

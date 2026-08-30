@@ -33,7 +33,8 @@ Do not add AI features, accounts, cloud services, telemetry, Webviews, validatio
 - YAML
 - Git Config
 - npm config / npmrc
-- Ignore files (`.gitignore`, `.dockerignore`, `.npmignore`, and related files)
+- Yarn config / classic `.yarnrc`
+- Ignore files (`.gitignore`, `.cursorignore`, any `.*ignore`, and related files)
 - Git Attributes
 - Browserslist
 - Tool version files (`.nvmrc`, `.node-version`, `.python-version`, `.ruby-version`, `.tool-versions`)

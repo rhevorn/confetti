@@ -2,6 +2,11 @@
 
 All notable changes to Confetti are documented in this file.
 
+## Unreleased
+
+- Expand Ignore detection to any `.*ignore` filename, including `.cursorignore`, `.vscodeignore`, `.vercelignore`, and related files.
+- Add detection, highlighting, and formatting for classic Yarn `.yarnrc` files.
+
 ## 1.2.0 - 2026-08-27
 
 - Add detection and TextMate highlighting for Ignore files and tool version files.

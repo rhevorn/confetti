@@ -1,0 +1,13 @@
+# Files excluded from the packaged VSIX
+.vscode/**
+.vscode-test/**
+src/**
+test/**
+examples/**
+coverage/**
+**/*.ts
+**/*.map
+.gitignore
+.eslintignore
+tsconfig.json
+vitest.config.ts

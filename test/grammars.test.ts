@@ -187,6 +187,25 @@ describe('TextMate grammars', () => {
     expect(variableScopes).toContain('variable.other.npmrc')
   })
 
+  it('tokenizes classic yarnrc keys, quoted values, URLs, and booleans', async () => {
+    const quotedScopes = await scopesForLine(
+      'yarnrc.tmLanguage.json',
+      'registry "https://registry.yarnpkg.com"',
+    )
+    const urlScopes = await scopesForLine(
+      'yarnrc.tmLanguage.json',
+      'registry https://registry.yarnpkg.com',
+    )
+    const flagScopes = await scopesForLine(
+      'yarnrc.tmLanguage.json',
+      '"--install.ignore-engines" true',
+    )
+    expect(quotedScopes).toContain('variable.other.assignment.yarnrc')
+    expect(quotedScopes).toContain('string.quoted.double.yarnrc')
+    expect(urlScopes).toContain('string.unquoted.url.yarnrc')
+    expect(flagScopes).toContain('constant.language.boolean.yarnrc')
+  })
+
   it('tokenizes TOML tables, keys, strings, dates, booleans, and numbers', async () => {
     const tableScopes = await scopesForLine(
       'toml.tmLanguage.json',

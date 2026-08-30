@@ -1,0 +1,7 @@
+# Local editor indexing exclusions
+node_modules/
+dist/
+coverage/
+**/.cache/
+*.log
+!important.log

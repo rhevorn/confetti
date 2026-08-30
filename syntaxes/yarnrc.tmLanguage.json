@@ -1,0 +1,32 @@
+{
+  "name": "Confetti Yarn Config",
+  "scopeName": "source.confetti.yarnrc",
+  "patterns": [
+    { "name": "comment.line.number-sign.yarnrc", "match": "^\\s*#.*$" },
+    {
+      "match": "^\\s*((?:\"[^\"]+\"|'[^']+'|[^\\s#]+))(\\s+)",
+      "captures": {
+        "1": { "name": "variable.other.assignment.yarnrc" },
+        "2": { "name": "punctuation.separator.key-value.yarnrc" }
+      }
+    },
+    {
+      "name": "constant.language.boolean.yarnrc",
+      "match": "(?i)\\b(?:true|false)\\b"
+    },
+    {
+      "name": "constant.numeric.yarnrc",
+      "match": "(?<![A-Za-z0-9_.-])[-+]?\\d+(?:\\.\\d+)?\\b"
+    },
+    { "name": "string.unquoted.url.yarnrc", "match": "https?://[^\\s#]+" },
+    {
+      "name": "string.quoted.double.yarnrc",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.yarnrc", "match": "\\\\." }
+      ]
+    },
+    { "name": "string.quoted.single.yarnrc", "begin": "'", "end": "'" }
+  ]
+}

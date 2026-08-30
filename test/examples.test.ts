@@ -86,6 +86,21 @@ const examples: ExampleCase[] = [
     preservedText: 'docs/generated\\ files/',
   },
   {
+    relativePath: 'ignore/.cursorignore',
+    expectedType: 'ignore',
+    preservedText: '**/.cache/',
+  },
+  {
+    relativePath: 'ignore/.vscodeignore',
+    expectedType: 'ignore',
+    preservedText: 'vitest.config.ts',
+  },
+  {
+    relativePath: 'yarn/.yarnrc',
+    expectedType: 'yarnrc',
+    preservedText: '"./npm-packages-offline-cache"',
+  },
+  {
     relativePath: 'git/.gitattributes',
     expectedType: 'gitattributes',
     preservedText: 'docs/generated\\ files/**',

@@ -12,6 +12,7 @@ import { formatNpmrc } from '../src/formatters/npmrc.js'
 import { formatProperties } from '../src/formatters/properties.js'
 import { formatSsh } from '../src/formatters/ssh.js'
 import { formatToml } from '../src/formatters/toml.js'
+import { formatYarnrc } from '../src/formatters/yarnrc.js'
 
 const formatters = [
   ['Nginx', formatNginx, 'events {\r\n}\r\n'],
@@ -20,6 +21,7 @@ const formatters = [
   ['properties', formatProperties, 'key=value\r\n'],
   ['Git Config', formatGitConfig, '[core]\r\nkey=value\r\n'],
   ['npmrc', formatNpmrc, 'key=value\r\n'],
+  ['yarnrc', formatYarnrc, 'registry "https://registry.yarnpkg.com"\r\n'],
   ['SSH', formatSsh, 'Host work\r\nUser deploy\r\n'],
   ['TOML', formatToml, '[table]\r\nkey=value\r\n'],
   ['Git Attributes', formatGitAttributes, '*.ts text\r\n'],

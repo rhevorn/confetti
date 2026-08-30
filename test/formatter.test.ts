@@ -12,6 +12,7 @@ import { formatNpmrc } from '../src/formatters/npmrc.js'
 import { formatProperties } from '../src/formatters/properties.js'
 import { formatSsh } from '../src/formatters/ssh.js'
 import { formatToml } from '../src/formatters/toml.js'
+import { formatYarnrc } from '../src/formatters/yarnrc.js'
 
 describe('formatNginx', () => {
   const messy = `# keep this comment
@@ -225,6 +226,15 @@ describe('line-oriented formatters', () => {
       'SHELL=/bin/bash\n*/5 * * * * echo "keep  two spaces"\n@daily run --name "daily  job"\n',
     )
   })
+  it('formats classic Yarn space-separated keys and values', () => {
+    expect(
+      formatYarnrc(
+        '  registry   "https://registry.yarnpkg.com"  \nyarn-offline-mirror    "./cache"\n"--install.ignore-engines"    true  # keep\n',
+      ),
+    ).toBe(
+      'registry "https://registry.yarnpkg.com"\nyarn-offline-mirror "./cache"\n"--install.ignore-engines" true # keep\n',
+    )
+  })
 })
 
 describe('formatter stability', () => {
@@ -237,6 +247,7 @@ describe('formatter stability', () => {
     ['TOML', formatToml, '[section]\n  key=value\n'],
     ['Git Config', formatGitConfig, '[core]\neditor=code\n'],
     ['npmrc', formatNpmrc, ' registry = https://registry.npmjs.org/ \n'],
+    ['yarnrc', formatYarnrc, ' registry   "https://registry.yarnpkg.com" \n'],
     ['Git Attributes', formatGitAttributes, '*.ts   text  eol=lf\n'],
     ['Browserslist', formatBrowserslist, 'last   2 versions\n'],
     ['Hosts', formatHosts, '127.0.0.1   localhost\n'],

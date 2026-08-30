@@ -57,7 +57,8 @@ Method: Apple Silicon (`darwin arm64`), Node.js 24.14.1, 10 warm-up runs; 100 me
 | YAML                  | `.yaml`, `.yml`, Docker Compose and workflow files      |      ✅      |     —      |
 | Git Config            | `.gitconfig`, `.gitmodules`, `.git/config`              |      ✅      |     ✅     |
 | npm Config            | `.npmrc`                                                |      ✅      |     ✅     |
-| Ignore files          | `.gitignore`, `.dockerignore`, `.npmignore`, and others |      ✅      |     —      |
+| Yarn Config           | classic `.yarnrc` (not `.yarnrc.yml`)                   |      ✅      |     ✅     |
+| Ignore files          | `.gitignore`, `.cursorignore`, `.*ignore`, and others   |      ✅      |     —      |
 | Git Attributes        | `.gitattributes`, `.git/info/attributes`                |      ✅      |     ✅     |
 | Browserslist          | `.browserslistrc`, `browserslist`                       |      ✅      |     ✅     |
 | Tool versions         | `.nvmrc`, `.node-version`, `.tool-versions`, and others |      ✅      |     —      |

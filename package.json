@@ -1,7 +1,7 @@
 {
   "name": "confetti",
   "displayName": "Confetti",
-  "description": "Detect, highlight, and format nginx, dotenv, gitignore, hosts, fstab, crontab, TOML, YAML, SSH, npmrc, and 16+ config files in one local extension.",
+  "description": "Detect, highlight, and format nginx, dotenv, gitignore, yarnrc, hosts, fstab, crontab, TOML, YAML, SSH, npmrc, and 16+ config files in one local extension.",
   "version": "1.2.0",
   "private": true,
   "publisher": "rhevorn",
@@ -48,7 +48,11 @@
     "gitattributes",
     "git config",
     "npmrc",
+    "yarnrc",
     "browserslist",
+    "cursorignore",
+    "vscodeignore",
+    "vercelignore",
     "nvmrc",
     "tool versions",
     "hosts",
@@ -237,13 +241,32 @@
           ".eslintignore",
           ".stylelintignore",
           ".helmignore",
-          ".ignore"
+          ".ignore",
+          ".cursorignore",
+          ".cursorindexingignore",
+          ".vscodeignore",
+          ".vercelignore",
+          ".netlifyignore",
+          ".gcloudignore",
+          ".terraformignore"
         ],
         "filenamePatterns": [
+          ".*ignore",
           "*.gitignore",
           "**/.git/info/exclude"
         ],
         "configuration": "./language-configurations/line-based.json"
+      },
+      {
+        "id": "confetti-yarnrc",
+        "aliases": [
+          "Yarn Config",
+          "yarnrc"
+        ],
+        "filenames": [
+          ".yarnrc"
+        ],
+        "configuration": "./language-configurations/key-value.json"
       },
       {
         "id": "confetti-gitattributes",
@@ -364,6 +387,11 @@
         "language": "confetti-npmrc",
         "scopeName": "source.confetti.npmrc",
         "path": "./syntaxes/npmrc.tmLanguage.json"
+      },
+      {
+        "language": "confetti-yarnrc",
+        "scopeName": "source.confetti.yarnrc",
+        "path": "./syntaxes/yarnrc.tmLanguage.json"
       },
       {
         "language": "confetti-yaml",
