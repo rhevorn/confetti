@@ -427,6 +427,39 @@ describe('VS Code extension adapter', () => {
     expect(mockState.diagnostics?.has(unsupported.uri)).toBe(false)
   })
 
+  it('tracks detection in the status bar across editor events', async () => {
+    const nginxDocument = document('/etc/nginx/nginx.conf', 'events {\n}\n')
+    mockState.activeEditor = editor(nginxDocument) as never
+    activateExtension()
+
+    const item = mockState.statusBarItem
+    expect(item?.text).toBe('$(eye) Nginx 100%')
+    expect(item?.command).toBe('confetti.showDetectionInfo')
+    expect(mockState.statusBarShown).toBe(true)
+
+    await mockState.openHandlers[0]?.(nginxDocument)
+    expect(item?.text).toBe('$(eye) Nginx 100%')
+
+    const envDocument = document('/app/.env', 'KEY=value\n')
+    await mockState.activeEditorHandlers[0]?.({ document: envDocument })
+    expect(item?.text).toBe('$(eye) Environment Variables 100%')
+
+    await mockState.activeEditorHandlers[0]?.(undefined)
+    expect(mockState.statusBarShown).toBe(false)
+
+    const unsupported = document('/app/notes.txt', 'plain text\n')
+    await mockState.saveHandlers[0]?.(unsupported)
+    expect(mockState.statusBarShown).toBe(false)
+
+    await mockState.activeEditorHandlers[0]?.({ document: nginxDocument })
+    expect(mockState.statusBarShown).toBe(true)
+    expect(item?.text).toBe('$(eye) Nginx 100%')
+
+    mockState.activeEditor = undefined
+    mockState.closeHandlers[0]?.(nginxDocument)
+    expect(mockState.statusBarShown).toBe(false)
+  })
+
   it('opens formatter output and handles missing active editors', async () => {
     activateExtension()
 

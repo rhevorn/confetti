@@ -164,9 +164,32 @@ export function activate(context: vscode.ExtensionContext): void {
     )
   }
 
+  const statusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100,
+  )
+  statusBarItem.command = 'confetti.showDetectionInfo'
+
+  const updateStatusBar = (document: vscode.TextDocument | undefined): void => {
+    if (!document) {
+      statusBarItem.hide()
+      return
+    }
+    const result =
+      detectionCache.get(document.uri.toString()) ?? detect(document)
+    if (!result) {
+      statusBarItem.hide()
+      return
+    }
+    const text = `$(eye) ${result.definition.displayName} ${result.confidence}%`
+    if (statusBarItem.text !== text) statusBarItem.text = text
+    statusBarItem.show()
+  }
+
   context.subscriptions.push(
     outputChannel,
     diagnosticCollection,
+    statusBarItem,
     vscode.commands.registerCommand('confetti.detectConfigType', async () => {
       const document = vscode.window.activeTextEditor?.document
       if (document) await detectAndApply(document, true)
@@ -289,26 +312,31 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.workspace.onDidOpenTextDocument((document) => {
       void autoDetect(document)
       updateDiagnostics(document)
+      updateStatusBar(document)
     }),
     vscode.workspace.onDidSaveTextDocument((document) => {
       void autoDetect(document)
       updateDiagnostics(document)
+      updateStatusBar(document)
     }),
     vscode.workspace.onDidCloseTextDocument((document) => {
       detectionCache.delete(document.uri.toString())
       diagnosticCollection.delete(document.uri)
+      updateStatusBar(vscode.window.activeTextEditor?.document)
     }),
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) {
         void autoDetect(editor.document)
         updateDiagnostics(editor.document)
       }
+      updateStatusBar(editor?.document)
     }),
   )
 
   if (vscode.window.activeTextEditor) {
     void autoDetect(vscode.window.activeTextEditor.document)
     updateDiagnostics(vscode.window.activeTextEditor.document)
+    updateStatusBar(vscode.window.activeTextEditor.document)
   }
 }
 

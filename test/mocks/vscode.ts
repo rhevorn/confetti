@@ -30,6 +30,16 @@ export const mockState = {
   outputShown: false,
   languageChanges: [] as Array<{ document: MockDocument; languageId: string }>,
   diagnostics: undefined as Map<unknown, Diagnostic[]> | undefined,
+  statusBarItem: undefined as StatusBarItem | undefined,
+  statusBarShown: false,
+}
+
+interface StatusBarItem {
+  text: string
+  command: string | undefined
+  show(): void
+  hide(): void
+  dispose(): void
 }
 
 export function resetMockState(): void {
@@ -53,6 +63,8 @@ export function resetMockState(): void {
   mockState.outputShown = false
   mockState.languageChanges.length = 0
   mockState.diagnostics = undefined
+  mockState.statusBarItem = undefined
+  mockState.statusBarShown = false
 }
 
 function disposable(): { dispose(): void } {
@@ -99,6 +111,11 @@ export class DocumentSymbol {
 export const SymbolKind = {
   Namespace: 3,
   Struct: 22,
+}
+
+export const StatusBarAlignment = {
+  Left: 1,
+  Right: 2,
 }
 
 export class Diagnostic {
@@ -168,6 +185,21 @@ export const window = {
   setStatusBarMessage(message: string) {
     mockState.statusMessages.push(message)
     return disposable()
+  },
+  createStatusBarItem(): StatusBarItem {
+    const item: StatusBarItem = {
+      text: '',
+      command: undefined,
+      show() {
+        mockState.statusBarShown = true
+      },
+      hide() {
+        mockState.statusBarShown = false
+      },
+      dispose() {},
+    }
+    mockState.statusBarItem = item
+    return item
   },
   onDidChangeActiveTextEditor(handler: Handler) {
     mockState.activeEditorHandlers.push(handler)
