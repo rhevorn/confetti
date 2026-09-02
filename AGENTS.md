@@ -74,7 +74,7 @@ YAML, Ignore files, and tool version files are detection and highlighting only. 
 
 Detection:
 
-- Use filename, normalized path, extension, and content signals.
+- Use filename, normalized path, extension, and content signals. Content signals only boost files that already match a filename, path pattern, or extension — never detect a file on content alone, so a README containing a config snippet is never hijacked.
 - Support POSIX and Windows paths.
 - Return the highest-confidence definition only when confidence is at least the fixed `MIN_CONFIDENCE` value.
 - Do not force a language mode for an unreliable result.

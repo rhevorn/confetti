@@ -45,6 +45,11 @@ function scoreDefinition(
     structuralScore = 10
   }
 
+  // Content signals only boost structurally matching files. Without this
+  // floor, arbitrary files (for example a README with an nginx snippet)
+  // would be hijacked by content-only scores that reach MIN_CONFIDENCE.
+  if (structuralScore === 0) return 0
+
   let contentScore: number
   try {
     contentScore = definition.detect?.(normalizedFilename, content) ?? 0

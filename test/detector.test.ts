@@ -320,6 +320,49 @@ describe('detectConfig', () => {
     ).toBeUndefined()
   })
 
+  it('ignores strong content signals in files without a structural match', () => {
+    const markdown = [
+      '# Deploy guide',
+      '',
+      '```nginx',
+      'server {',
+      '  listen 80;',
+      '  server_name foo;',
+      '}',
+      '```',
+      '',
+      '```',
+      'Host example',
+      'HostName 1.2.3.4',
+      '```',
+      '',
+    ].join('\n')
+
+    for (const filename of ['README.md', '/home/u/notes.txt']) {
+      expect(detectConfig(registry, filename, markdown)).toBeUndefined()
+    }
+  })
+
+  it('does not hijack source or text files with host or cron entries', () => {
+    expect(
+      detectConfig(registry, '/w/src/fixture.ts', '127.0.0.1 localhost\n'),
+    ).toBeUndefined()
+    expect(
+      detectConfig(
+        registry,
+        '/tmp/x.txt',
+        '0 2 * * * /usr/bin/backup\nMAILTO=admin\n',
+      ),
+    ).toBeUndefined()
+    expect(
+      detectConfig(
+        registry,
+        '/tmp/notes.txt',
+        'Host example\nHostName 1.2.3.4\nUser deploy\n',
+      ),
+    ).toBeUndefined()
+  })
+
   it('survives a broken custom detector', () => {
     const brokenRegistry = createDefaultRegistry()
     brokenRegistry.register({
@@ -341,16 +384,18 @@ describe('detectConfig', () => {
       id: 'accepted',
       displayName: 'Accepted',
       languageId: 'accepted',
-      detect: () => MIN_CONFIDENCE,
+      extensions: ['.file'],
+      detect: () => MIN_CONFIDENCE - 10,
     })
     boundaryRegistry.register({
       id: 'rejected',
       displayName: 'Rejected',
       languageId: 'rejected',
-      detect: () => MIN_CONFIDENCE - 1,
+      extensions: ['.file'],
+      detect: () => MIN_CONFIDENCE - 11,
     })
 
-    const result = detectConfig(boundaryRegistry, '/tmp/file', '')
+    const result = detectConfig(boundaryRegistry, '/tmp/probe.file', '')
     expect(result?.definition.id).toBe('accepted')
     expect(result?.confidence).toBe(MIN_CONFIDENCE)
     expect(
@@ -371,12 +416,13 @@ describe('detectConfig', () => {
         id,
         displayName: id,
         languageId: id,
+        extensions: ['.file'],
         detect: () => 80,
       })
     }
 
     expect(
-      detectConfig(tiedRegistry, '/tmp/file', '')?.candidates.map(
+      detectConfig(tiedRegistry, '/tmp/probe.file', '')?.candidates.map(
         ({ definition }) => definition.id,
       ),
     ).toEqual(['alpha', 'zeta'])
@@ -413,12 +459,14 @@ describe('detectConfig', () => {
       id: 'high',
       displayName: 'High',
       languageId: 'high',
+      extensions: ['.file'],
       detect: () => 500,
     })
     scoreRegistry.register({
       id: 'negative',
       displayName: 'Negative',
       languageId: 'negative',
+      extensions: ['.file'],
       detect: () => -500,
     })
     scoreRegistry.register({
@@ -427,7 +475,7 @@ describe('detectConfig', () => {
       languageId: 'none',
     })
 
-    const result = detectConfig(scoreRegistry, '/tmp/file', '')
+    const result = detectConfig(scoreRegistry, '/tmp/probe.file', '')
     expect(result?.confidence).toBe(100)
     expect(result?.candidates.map(({ definition }) => definition.id)).toEqual([
       'high',
