@@ -3,6 +3,7 @@ import { createDefaultRegistry } from './configs/index.js'
 import { detectConfig } from './core/detector.js'
 import { formatConfig } from './core/formatter.js'
 import type { ConfigDefinition, DetectionResult } from './core/types.js'
+import { computeFoldingRanges } from './features/folding.js'
 import { isCompatibleLanguageId } from './language-compatibility.js'
 
 const registry = createDefaultRegistry()
@@ -185,6 +186,19 @@ export function activate(context: vscode.ExtensionContext): void {
         )
       }
     }),
+    vscode.languages.registerFoldingRangeProvider(
+      registry.all().map((definition) => ({ language: definition.languageId })),
+      {
+        provideFoldingRanges(document) {
+          const definition = definitionForDocument(document)
+          if (!definition) return []
+          return computeFoldingRanges(definition.id, document.getText()).map(
+            ({ startLine, endLine }) =>
+              new vscode.FoldingRange(startLine, endLine),
+          )
+        },
+      },
+    ),
     vscode.languages.registerDocumentFormattingEditProvider(
       [
         ...registry

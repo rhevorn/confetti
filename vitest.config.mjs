@@ -14,6 +14,7 @@ export default defineConfig({
         'src/configs/**/*.ts',
         'src/core/**/*.ts',
         'src/formatters/**/*.ts',
+        'src/features/**/*.ts',
         'src/tokenizers/**/*.ts',
         'src/extension.ts',
         'src/language-compatibility.ts',

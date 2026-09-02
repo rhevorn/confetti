@@ -14,6 +14,8 @@ export const mockState = {
   formattingProvider: undefined as
     { provideDocumentFormattingEdits: Handler } | undefined,
   formattingSelector: undefined as unknown,
+  foldingProvider: undefined as { provideFoldingRanges: Handler } | undefined,
+  foldingSelector: undefined as unknown,
   openHandlers: [] as Handler[],
   saveHandlers: [] as Handler[],
   closeHandlers: [] as Handler[],
@@ -32,6 +34,8 @@ export function resetMockState(): void {
   mockState.commandHandlers.clear()
   mockState.formattingProvider = undefined
   mockState.formattingSelector = undefined
+  mockState.foldingProvider = undefined
+  mockState.foldingSelector = undefined
   mockState.openHandlers.length = 0
   mockState.saveHandlers.length = 0
   mockState.closeHandlers.length = 0
@@ -60,6 +64,13 @@ export const TextEdit = {
   replace(range: Range, newText: string) {
     return { range, newText }
   },
+}
+
+export class FoldingRange {
+  constructor(
+    public readonly start: number,
+    public readonly end: number,
+  ) {}
 }
 
 export const workspace = {
@@ -135,6 +146,14 @@ export const languages = {
   ) {
     mockState.formattingSelector = selector
     mockState.formattingProvider = provider
+    return disposable()
+  },
+  registerFoldingRangeProvider(
+    selector: unknown,
+    provider: { provideFoldingRanges: Handler },
+  ) {
+    mockState.foldingSelector = selector
+    mockState.foldingProvider = provider
     return disposable()
   },
   async setTextDocumentLanguage(

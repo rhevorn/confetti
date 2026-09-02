@@ -106,6 +106,16 @@ describe('VS Code extension adapter', () => {
     expect(mockState.saveHandlers).toHaveLength(1)
     expect(mockState.closeHandlers).toHaveLength(1)
     expect(mockState.activeEditorHandlers).toHaveLength(1)
+    expect(mockState.foldingProvider).toBeDefined()
+    const foldingSelector = mockState.foldingSelector as Array<{
+      language: string
+    }>
+    expect(foldingSelector.map(({ language }) => language)).toContain(
+      'confetti-nginx',
+    )
+    expect(foldingSelector.map(({ language }) => language)).toContain(
+      'confetti-env',
+    )
     expect(mockState.outputLines[0]).toContain('Extension activated')
   })
 
@@ -286,6 +296,29 @@ describe('VS Code extension adapter', () => {
 
     expect(edits).toHaveLength(1)
     expect(edits[0]?.newText).toBe('server {\n}\n')
+  })
+
+  it('provides folding ranges for detected documents and none otherwise', () => {
+    activateExtension()
+
+    const supported = document(
+      '/etc/nginx/nginx.conf',
+      'server {\n  location /api {\n    proxy_pass http://backend;\n  }\n}\n',
+      'confetti-nginx',
+    )
+    const supportedRanges = mockState.foldingProvider?.provideFoldingRanges(
+      supported,
+    ) as Array<{ start: number; end: number }>
+
+    expect(supportedRanges).toEqual([
+      { start: 1, end: 3 },
+      { start: 0, end: 4 },
+    ])
+
+    const unsupported = document('/app/notes.txt', 'plain text\n')
+    expect(
+      mockState.foldingProvider?.provideFoldingRanges(unsupported),
+    ).toEqual([])
   })
 
   it('honors auto-detect settings and file schemes on editor events', async () => {
