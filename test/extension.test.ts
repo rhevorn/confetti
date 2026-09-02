@@ -427,6 +427,49 @@ describe('VS Code extension adapter', () => {
     expect(mockState.diagnostics?.has(unsupported.uri)).toBe(false)
   })
 
+  it('honors per-format whitelists for auto-detection', async () => {
+    mockState.configuration.set('autoDetect.formats', ['nginx'])
+    activateExtension()
+
+    const sshDocument = document(
+      '/etc/ssh/ssh_config',
+      'Host work\n  User deploy\n',
+    )
+    await mockState.openHandlers[0]?.(sshDocument)
+    expect(sshDocument.languageId).toBe('plaintext')
+    expect(mockState.languageChanges).toHaveLength(0)
+    expect(mockState.statusBarItem?.text).toBe('$(eye) SSH Config 100%')
+
+    const nginxDocument = document('/etc/nginx/nginx.conf', 'events {\n}\n')
+    await mockState.openHandlers[0]?.(nginxDocument)
+    expect(nginxDocument.languageId).toBe('confetti-nginx')
+  })
+
+  it('honors per-format whitelists for formatting', () => {
+    mockState.configuration.set('format.formats', ['ssh'])
+    activateExtension()
+
+    const nginxEdits =
+      mockState.formattingProvider?.provideDocumentFormattingEdits(
+        document('/etc/nginx/nginx.conf', 'server{\n}\n', 'confetti-nginx'),
+      )
+    expect(nginxEdits).toEqual([])
+    expect(mockState.outputLines.join('\n')).toContain(
+      'formatting not enabled for nginx',
+    )
+
+    const sshEdits =
+      mockState.formattingProvider?.provideDocumentFormattingEdits(
+        document(
+          '/etc/ssh/ssh_config',
+          'Host work\nHostName example.com\n',
+          'confetti-ssh',
+        ),
+      ) as Array<{ newText: string }>
+    expect(sshEdits).toHaveLength(1)
+    expect(sshEdits[0]?.newText).toBe('Host work\n  HostName example.com\n')
+  })
+
   it('tracks detection in the status bar across editor events', async () => {
     const nginxDocument = document('/etc/nginx/nginx.conf', 'events {\n}\n')
     mockState.activeEditor = editor(nginxDocument) as never

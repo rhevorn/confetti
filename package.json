@@ -133,6 +133,15 @@
           "default": true,
           "description": "Automatically detect supported configuration files when they are opened, activated, or saved."
         },
+        "confetti.autoDetect.formats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "default": [],
+          "description": "Restrict automatic language detection to these format ids, such as \"nginx\" or \"ssh\". An empty list enables detection for every supported format."
+        },
         "confetti.diagnostics.enable": {
           "type": "boolean",
           "default": true,
@@ -142,6 +151,15 @@
           "type": "boolean",
           "default": true,
           "description": "Enable document formatting for supported configuration files."
+        },
+        "confetti.format.formats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "default": [],
+          "description": "Restrict formatting to these format ids, such as \"nginx\" or \"ssh\". An empty list formats every supported format."
         }
       }
     },

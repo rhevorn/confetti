@@ -28,6 +28,11 @@ function settings(): vscode.WorkspaceConfiguration {
   return vscode.workspace.getConfiguration('confetti')
 }
 
+function isEnabled(id: string, setting: string): boolean {
+  const formats = settings().get<string[]>(setting, [])
+  return formats.length === 0 || formats.includes(id)
+}
+
 function detect(document: vscode.TextDocument): DetectionResult | undefined {
   const result = detectConfig(
     registry,
@@ -63,6 +68,13 @@ function formattingEdits(
   if (!definition?.formatter) {
     log(
       `${trigger} | skipped: unsupported configuration | language=${document.languageId} | ${document.uri.fsPath}`,
+    )
+    return []
+  }
+
+  if (!isEnabled(definition.id, 'format.formats')) {
+    log(
+      `${trigger} | skipped: formatting not enabled for ${definition.id} | ${document.uri.fsPath}`,
     )
     return []
   }
@@ -103,6 +115,7 @@ async function detectAndApply(
   }
 
   if (
+    isEnabled(result.definition.id, 'autoDetect.formats') &&
     !isCompatibleLanguageId(
       result.definition.id,
       result.definition.languageId,

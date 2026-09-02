@@ -4,6 +4,7 @@ All notable changes to Confetti are documented in this file.
 
 ## Unreleased
 
+- Add per-format settings `confetti.autoDetect.formats` and `confetti.format.formats` to restrict detection and formatting to specific format ids; an empty list keeps every format enabled.
 - Add a status bar indicator showing the detected format and confidence, clickable to open detection details.
 - Add Nginx snippets for server blocks, locations, reverse proxies, upstreams, HTTPS servers, and HTTP-to-HTTPS redirects.
 - Add duplicate-key diagnostics for dotenv files, INI-family sections (INI, Git Config, MySQL, pip, setup.cfg), and TOML tables, reported as warnings when files are opened, activated, or saved — never while typing. Controlled by `confetti.diagnostics.enable`.
