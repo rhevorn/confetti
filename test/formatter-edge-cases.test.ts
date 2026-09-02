@@ -8,14 +8,17 @@ import { formatGitConfig } from '../src/formatters/gitconfig.js'
 import { formatGitAttributes } from '../src/formatters/gitattributes.js'
 import { formatHosts } from '../src/formatters/hosts.js'
 import { formatIni } from '../src/formatters/ini.js'
+import { formatInputrc } from '../src/formatters/inputrc.js'
 import { formatMyCnf } from '../src/formatters/mysql.js'
 import { formatNginx } from '../src/formatters/nginx.js'
 import { formatPip } from '../src/formatters/pip.js'
 import { formatSetupCfg } from '../src/formatters/setupcfg.js'
 import { formatNpmrc } from '../src/formatters/npmrc.js'
 import { formatProperties } from '../src/formatters/properties.js'
+import { formatScreen } from '../src/formatters/screen.js'
 import { formatSsh } from '../src/formatters/ssh.js'
 import { formatToml } from '../src/formatters/toml.js'
+import { formatTmux } from '../src/formatters/tmux.js'
 import { formatYarnrc } from '../src/formatters/yarnrc.js'
 
 const formatters = [
@@ -28,6 +31,9 @@ const formatters = [
   ['MySQL', formatMyCnf, '[mysqld]\r\nport=3306\r\n'],
   ['pip', formatPip, '[global]\r\nindex-url=https://pypi.org/simple\r\n'],
   ['setup.cfg', formatSetupCfg, '[metadata]\r\nrequires =\r\n    keep me\r\n'],
+  ['tmux', formatTmux, 'set -g mouse on\r\n'],
+  ['screen', formatScreen, 'startup_message off\r\n'],
+  ['inputrc', formatInputrc, 'set bell-style visible\r\n'],
   ['env', formatEnv, 'KEY=value\r\n'],
   ['INI', formatIni, '[section]\r\nkey=value\r\n'],
   ['properties', formatProperties, 'key=value\r\n'],

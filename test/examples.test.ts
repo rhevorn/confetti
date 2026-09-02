@@ -165,6 +165,21 @@ const examples: ExampleCase[] = [
     expectedType: 'crontab',
     preservedText: '"keep  two spaces"',
   },
+  {
+    relativePath: 'tmux/tmux.conf',
+    expectedType: 'tmux',
+    preservedText: '#{?window_zoomed_flag,ZOOM,}',
+  },
+  {
+    relativePath: 'screen/.screenrc',
+    expectedType: 'screen',
+    preservedText: 'Wuff,  Wuff!!  ',
+  },
+  {
+    relativePath: 'inputrc/.inputrc',
+    expectedType: 'inputrc',
+    preservedText: 'exchange-point-and-mark',
+  },
   { relativePath: 'unknown/application.conf' },
 ]
 

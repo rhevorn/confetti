@@ -1,0 +1,28 @@
+# ~/.screenrc — GNU screen configuration
+startup_message   off
+escape   ^Aa
+term   screen-256color
+vbell   off
+vbell_msg   "   Wuff,  Wuff!!  "
+autodetach   on
+defscrollback   10000
+shell   -$SHELL
+scrollback   5000
+
+hardstatus   alwayslastline
+hardstatus   string   '%{= kG}[ %{G}%H %{g}][%= %{= kw}%?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B} %d/%m %{W}%c %{g}]'
+
+caption   always   "%{= wk}%-w%{= BW}%n %t%{-}%+w %-="
+
+# window title
+shelltitle   '$ | bash'
+
+# key bindings
+bindkey   -k   k1   select   0
+bindkey   -k   k2   select   1
+screen   -t   editor   1
+screen   -t   shell   2
+select   0
+
+setenv   SSH_AUTH_SOCK   "$HOME/.ssh/agent"
+defutf8   on

@@ -9,13 +9,16 @@ import { gitAttributesConfig } from './gitattributes.js'
 import { hostsConfig } from './hosts.js'
 import { ignoreConfig } from './ignore.js'
 import { iniConfig } from './ini.js'
+import { inputrcConfig } from './inputrc.js'
 import { mysqlConfig } from './mysql.js'
 import { nginxConfig } from './nginx.js'
 import { npmrcConfig } from './npmrc.js'
 import { pipConfig } from './pip.js'
 import { propertiesConfig } from './properties.js'
+import { screenConfig } from './screen.js'
 import { setupCfgConfig } from './setupcfg.js'
 import { sshConfig } from './ssh.js'
+import { tmuxConfig } from './tmux.js'
 import { tomlConfig } from './toml.js'
 import { versionsConfig } from './versions.js'
 import { yarnrcConfig } from './yarnrc.js'
@@ -44,5 +47,8 @@ export function createDefaultRegistry(): ConfigRegistry {
   registry.register(hostsConfig)
   registry.register(fstabConfig)
   registry.register(crontabConfig)
+  registry.register(tmuxConfig)
+  registry.register(screenConfig)
+  registry.register(inputrcConfig)
   return registry
 }

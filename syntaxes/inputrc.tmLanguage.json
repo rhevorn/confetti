@@ -1,0 +1,51 @@
+{
+  "name": "Confetti Readline Config",
+  "scopeName": "source.confetti.inputrc",
+  "patterns": [
+    { "name": "comment.line.number-sign.inputrc", "match": "^\\s*#.*$" },
+    {
+      "name": "keyword.control.inputrc",
+      "match": "(?i)^\\s*(?:\\$if|\\$else|\\$endif|\\$include)\\b"
+    },
+    {
+      "match": "(?i)^\\s*(set)\\s+(\\S+)",
+      "captures": {
+        "1": { "name": "keyword.other.set.inputrc" },
+        "2": { "name": "variable.other.option.inputrc" }
+      }
+    },
+    {
+      "name": "keyword.other.set.inputrc",
+      "match": "(?i)^\\s*set\\b"
+    },
+    {
+      "name": "string.quoted.keyseq.inputrc",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.keyseq.inputrc", "match": "\\\\." }
+      ]
+    },
+    {
+      "name": "string.quoted.keyseq.inputrc",
+      "begin": "'",
+      "end": "'"
+    },
+    {
+      "name": "entity.name.function.inputrc",
+      "match": "(?i)\\b(?:beginning-of-line|end-of-line|forward-char|backward-char|forward-word|backward-word|history-search-forward|history-search-backward|delete-char|backward-delete-char|kill-line|unix-line-discard|yank|complete|menu-complete|insert-comment|re-read-init-file|dump-functions|dump-variables|dump-macros|accept-line|previous-history|next-history|reverse-search-history|forward-search-history|quoted-insert|tab-insert|capitalize-word|upcase-word|downcase-word|transpose-chars|clear-screen|redraw-current-line|undo|revert-line|copy-region-as-kill|kill-region|kill-whole-line)\\b"
+    },
+    {
+      "name": "constant.language.boolean.inputrc",
+      "match": "(?i)\\b(?:on|off)\\b"
+    },
+    {
+      "name": "constant.numeric.inputrc",
+      "match": "(?<![A-Za-z0-9_.-])\\d+(?:\\.\\d+)?\\b"
+    },
+    {
+      "name": "string.unquoted.path.inputrc",
+      "match": "(?<![\\w.])(?:[~/][\\w.-]+)+/?"
+    }
+  ]
+}

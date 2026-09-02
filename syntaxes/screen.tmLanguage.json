@@ -1,0 +1,36 @@
+{
+  "name": "Confetti screen Config",
+  "scopeName": "source.confetti.screen",
+  "patterns": [
+    { "name": "comment.line.number-sign.screen", "match": "^\\s*#.*$" },
+    {
+      "name": "keyword.other.directive.screen",
+      "match": "(?i)^\\s*(?:startup_message|startup_message\\s+off|escape|term|termcapinfo|terminfo|vbell|vbell_msg|vbellwait|autodetach|defscrollback|scrollback|shell|shelltitle|caption|hardstatus|hardstatus\\s+string|defmonitor|bell_msg|bindkey|bind|screen|split|focus|layout|log|logfile|login|password|pow_detach|quit|refresh|reset|setsid|silence|sleep|stuff|suspend|utf8|width|height|wrap|zombie|allpartial|crlf|debug|deflogin|defutf8|detach|echo|msgminwait|msgwait|nethack|nonblock|number|obuflimit|only|partial|readbuf|redisplay|register|remove|rendition|select|sessionname|setenv|shellmatch|source|startup|stuff|suspend|termcap|termcapinfo|unsetenv|use)\\b"
+    },
+    {
+      "name": "constant.numeric.screen",
+      "match": "(?<![A-Za-z0-9_.-])\\d+(?:\\.\\d+)?\\b"
+    },
+    {
+      "name": "constant.language.boolean.screen",
+      "match": "(?i)\\b(?:on|off|auto)\\b"
+    },
+    {
+      "name": "variable.other.screen",
+      "match": "%[HnNDdwMmcCst:>?%]|%[?=]"
+    },
+    {
+      "name": "string.unquoted.path.screen",
+      "match": "(?<![\\w.])(?:[~/][\\w.-]+)+/?"
+    },
+    {
+      "name": "string.quoted.double.screen",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.screen", "match": "\\\\." }
+      ]
+    },
+    { "name": "string.quoted.single.screen", "begin": "'", "end": "'" }
+  ]
+}

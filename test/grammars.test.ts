@@ -192,6 +192,54 @@ describe('TextMate grammars', () => {
     expect(setupCfgScopes).toContain('variable.other.assignment.setupcfg')
   })
 
+  it('tokenizes tmux commands, options, and format variables', async () => {
+    const commandScopes = await scopesForLine(
+      'tmux.tmLanguage.json',
+      'set -g status-left #S',
+    )
+    const formatScopes = await scopesForLine(
+      'tmux.tmLanguage.json',
+      'display-message session: #{session_name}',
+    )
+    const bindScopes = await scopesForLine(
+      'tmux.tmLanguage.json',
+      'bind r source-file ~/.tmux.conf',
+    )
+    expect(commandScopes).toContain('keyword.other.command.tmux')
+    expect(commandScopes).toContain('constant.language.option.tmux')
+    expect(formatScopes).toContain('variable.other.tmux')
+    expect(bindScopes).toContain('string.unquoted.path.tmux')
+  })
+
+  it('tokenizes screen directives and status strings', async () => {
+    const directiveScopes = await scopesForLine(
+      'screen.tmLanguage.json',
+      'hardstatus string "%H %{= kw}%-w%{= BW}%n %t"',
+    )
+    expect(directiveScopes).toContain('keyword.other.directive.screen')
+    expect(directiveScopes).toContain('string.quoted.double.screen')
+  })
+
+  it('tokenizes readline options, key sequences, and functions', async () => {
+    const setScopes = await scopesForLine(
+      'inputrc.tmLanguage.json',
+      'set editing-mode emacs',
+    )
+    const keyScopes = await scopesForLine(
+      'inputrc.tmLanguage.json',
+      '"\\M-[1;5D": backward-word',
+    )
+    const conditionalScopes = await scopesForLine(
+      'inputrc.tmLanguage.json',
+      '$if mode=emacs',
+    )
+    expect(setScopes).toContain('keyword.other.set.inputrc')
+    expect(setScopes).toContain('variable.other.option.inputrc')
+    expect(keyScopes).toContain('string.quoted.keyseq.inputrc')
+    expect(keyScopes).toContain('entity.name.function.inputrc')
+    expect(conditionalScopes).toContain('keyword.control.inputrc')
+  })
+
   it('tokenizes SSH blocks, directives, paths, and placeholders', async () => {
     const hostScopes = await scopesForLine('ssh.tmLanguage.json', 'Host work')
     const directiveScopes = await scopesForLine(

@@ -1,0 +1,40 @@
+{
+  "name": "Confetti tmux Config",
+  "scopeName": "source.confetti.tmux",
+  "patterns": [
+    { "name": "comment.line.number-sign.tmux", "match": "^\\s*#.*$" },
+    {
+      "name": "keyword.other.command.tmux",
+      "match": "(?i)^\\s*(?:set|setw|set-option|set-window-option|setenv|set-environment|bind|bind-key|unbind|unbind-key|source|source-file|run|run-shell|if-shell|new-session|new-window|split-window|rename-session|set-hook|display|display-message|kill-session)\\b"
+    },
+    {
+      "name": "constant.language.option.tmux",
+      "match": "(?<![\\w-])-{1,2}[A-Za-z][\\w-]*"
+    },
+    {
+      "name": "variable.other.tmux",
+      "match": "#\\{[^}]*\\}"
+    },
+    {
+      "name": "constant.language.boolean.tmux",
+      "match": "(?i)\\b(?:on|off)\\b"
+    },
+    {
+      "name": "constant.numeric.tmux",
+      "match": "(?<![A-Za-z0-9_.-])\\d+(?:\\.\\d+)?\\b"
+    },
+    {
+      "name": "string.unquoted.path.tmux",
+      "match": "(?<![\\w.])(?:[~/][\\w.-]+)+/?"
+    },
+    {
+      "name": "string.quoted.double.tmux",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.tmux", "match": "\\\\." }
+      ]
+    },
+    { "name": "string.quoted.single.tmux", "begin": "'", "end": "'" }
+  ]
+}

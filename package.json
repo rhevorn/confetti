@@ -65,6 +65,10 @@
     "hosts",
     "fstab",
     "crontab",
+    "tmux",
+    "screenrc",
+    "inputrc",
+    "readline",
     "system config"
   ],
   "main": "./dist/extension.js",
@@ -400,6 +404,44 @@
         "configuration": "./language-configurations/line-based.json"
       },
       {
+        "id": "confetti-tmux",
+        "aliases": [
+          "tmux Config",
+          "tmux"
+        ],
+        "filenames": [
+          "tmux.conf"
+        ],
+        "filenamePatterns": [
+          "*/.tmux.conf",
+          "*/.config/tmux/tmux.conf"
+        ],
+        "configuration": "./language-configurations/line-based.json"
+      },
+      {
+        "id": "confetti-screen",
+        "aliases": [
+          "screen Config",
+          "screenrc"
+        ],
+        "filenames": [
+          ".screenrc",
+          "screenrc"
+        ],
+        "configuration": "./language-configurations/line-based.json"
+      },
+      {
+        "id": "confetti-inputrc",
+        "aliases": [
+          "Readline Config",
+          "inputrc"
+        ],
+        "filenames": [
+          ".inputrc"
+        ],
+        "configuration": "./language-configurations/line-based.json"
+      },
+      {
         "id": "confetti-crontab",
         "aliases": [
           "Crontab",
@@ -520,6 +562,21 @@
         "language": "confetti-crontab",
         "scopeName": "source.confetti.crontab",
         "path": "./syntaxes/crontab.tmLanguage.json"
+      },
+      {
+        "language": "confetti-tmux",
+        "scopeName": "source.confetti.tmux",
+        "path": "./syntaxes/tmux.tmLanguage.json"
+      },
+      {
+        "language": "confetti-screen",
+        "scopeName": "source.confetti.screen",
+        "path": "./syntaxes/screen.tmLanguage.json"
+      },
+      {
+        "language": "confetti-inputrc",
+        "scopeName": "source.confetti.inputrc",
+        "path": "./syntaxes/inputrc.tmLanguage.json"
       }
     ]
   },

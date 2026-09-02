@@ -1,0 +1,36 @@
+# ~/.inputrc — GNU Readline initialization
+$include   /etc/inputrc
+
+# Be 8 bit clean.
+set   meta-flag   on
+set   input-meta   on
+set   output-meta   on
+set   convert-meta   off
+
+# Editing behavior
+set   editing-mode   emacs
+set   bell-style   visible
+set   show-all-if-ambiguous   on
+set   show-all-if-unmodified   on
+set   completion-ignore-case   on
+set   menu-complete-display-prefix   on
+set   mark-symlinked-directories   on
+set   colored-stats   on
+set   page-completions   off
+set   visible-stats   on
+
+# Key bindings
+"\C-x\C-r":   re-read-init-file
+"\M-[1;5D":   backward-word
+"\M-[1;5C":   forward-word
+"\M-[1;3~":   kill-word
+"\C-w":   unix-word-rubout
+"\e[3~":   delete-char
+"\C-a":   beginning-of-line
+"\C-e":   end-of-line
+"\\C-a":   beginning-of-line
+"\\M- ":   set-mark
+
+$if   mode=emacs
+  "\C-x\C-x":   exchange-point-and-mark
+$endif

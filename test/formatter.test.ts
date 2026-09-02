@@ -8,14 +8,17 @@ import { formatGitConfig } from '../src/formatters/gitconfig.js'
 import { formatGitAttributes } from '../src/formatters/gitattributes.js'
 import { formatHosts } from '../src/formatters/hosts.js'
 import { formatIni } from '../src/formatters/ini.js'
+import { formatInputrc } from '../src/formatters/inputrc.js'
 import { formatMyCnf } from '../src/formatters/mysql.js'
 import { formatNginx } from '../src/formatters/nginx.js'
 import { formatPip } from '../src/formatters/pip.js'
 import { formatSetupCfg } from '../src/formatters/setupcfg.js'
 import { formatNpmrc } from '../src/formatters/npmrc.js'
 import { formatProperties } from '../src/formatters/properties.js'
+import { formatScreen } from '../src/formatters/screen.js'
 import { formatSsh } from '../src/formatters/ssh.js'
 import { formatToml } from '../src/formatters/toml.js'
+import { formatTmux } from '../src/formatters/tmux.js'
 import { formatYarnrc } from '../src/formatters/yarnrc.js'
 
 describe('formatNginx', () => {
@@ -161,6 +164,36 @@ describe('formatSetupCfg', () => {
       ),
     ).toBe(
       'requires =\n    keep me\n# comment\nneeds =\n\nafter blank\n[metadata]\nindented fresh\n',
+    )
+  })
+})
+
+describe('tmux, screen, and readline formatters', () => {
+  it('formats tmux commands, options, and format variables', () => {
+    expect(
+      formatTmux(
+        '  set -g   default-terminal   "screen-256color"\n  bind r   source-file   ~/.tmux.conf   \\;   display   "Reloaded #{T}"\n',
+      ),
+    ).toBe(
+      'set -g default-terminal "screen-256color"\nbind r source-file ~/.tmux.conf \\; display "Reloaded #{T}"\n',
+    )
+  })
+
+  it('formats screen directives while keeping quoted status strings intact', () => {
+    expect(
+      formatScreen(
+        '  startup_message   off\n  vbell_msg   "Wuff,  Wuff!!  "\n',
+      ),
+    ).toBe('startup_message off\nvbell_msg "Wuff,  Wuff!!  "\n')
+  })
+
+  it('formats readline key bindings as single-space columns', () => {
+    expect(
+      formatInputrc(
+        '  set   editing-mode   emacs\n"\\M-[1;5D":   backward-word\n"\\C-x\\C-r":   re-read-init-file\n',
+      ),
+    ).toBe(
+      'set editing-mode emacs\n"\\M-[1;5D": backward-word\n"\\C-x\\C-r": re-read-init-file\n',
     )
   })
 })
@@ -349,6 +382,9 @@ describe('formatter stability', () => {
     ['MySQL', formatMyCnf, '[mysqld]\n  port=3306\n'],
     ['pip', formatPip, '[global]\n  timeout=30\n'],
     ['setup.cfg', formatSetupCfg, '[metadata]\nrequires =\n    keep me\n'],
+    ['tmux', formatTmux, 'set -g   mouse   on\n'],
+    ['screen', formatScreen, 'startup_message   off\n'],
+    ['inputrc', formatInputrc, 'set   editing-mode   emacs\n'],
     ['env', formatEnv, '  KEY = "a  b"  \n'],
     ['INI', formatIni, '[section]\n  key   = value\n'],
     ['SSH', formatSsh, 'Host work\nHostName example.com\n'],

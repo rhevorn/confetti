@@ -34,6 +34,9 @@ These files are intentionally messy. They cover detection, TextMate scopes, form
 | `toml/pyproject.toml` | `.toml` extension | Tables, array tables, dotted keys, dates, arrays, inline tables, multiline strings |
 | `git/.gitconfig` | Exact filename | Sections, subsections, aliases, paths, booleans |
 | `npm/.npmrc` | Exact filename | Scoped registries, auth keys, URLs, variables, booleans, numbers |
+| `tmux/tmux.conf` | Exact filename | Commands, `-g` flags, `#{...}` format variables, quoted strings |
+| `screen/.screenrc` | Exact filename | Directives, status format strings, escapes |
+| `inputrc/.inputrc` | Exact filename | `set` options, quoted key sequences, function names, `$if` conditionals |
 | `yaml/compose.yaml` | `.yaml` extension | Maps, sequences, anchors, aliases, tags, flow collections, block scalars |
 | `unknown/application.conf` | None expected | Must remain outside all Confetti language modes |
 

@@ -45,6 +45,9 @@ Do not add AI features, accounts, cloud services, telemetry, Webviews, validatio
 - Hosts
 - Filesystem table / fstab
 - Crontab
+- tmux config (`tmux.conf`)
+- GNU screen config (`.screenrc`)
+- GNU Readline config (`.inputrc`)
 
 Redis is intentionally not supported.
 

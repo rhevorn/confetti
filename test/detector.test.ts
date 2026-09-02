@@ -90,6 +90,22 @@ describe('detectConfig', () => {
     ],
     ['pip', '/home/user/.pip/pip.conf', '[global]\ntimeout = 30\n'],
     ['setupcfg', '/app/setup.cfg', '[metadata]\nname = demo\n'],
+    ['tmux', '/home/user/.tmux.conf', 'set -g mouse on\n'],
+    [
+      'tmux',
+      '/home/user/.config/tmux/tmux.conf',
+      'set -g base-index 1\nbind r source-file ~/.tmux.conf\n',
+    ],
+    [
+      'screen',
+      '/home/user/.screenrc',
+      'startup_message off\nhardstatus alwayslastline\n',
+    ],
+    [
+      'inputrc',
+      '/home/user/.inputrc',
+      'set editing-mode emacs\n"\\C-a": beginning-of-line\n',
+    ],
   ])('detects %s configuration', (expected, filename, content) => {
     expect(detectConfig(registry, filename, content)?.definition.id).toBe(
       expected,
@@ -270,6 +286,19 @@ describe('detectConfig', () => {
         '[metadata]\nname = demo\nversion = 1.0.0\n',
       )?.definition.id,
     ).toBe('ini')
+  })
+
+  it('keeps tmux content detection below the hijacking threshold', () => {
+    expect(
+      detectConfig(registry, '/srv/notes.txt', 'set -g mouse on\n'),
+    ).toBeUndefined()
+    expect(
+      detectConfig(
+        registry,
+        '/srv/generic.conf',
+        'set -g status-interval 5\nbind r source-file ~/.tmux.conf\n',
+      ),
+    ).toBeUndefined()
   })
 
   it('does not let weak Apache content alone cross the threshold', () => {
