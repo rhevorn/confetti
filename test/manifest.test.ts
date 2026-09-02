@@ -16,6 +16,11 @@ interface GrammarContribution {
   path: string
 }
 
+interface SnippetContribution {
+  language: string
+  path: string
+}
+
 interface CommandContribution {
   command: string
 }
@@ -37,6 +42,7 @@ interface ExtensionManifest {
     configuration: { properties: Record<string, unknown> }
     languages: LanguageContribution[]
     grammars: GrammarContribution[]
+    snippets: SnippetContribution[]
   }
 }
 
@@ -242,5 +248,22 @@ describe('VS Code extension manifest', () => {
         'images/icon.png',
       ]),
     )
+  })
+
+  it('contributes parseable snippets for registered languages', () => {
+    const languageIds = new Set(
+      createDefaultRegistry()
+        .all()
+        .map(({ languageId }) => languageId),
+    )
+    expect(manifest.contributes.snippets.length).toBeGreaterThan(0)
+
+    for (const contribution of manifest.contributes.snippets) {
+      expect(languageIds.has(contribution.language)).toBe(true)
+      expect(() =>
+        JSON.parse(fs.readFileSync(contributedPath(contribution.path), 'utf8')),
+      ).not.toThrow()
+    }
+    expect(manifest.files).toEqual(expect.arrayContaining(['snippets']))
   })
 })

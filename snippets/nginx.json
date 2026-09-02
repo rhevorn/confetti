@@ -1,0 +1,77 @@
+{
+  "Server Block": {
+    "prefix": "server",
+    "body": [
+      "server {",
+      "    listen ${1:80};",
+      "    server_name ${2:example.com};",
+      "",
+      "    location / {",
+      "        root ${3:/var/www/html};",
+      "        index index.html index.htm;",
+      "    }",
+      "}"
+    ],
+    "description": "HTTP server block with a default location"
+  },
+  "Location Block": {
+    "prefix": "location",
+    "body": [
+      "location ${1:/} {",
+      "    ${2:try_files \\$uri \\$uri/ =404;}",
+      "}"
+    ],
+    "description": "Location block for routing requests"
+  },
+  "Reverse Proxy": {
+    "prefix": "proxy",
+    "body": [
+      "location ${1:/} {",
+      "    proxy_pass ${2:http://127.0.0.1:8080};",
+      "    proxy_set_header Host \\$host;",
+      "    proxy_set_header X-Real-IP \\$remote_addr;",
+      "    proxy_set_header X-Forwarded-For \\$proxy_add_x_forwarded_for;",
+      "    proxy_set_header X-Forwarded-Proto \\$scheme;",
+      "}"
+    ],
+    "description": "Reverse proxy location with forwarding headers"
+  },
+  "Upstream": {
+    "prefix": "upstream",
+    "body": [
+      "upstream ${1:backend} {",
+      "    server ${2:127.0.0.1:8080};",
+      "    # server backup.example.com:8080 backup;",
+      "}"
+    ],
+    "description": "Upstream pool for load balancing"
+  },
+  "HTTPS Server": {
+    "prefix": "https",
+    "body": [
+      "server {",
+      "    listen 443 ssl http2;",
+      "    server_name ${1:example.com};",
+      "",
+      "    ssl_certificate ${2:/etc/ssl/certs/example.com.crt};",
+      "    ssl_certificate_key ${3:/etc/ssl/private/example.com.key};",
+      "",
+      "    location / {",
+      "        root /var/www/html;",
+      "    }",
+      "}"
+    ],
+    "description": "HTTPS server block with TLS certificates"
+  },
+  "Redirect to HTTPS": {
+    "prefix": "redirect",
+    "body": [
+      "server {",
+      "    listen 80;",
+      "    server_name ${1:example.com};",
+      "    return 301 https://\\$host\\$request_uri;",
+      "}"
+    ],
+    "description": "Redirect plain HTTP traffic to HTTPS"
+  }
+}

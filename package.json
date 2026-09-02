@@ -25,7 +25,8 @@
   },
   "categories": [
     "Programming Languages",
-    "Formatters"
+    "Formatters",
+    "Snippets"
   ],
   "keywords": [
     "configuration",
@@ -78,6 +79,7 @@
   "files": [
     "dist",
     "syntaxes",
+    "snippets",
     "language-configurations",
     "README.md",
     "README.zh-CN.md",
@@ -143,6 +145,12 @@
         }
       }
     },
+    "snippets": [
+      {
+        "language": "confetti-nginx",
+        "path": "./snippets/nginx.json"
+      }
+    ],
     "languages": [
       {
         "id": "confetti-nginx",
