@@ -1,0 +1,44 @@
+{
+  "name": "Confetti setup.cfg",
+  "scopeName": "source.confetti.setupcfg",
+  "patterns": [
+    { "name": "comment.line.semicolon.setupcfg", "match": "^\\s*[;#].*$" },
+    {
+      "name": "meta.section.setupcfg",
+      "match": "^\\s*(\\[)([^\\]\\r\\n]+)(\\])",
+      "captures": {
+        "1": { "name": "punctuation.definition.section.begin.setupcfg" },
+        "2": { "name": "entity.name.section.setupcfg" },
+        "3": { "name": "punctuation.definition.section.end.setupcfg" }
+      }
+    },
+    {
+      "match": "^\\s*([^;#=:\\s][^=:\\r\\n]*?)(\\s*[=:])",
+      "captures": {
+        "1": { "name": "variable.other.assignment.setupcfg" },
+        "2": { "name": "keyword.operator.assignment.setupcfg" }
+      }
+    },
+    {
+      "name": "string.quoted.double.setupcfg",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.setupcfg", "match": "\\\\." }
+      ]
+    },
+    { "name": "string.quoted.single.setupcfg", "begin": "'", "end": "'" },
+    {
+      "name": "constant.language.boolean.setupcfg",
+      "match": "(?i)\\b(?:true|false|yes|no|on|off|null|none)\\b"
+    },
+    {
+      "name": "constant.numeric.setupcfg",
+      "match": "(?<![A-Za-z0-9_.-])[-+]?\\d+(?:\\.\\d+)?\\b"
+    },
+    {
+      "name": "string.unquoted.path.setupcfg",
+      "match": "(?<![\\w.])(?:/[\\w.-]+)+/?"
+    }
+  ]
+}

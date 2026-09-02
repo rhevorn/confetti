@@ -29,6 +29,9 @@ Do not add AI features, accounts, cloud services, telemetry, Webviews, validatio
 - SSH config
 - Environment variables / dotenv
 - INI / EditorConfig
+- MySQL config (`my.cnf`, `.my.cnf`)
+- pip config (`pip.conf`)
+- setup.cfg
 - Java Properties
 - TOML
 - YAML

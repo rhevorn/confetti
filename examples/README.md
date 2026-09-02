@@ -27,6 +27,9 @@ These files are intentionally messy. They cover detection, TextMate scopes, form
 | `env/.env.local` | `.env.*` filename | Keys versus values, `export`, empty values, quotes, interpolation, booleans, numbers |
 | `ini/settings.ini` | `.ini` extension | Sections, `=` and `:` assignments, URLs containing `=`, comments, empty values |
 | `ini/.editorconfig` | Exact filename | Glob sections and normalized `key = value` spacing |
+| `mysql/my.cnf` | Exact filename and `mysql`/`mariadb` paths | Sections, assignments, socket paths, booleans, numbers |
+| `pip/pip.conf` | Exact filename and `.config/pip` path | Sections, URLs, booleans, numbers |
+| `python/setup.cfg` | Exact filename beating the generic INI extension | Sections, `attr:` and `file:` directives, multiline classifier and requirement lists preserved |
 | `properties/messages.properties` | `.properties` extension | Escapes, Unicode escapes, interpolation, continuation lines |
 | `toml/pyproject.toml` | `.toml` extension | Tables, array tables, dotted keys, dates, arrays, inline tables, multiline strings |
 | `git/.gitconfig` | Exact filename | Sections, subsections, aliases, paths, booleans |

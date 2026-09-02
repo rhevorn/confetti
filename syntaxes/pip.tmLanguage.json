@@ -1,0 +1,41 @@
+{
+  "name": "Confetti pip Config",
+  "scopeName": "source.confetti.pip",
+  "patterns": [
+    { "name": "comment.line.semicolon.pip", "match": "^\\s*[;#].*$" },
+    {
+      "name": "meta.section.pip",
+      "match": "^\\s*(\\[)([^\\]\\r\\n]+)(\\])",
+      "captures": {
+        "1": { "name": "punctuation.definition.section.begin.pip" },
+        "2": { "name": "entity.name.section.pip" },
+        "3": { "name": "punctuation.definition.section.end.pip" }
+      }
+    },
+    {
+      "match": "^\\s*([^;#=:\\s][^=:\\r\\n]*?)(\\s*[=:])",
+      "captures": {
+        "1": { "name": "variable.other.assignment.pip" },
+        "2": { "name": "keyword.operator.assignment.pip" }
+      }
+    },
+    {
+      "name": "string.quoted.double.pip",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.pip", "match": "\\\\." }
+      ]
+    },
+    { "name": "string.quoted.single.pip", "begin": "'", "end": "'" },
+    {
+      "name": "constant.language.boolean.pip",
+      "match": "(?i)\\b(?:true|false|yes|no|on|off|null|none)\\b"
+    },
+    {
+      "name": "constant.numeric.pip",
+      "match": "(?<![A-Za-z0-9_.-])[-+]?\\d+(?:\\.\\d+)?\\b"
+    },
+    { "name": "string.unquoted.url.pip", "match": "https?://[^\\s#\"']+" }
+  ]
+}

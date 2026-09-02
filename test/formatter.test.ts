@@ -8,7 +8,10 @@ import { formatGitConfig } from '../src/formatters/gitconfig.js'
 import { formatGitAttributes } from '../src/formatters/gitattributes.js'
 import { formatHosts } from '../src/formatters/hosts.js'
 import { formatIni } from '../src/formatters/ini.js'
+import { formatMyCnf } from '../src/formatters/mysql.js'
 import { formatNginx } from '../src/formatters/nginx.js'
+import { formatPip } from '../src/formatters/pip.js'
+import { formatSetupCfg } from '../src/formatters/setupcfg.js'
 import { formatNpmrc } from '../src/formatters/npmrc.js'
 import { formatProperties } from '../src/formatters/properties.js'
 import { formatSsh } from '../src/formatters/ssh.js'
@@ -93,6 +96,72 @@ Require   all   granted
         '  RewriteEngine   On   \n  # keep   comment  \nErrorLog   "logs/error   log"  \n',
       ),
     ).toBe('RewriteEngine On\n# keep   comment\nErrorLog "logs/error   log"\n')
+  })
+})
+
+describe('formatMyCnf and formatPip', () => {
+  it('normalizes MySQL and pip assignments with both separators', () => {
+    expect(
+      formatMyCnf(
+        '  [client]  \n port   =  3306 \nsocket:/var/run/mysqld.sock\n',
+      ),
+    ).toBe('[client]\nport = 3306\nsocket: /var/run/mysqld.sock\n')
+    expect(
+      formatPip('  [global]  \n index-url  =  https://pypi.org/simple\n'),
+    ).toBe('[global]\nindex-url = https://pypi.org/simple\n')
+  })
+})
+
+describe('formatSetupCfg', () => {
+  it('normalizes assignments and preserves multiline value content', () => {
+    const input = [
+      '  [metadata]  ',
+      'name   = demo',
+      'classifiers   =',
+      '    Programming Language :: Python :: 3',
+      '    License :: OSI Approved :: MIT License',
+      '',
+      '[options]',
+      'install_requires    =',
+      '    requests>=2.28',
+      '    click==8.1.7',
+    ].join('\n')
+    const expected = [
+      '[metadata]',
+      'name = demo',
+      'classifiers =',
+      '    Programming Language :: Python :: 3',
+      '    License :: OSI Approved :: MIT License',
+      '',
+      '[options]',
+      'install_requires =',
+      '    requests>=2.28',
+      '    click==8.1.7',
+    ].join('\n')
+    expect(formatSetupCfg(input)).toBe(expected)
+    expect(formatSetupCfg(expected)).toBe(expected)
+  })
+
+  it('treats an indented line after a non-assignment as a normal line', () => {
+    expect(formatSetupCfg('[mysqldump]\n  quick\n  quote-names\n')).toBe(
+      '[mysqldump]\nquick\nquote-names\n',
+    )
+  })
+
+  it('keeps colon-separated assignments colon-separated', () => {
+    expect(
+      formatSetupCfg('[metadata]\nlong_description   :   file: README.md\n'),
+    ).toBe('[metadata]\nlong_description: file: README.md\n')
+  })
+
+  it('ends a multiline value at a comment, blank line, or section header', () => {
+    expect(
+      formatSetupCfg(
+        'requires =\n    keep me\n# comment\nneeds =\n\n    after blank\n[metadata]\n    indented fresh\n',
+      ),
+    ).toBe(
+      'requires =\n    keep me\n# comment\nneeds =\n\nafter blank\n[metadata]\nindented fresh\n',
+    )
   })
 })
 
@@ -272,7 +341,14 @@ describe('line-oriented formatters', () => {
 describe('formatter stability', () => {
   it.each([
     ['Nginx', formatNginx, 'server {\nlisten 80;\n}\n'],
-    ['Apache', formatApache, '<Directory />\nAllowOverride none\n</Directory>\n'],
+    [
+      'Apache',
+      formatApache,
+      '<Directory />\nAllowOverride none\n</Directory>\n',
+    ],
+    ['MySQL', formatMyCnf, '[mysqld]\n  port=3306\n'],
+    ['pip', formatPip, '[global]\n  timeout=30\n'],
+    ['setup.cfg', formatSetupCfg, '[metadata]\nrequires =\n    keep me\n'],
     ['env', formatEnv, '  KEY = "a  b"  \n'],
     ['INI', formatIni, '[section]\n  key   = value\n'],
     ['SSH', formatSsh, 'Host work\nHostName example.com\n'],

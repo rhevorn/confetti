@@ -158,6 +158,40 @@ describe('TextMate grammars', () => {
     expect(directiveScopes).toContain('constant.language.boolean.apache')
   })
 
+  it('tokenizes MySQL, pip, and setup.cfg sections, keys, and values', async () => {
+    const mysqlSectionScopes = await scopesForLine(
+      'mysql.tmLanguage.json',
+      '[mysqld]',
+    )
+    const mysqlScopes = await scopesForLine(
+      'mysql.tmLanguage.json',
+      'datadir = /var/lib/mysql',
+    )
+    const pipSectionScopes = await scopesForLine(
+      'pip.tmLanguage.json',
+      '[global]',
+    )
+    const pipScopes = await scopesForLine(
+      'pip.tmLanguage.json',
+      'index-url = https://pypi.org/simple',
+    )
+    const setupCfgSectionScopes = await scopesForLine(
+      'setupcfg.tmLanguage.json',
+      '[metadata]',
+    )
+    const setupCfgScopes = await scopesForLine(
+      'setupcfg.tmLanguage.json',
+      'name = confetti-demo',
+    )
+    expect(mysqlSectionScopes).toContain('entity.name.section.mysql')
+    expect(mysqlScopes).toContain('variable.other.assignment.mysql')
+    expect(mysqlScopes).toContain('string.unquoted.path.mysql')
+    expect(pipSectionScopes).toContain('entity.name.section.pip')
+    expect(pipScopes).toContain('string.unquoted.url.pip')
+    expect(setupCfgSectionScopes).toContain('entity.name.section.setupcfg')
+    expect(setupCfgScopes).toContain('variable.other.assignment.setupcfg')
+  })
+
   it('tokenizes SSH blocks, directives, paths, and placeholders', async () => {
     const hostScopes = await scopesForLine('ssh.tmLanguage.json', 'Host work')
     const directiveScopes = await scopesForLine(

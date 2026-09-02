@@ -9,7 +9,9 @@ export const iniConfig: ConfigDefinition = {
   extensions: ['.ini', '.cfg'],
   detect(filename, content) {
     const extension = path.extname(filename).toLowerCase()
-    let score = extension === '.ini' ? 60 : extension === '.cfg' ? 30 : 0
+    // The .cfg bonus stays low enough that a dedicated exact filename such as
+    // setup.cfg (structural 100) always outranks a generic .cfg match.
+    let score = extension === '.ini' ? 60 : extension === '.cfg' ? 20 : 0
     if (/^\s*\[[^\]\r\n]+\]\s*(?:[;#].*)?$/m.test(content)) score += 35
     if (/^\s*[A-Za-z0-9_.-]+\s*[=:]\s*.*$/m.test(content)) score += 30
     return Math.min(score, 100)

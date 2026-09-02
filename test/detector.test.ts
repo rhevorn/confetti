@@ -76,6 +76,20 @@ describe('detectConfig', () => {
       '/srv/app/site.conf',
       '<VirtualHost *:80>\nServerName example.com\n</VirtualHost>\n',
     ],
+    ['mysql', '/etc/mysql/my.cnf', '[client]\nport = 3306\n'],
+    ['mysql', '/home/user/.my.cnf', '[client]\nuser = root\n'],
+    [
+      'mysql',
+      '/etc/mariadb/mariadb.cnf',
+      '[mysqld]\ndatadir = /var/lib/mysql\n',
+    ],
+    [
+      'pip',
+      '/home/user/.config/pip/pip.conf',
+      '[global]\nindex-url = https://pypi.org/simple\n',
+    ],
+    ['pip', '/home/user/.pip/pip.conf', '[global]\ntimeout = 30\n'],
+    ['setupcfg', '/app/setup.cfg', '[metadata]\nname = demo\n'],
   ])('detects %s configuration', (expected, filename, content) => {
     expect(detectConfig(registry, filename, content)?.definition.id).toBe(
       expected,
@@ -213,6 +227,49 @@ describe('detectConfig', () => {
         'server {\nlisten 80;\nlocation / {\nproxy_pass http://app;\n}\n}\n',
       )?.definition.id,
     ).toBe('nginx')
+  })
+
+  it('keeps INI-family content detection below the hijacking threshold', () => {
+    // A generic INI file with MySQL-ish or pip-ish sections stays INI: the
+    // INI definition owns the extension and content-only scores stay < 70.
+    expect(
+      detectConfig(
+        registry,
+        '/app/settings.ini',
+        '[mysql]\nbasedir=/usr\ndatadir=/var/lib/mysql\n',
+      )?.definition.id,
+    ).toBe('ini')
+    expect(
+      detectConfig(
+        registry,
+        '/app/notes.txt',
+        '[client]\nport=3306\nsocket=/var/run/mysqld.sock\n',
+      ),
+    ).toBeUndefined()
+    expect(
+      detectConfig(
+        registry,
+        '/app/notes.txt',
+        '[global]\nindex-url=https://pypi.org/simple\n',
+      ),
+    ).toBeUndefined()
+  })
+
+  it('prefers an exact setup.cfg filename over the generic INI extension', () => {
+    expect(
+      detectConfig(
+        registry,
+        '/app/setup.cfg',
+        '[metadata]\nname = demo\nversion = 1.0.0\n',
+      )?.definition.id,
+    ).toBe('setupcfg')
+    expect(
+      detectConfig(
+        registry,
+        '/app/other.cfg',
+        '[metadata]\nname = demo\nversion = 1.0.0\n',
+      )?.definition.id,
+    ).toBe('ini')
   })
 
   it('does not let weak Apache content alone cross the threshold', () => {

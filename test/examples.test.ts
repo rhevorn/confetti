@@ -71,6 +71,21 @@ const examples: ExampleCase[] = [
     preservedText: 'insert_final_newline',
   },
   {
+    relativePath: 'mysql/my.cnf',
+    expectedType: 'mysql',
+    preservedText: '/var/run/mysqld/mysqld.sock',
+  },
+  {
+    relativePath: 'pip/pip.conf',
+    expectedType: 'pip',
+    preservedText: 'https://download.pytorch.org/whl/cpu',
+  },
+  {
+    relativePath: 'python/setup.cfg',
+    expectedType: 'setupcfg',
+    preservedText: 'Programming Language :: Python :: 3',
+  },
+  {
     relativePath: 'properties/messages.properties',
     expectedType: 'properties',
     preservedText: 'second part keeps its indentation',

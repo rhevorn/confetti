@@ -9,9 +9,12 @@ import { gitAttributesConfig } from './gitattributes.js'
 import { hostsConfig } from './hosts.js'
 import { ignoreConfig } from './ignore.js'
 import { iniConfig } from './ini.js'
+import { mysqlConfig } from './mysql.js'
 import { nginxConfig } from './nginx.js'
 import { npmrcConfig } from './npmrc.js'
+import { pipConfig } from './pip.js'
 import { propertiesConfig } from './properties.js'
+import { setupCfgConfig } from './setupcfg.js'
 import { sshConfig } from './ssh.js'
 import { tomlConfig } from './toml.js'
 import { versionsConfig } from './versions.js'
@@ -25,6 +28,9 @@ export function createDefaultRegistry(): ConfigRegistry {
   registry.register(sshConfig)
   registry.register(envConfig)
   registry.register(iniConfig)
+  registry.register(mysqlConfig)
+  registry.register(pipConfig)
+  registry.register(setupCfgConfig)
   registry.register(propertiesConfig)
   registry.register(tomlConfig)
   registry.register(gitConfig)

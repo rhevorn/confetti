@@ -16,7 +16,10 @@
       "name": "keyword.other.directive.apache",
       "match": "(?i)^\\s*(?:ServerName|ServerAdmin|ServerRoot|ServerAlias|DocumentRoot|Listen|LoadModule|DirectoryIndex|CustomLog|ErrorLog|LogFormat|LogLevel|AllowOverride|Options|Require|Order|Allow|Deny|AddType|AddHandler|SetEnv|UnsetEnv|PassEnv|Include|IncludeOptional|User|Group|PidFile|TypesConfig|KeepAlive|KeepAliveTimeout|Timeout|MaxRequestWorkers|DirectorySlash|FallbackResource|HostnameLookups|IndexOptions|IndexIgnore|ErrorDocument|Redirect|RedirectPermanent|Alias|AliasMatch|ScriptAlias|Header|RequestHeader|RewriteEngine|RewriteBase|RewriteCond|RewriteRule|RewriteOptions|SSLEngine|SSLCertificateFile|SSLCertificateKeyFile|Protocols|CacheEnable|ExpiresActive|BrowserMatch|Define|Mutex)\\b"
     },
-    { "name": "constant.language.boolean.apache", "match": "(?i)\\b(?:on|off)\\b" },
+    {
+      "name": "constant.language.boolean.apache",
+      "match": "(?i)\\b(?:on|off)\\b"
+    },
     {
       "name": "constant.numeric.apache",
       "match": "(?<![A-Za-z0-9_.-])\\d+(?:\\.\\d+)?\\b"

@@ -45,6 +45,10 @@
     "yaml",
     "ini",
     "editorconfig",
+    "my.cnf",
+    "mysql",
+    "pip.conf",
+    "setup.cfg",
     "properties",
     "ssh",
     "gitignore",
@@ -196,6 +200,48 @@
         "aliases": [
           "INI",
           "EditorConfig"
+        ],
+        "configuration": "./language-configurations/ini.json"
+      },
+      {
+        "id": "confetti-mysql",
+        "aliases": [
+          "MySQL Config",
+          "my.cnf"
+        ],
+        "filenames": [
+          "my.cnf",
+          ".my.cnf"
+        ],
+        "filenamePatterns": [
+          "*/mysql/*.cnf",
+          "*/mariadb/*.cnf"
+        ],
+        "configuration": "./language-configurations/ini.json"
+      },
+      {
+        "id": "confetti-pip",
+        "aliases": [
+          "pip Config",
+          "pip.conf"
+        ],
+        "filenames": [
+          "pip.conf"
+        ],
+        "filenamePatterns": [
+          "*/.pip/pip.conf",
+          "*/.config/pip/pip.conf"
+        ],
+        "configuration": "./language-configurations/ini.json"
+      },
+      {
+        "id": "confetti-setupcfg",
+        "aliases": [
+          "setup.cfg",
+          "setup config"
+        ],
+        "filenames": [
+          "setup.cfg"
         ],
         "configuration": "./language-configurations/ini.json"
       },
@@ -394,6 +440,21 @@
         "language": "confetti-ini",
         "scopeName": "source.confetti.ini",
         "path": "./syntaxes/ini.tmLanguage.json"
+      },
+      {
+        "language": "confetti-mysql",
+        "scopeName": "source.confetti.mysql",
+        "path": "./syntaxes/mysql.tmLanguage.json"
+      },
+      {
+        "language": "confetti-pip",
+        "scopeName": "source.confetti.pip",
+        "path": "./syntaxes/pip.tmLanguage.json"
+      },
+      {
+        "language": "confetti-setupcfg",
+        "scopeName": "source.confetti.setupcfg",
+        "path": "./syntaxes/setupcfg.tmLanguage.json"
       },
       {
         "language": "confetti-properties",
