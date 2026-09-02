@@ -112,7 +112,11 @@ describe('VS Code extension manifest', () => {
   it('keeps the public settings intentionally small', () => {
     expect(
       Object.keys(manifest.contributes.configuration.properties).sort(),
-    ).toEqual(['confetti.autoDetect', 'confetti.format.enable'])
+    ).toEqual([
+      'confetti.autoDetect',
+      'confetti.diagnostics.enable',
+      'confetti.format.enable',
+    ])
   })
 
   it('registers one language and one grammar for every config definition', () => {

@@ -4,6 +4,7 @@ All notable changes to Confetti are documented in this file.
 
 ## Unreleased
 
+- Add duplicate-key diagnostics for dotenv files, INI-family sections (INI, Git Config, MySQL, pip, setup.cfg), and TOML tables, reported as warnings when files are opened, activated, or saved — never while typing. Controlled by `confetti.diagnostics.enable`.
 - Add document symbol providers powering the outline view for Nginx blocks, SSH hosts, TOML tables, and INI-family sections.
 - Add folding range providers for Nginx and Apache blocks, INI-family sections (INI, Git Config, MySQL, pip, setup.cfg), and SSH `Host`/`Match` blocks.
 - Add detection, highlighting, and formatting for tmux (`tmux.conf`), GNU screen (`.screenrc`), and GNU Readline (`.inputrc`) configuration files.

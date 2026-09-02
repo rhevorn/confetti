@@ -3,6 +3,7 @@ import { createDefaultRegistry } from './configs/index.js'
 import { detectConfig } from './core/detector.js'
 import { formatConfig } from './core/formatter.js'
 import type { ConfigDefinition, DetectionResult } from './core/types.js'
+import { computeDiagnostics } from './features/diagnostics.js'
 import { computeFoldingRanges } from './features/folding.js'
 import { computeDocumentSymbols, type SymbolInfo } from './features/symbols.js'
 import { isCompatibleLanguageId } from './language-compatibility.js'
@@ -130,10 +131,42 @@ async function autoDetect(document: vscode.TextDocument): Promise<void> {
 
 export function activate(context: vscode.ExtensionContext): void {
   outputChannel = vscode.window.createOutputChannel('Confetti')
+  const diagnosticCollection =
+    vscode.languages.createDiagnosticCollection('confetti')
   log('Extension activated')
+
+  const updateDiagnostics = (document: vscode.TextDocument): void => {
+    const uri = document.uri
+    if (!settings().get('diagnostics.enable', true)) {
+      diagnosticCollection.delete(uri)
+      return
+    }
+
+    const definition = definitionForDocument(document)
+    if (!definition) {
+      diagnosticCollection.delete(uri)
+      return
+    }
+
+    diagnosticCollection.set(
+      uri,
+      computeDiagnostics(definition.id, document.getText()).map(
+        (diagnostic) =>
+          new vscode.Diagnostic(
+            new vscode.Range(
+              new vscode.Position(diagnostic.line, diagnostic.startCharacter),
+              new vscode.Position(diagnostic.line, diagnostic.endCharacter),
+            ),
+            diagnostic.message,
+            vscode.DiagnosticSeverity.Warning,
+          ),
+      ),
+    )
+  }
 
   context.subscriptions.push(
     outputChannel,
+    diagnosticCollection,
     vscode.commands.registerCommand('confetti.detectConfigType', async () => {
       const document = vscode.window.activeTextEditor?.document
       if (document) await detectAndApply(document, true)
@@ -253,22 +286,29 @@ export function activate(context: vscode.ExtensionContext): void {
         },
       },
     ),
-    vscode.workspace.onDidOpenTextDocument(
-      (document) => void autoDetect(document),
-    ),
-    vscode.workspace.onDidSaveTextDocument(
-      (document) => void autoDetect(document),
-    ),
+    vscode.workspace.onDidOpenTextDocument((document) => {
+      void autoDetect(document)
+      updateDiagnostics(document)
+    }),
+    vscode.workspace.onDidSaveTextDocument((document) => {
+      void autoDetect(document)
+      updateDiagnostics(document)
+    }),
     vscode.workspace.onDidCloseTextDocument((document) => {
       detectionCache.delete(document.uri.toString())
+      diagnosticCollection.delete(document.uri)
     }),
     vscode.window.onDidChangeActiveTextEditor((editor) => {
-      if (editor) void autoDetect(editor.document)
+      if (editor) {
+        void autoDetect(editor.document)
+        updateDiagnostics(editor.document)
+      }
     }),
   )
 
   if (vscode.window.activeTextEditor) {
     void autoDetect(vscode.window.activeTextEditor.document)
+    updateDiagnostics(vscode.window.activeTextEditor.document)
   }
 }
 

@@ -29,6 +29,7 @@ export const mockState = {
   outputLines: [] as string[],
   outputShown: false,
   languageChanges: [] as Array<{ document: MockDocument; languageId: string }>,
+  diagnostics: undefined as Map<unknown, Diagnostic[]> | undefined,
 }
 
 export function resetMockState(): void {
@@ -51,6 +52,7 @@ export function resetMockState(): void {
   mockState.outputLines.length = 0
   mockState.outputShown = false
   mockState.languageChanges.length = 0
+  mockState.diagnostics = undefined
 }
 
 function disposable(): { dispose(): void } {
@@ -97,6 +99,21 @@ export class DocumentSymbol {
 export const SymbolKind = {
   Namespace: 3,
   Struct: 22,
+}
+
+export class Diagnostic {
+  constructor(
+    public readonly range: Range,
+    public readonly message: string,
+    public readonly severity?: number,
+  ) {}
+}
+
+export const DiagnosticSeverity = {
+  Error: 0,
+  Warning: 1,
+  Information: 2,
+  Hint: 3,
 }
 
 export const workspace = {
@@ -189,6 +206,22 @@ export const languages = {
     mockState.symbolSelector = selector
     mockState.symbolProvider = provider
     return disposable()
+  },
+  createDiagnosticCollection() {
+    const entries = new Map<unknown, Diagnostic[]>()
+    mockState.diagnostics = entries
+    return {
+      set(uri: unknown, diagnostics: Diagnostic[]) {
+        entries.set(uri, diagnostics)
+      },
+      delete(uri: unknown) {
+        entries.delete(uri)
+      },
+      clear() {
+        entries.clear()
+      },
+      dispose() {},
+    }
   },
   async setTextDocumentLanguage(
     document: MockDocument,

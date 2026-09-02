@@ -395,6 +395,38 @@ describe('VS Code extension adapter', () => {
     )
   })
 
+  it('updates, disables, and clears duplicate-key diagnostics on existing handlers', async () => {
+    activateExtension()
+    const duplicateDocument = document('/app/.env', 'KEY=1\nKEY=2\n')
+    const uri = duplicateDocument.uri
+
+    await mockState.openHandlers[0]?.(duplicateDocument)
+    const created = mockState.diagnostics?.get(uri) as Array<{
+      message: string
+      severity: number
+    }>
+    expect(created).toHaveLength(1)
+    expect(created[0]?.message).toBe(
+      'Duplicate key "KEY" (also defined on line 1)',
+    )
+    expect(created[0]?.severity).toBe(1)
+
+    mockState.configuration.set('diagnostics.enable', false)
+    await mockState.saveHandlers[0]?.(duplicateDocument)
+    expect(mockState.diagnostics?.has(uri)).toBe(false)
+
+    mockState.configuration.delete('diagnostics.enable')
+    await mockState.openHandlers[0]?.(duplicateDocument)
+    expect(mockState.diagnostics?.has(uri)).toBe(true)
+
+    mockState.closeHandlers[0]?.(duplicateDocument)
+    expect(mockState.diagnostics?.has(uri)).toBe(false)
+
+    const unsupported = document('/app/notes.txt', 'plain text\n')
+    await mockState.saveHandlers[0]?.(unsupported)
+    expect(mockState.diagnostics?.has(unsupported.uri)).toBe(false)
+  })
+
   it('opens formatter output and handles missing active editors', async () => {
     activateExtension()
 
