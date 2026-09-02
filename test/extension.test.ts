@@ -116,6 +116,16 @@ describe('VS Code extension adapter', () => {
     expect(foldingSelector.map(({ language }) => language)).toContain(
       'confetti-env',
     )
+    expect(mockState.symbolProvider).toBeDefined()
+    const symbolSelector = mockState.symbolSelector as Array<{
+      language: string
+    }>
+    expect(symbolSelector.map(({ language }) => language)).toContain(
+      'confetti-nginx',
+    )
+    expect(symbolSelector.map(({ language }) => language)).toContain(
+      'confetti-env',
+    )
     expect(mockState.outputLines[0]).toContain('Extension activated')
   })
 
@@ -318,6 +328,33 @@ describe('VS Code extension adapter', () => {
     const unsupported = document('/app/notes.txt', 'plain text\n')
     expect(
       mockState.foldingProvider?.provideFoldingRanges(unsupported),
+    ).toEqual([])
+  })
+
+  it('provides document symbols for detected documents and none otherwise', () => {
+    activateExtension()
+
+    const supported = document(
+      '/etc/nginx/nginx.conf',
+      'server {\n  listen 80;\n}\n',
+      'confetti-nginx',
+    )
+    const symbols = mockState.symbolProvider?.provideDocumentSymbols(
+      supported,
+    ) as Array<{
+      name: string
+      kind: number
+      range: { start: unknown; end: unknown }
+      selectionRange: { start: unknown; end: unknown }
+    }>
+
+    expect(symbols).toHaveLength(1)
+    expect(symbols[0]?.name).toBe('server')
+    expect(symbols[0]?.kind).toBe(22)
+
+    const unsupported = document('/app/notes.txt', 'plain text\n')
+    expect(
+      mockState.symbolProvider?.provideDocumentSymbols(unsupported),
     ).toEqual([])
   })
 

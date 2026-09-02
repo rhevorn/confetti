@@ -4,6 +4,7 @@ All notable changes to Confetti are documented in this file.
 
 ## Unreleased
 
+- Add document symbol providers powering the outline view for Nginx blocks, SSH hosts, TOML tables, and INI-family sections.
 - Add folding range providers for Nginx and Apache blocks, INI-family sections (INI, Git Config, MySQL, pip, setup.cfg), and SSH `Host`/`Match` blocks.
 - Add detection, highlighting, and formatting for tmux (`tmux.conf`), GNU screen (`.screenrc`), and GNU Readline (`.inputrc`) configuration files.
 - Add detection, highlighting, and formatting for MySQL `my.cnf`, pip `pip.conf`, and Python `setup.cfg` files, with setup.cfg multiline values preserved during formatting.

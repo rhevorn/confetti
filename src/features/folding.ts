@@ -6,12 +6,12 @@ export interface FoldingRangeInfo {
   endLine: number
 }
 
-type HeaderPredicate = (line: string) => boolean
+export type HeaderPredicate = (line: string) => boolean
 
-const INI_COMMENTS = ['#', ';']
-const HASH_COMMENTS = ['#']
+export const INI_COMMENTS = ['#', ';']
+export const HASH_COMMENTS = ['#']
 
-const INI_SECTION_FORMATS = new Set([
+export const INI_SECTION_FORMATS = new Set([
   'ini',
   'gitconfig',
   'mysql',
@@ -19,10 +19,10 @@ const INI_SECTION_FORMATS = new Set([
   'setupcfg',
 ])
 
-const isIniSectionHeader: HeaderPredicate = (line) =>
+export const isIniSectionHeader: HeaderPredicate = (line) =>
   line.startsWith('[') && line.endsWith(']') && line.length > 2
 
-const isSshBlockHeader: HeaderPredicate = (line) =>
+export const isSshBlockHeader: HeaderPredicate = (line) =>
   /^(?:Host|Match)\s+\S/.test(line)
 
 /**
@@ -49,31 +49,64 @@ function contentEnd(
   return end
 }
 
-function blockFoldingRanges(
+export interface HeaderBlock {
+  name: string
+  startLine: number
+  startCharacter: number
+  headerEndCharacter: number
+  endLine: number
+  contentEndCharacter: number
+}
+
+export function headerBlocks(
   content: string,
   isHeader: HeaderPredicate,
   comments: readonly string[],
-): FoldingRangeInfo[] {
+): HeaderBlock[] {
   const { lines } = normalizeLines(content)
-  const ranges: FoldingRangeInfo[] = []
-  let start: number | undefined
+  const blocks: HeaderBlock[] = []
+  let start:
+    | { name: string; line: number; character: number; headerEnd: number }
+    | undefined
 
   const close = (before: number): void => {
     if (start === undefined) return
     const endLine = contentEnd(lines, before, comments)
-    if (endLine > start) ranges.push({ startLine: start, endLine })
+    blocks.push({
+      name: start.name,
+      startLine: start.line,
+      startCharacter: start.character,
+      headerEndCharacter: start.headerEnd,
+      endLine,
+      contentEndCharacter: lines[endLine].length,
+    })
     start = undefined
   }
 
   lines.forEach((line, index) => {
     if (isHeader(line.trim())) {
       close(index - 1)
-      start = index
+      start = {
+        name: line.trim(),
+        line: index,
+        character: line.length - line.trimStart().length,
+        headerEnd: line.length - line.trimStart().length + line.trim().length,
+      }
     }
   })
   close(lines.length - 1)
 
-  return ranges
+  return blocks
+}
+
+function blockFoldingRanges(
+  content: string,
+  isHeader: HeaderPredicate,
+  comments: readonly string[],
+): FoldingRangeInfo[] {
+  return headerBlocks(content, isHeader, comments)
+    .filter(({ startLine, endLine }) => endLine > startLine)
+    .map(({ startLine, endLine }) => ({ startLine, endLine }))
 }
 
 function braceFoldingRanges(content: string): FoldingRangeInfo[] {

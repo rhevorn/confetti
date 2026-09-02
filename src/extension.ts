@@ -4,11 +4,19 @@ import { detectConfig } from './core/detector.js'
 import { formatConfig } from './core/formatter.js'
 import type { ConfigDefinition, DetectionResult } from './core/types.js'
 import { computeFoldingRanges } from './features/folding.js'
+import { computeDocumentSymbols, type SymbolInfo } from './features/symbols.js'
 import { isCompatibleLanguageId } from './language-compatibility.js'
 
 const registry = createDefaultRegistry()
 const detectionCache = new Map<string, DetectionResult>()
 let outputChannel: vscode.OutputChannel | undefined
+
+const SYMBOL_KINDS: Record<SymbolInfo['kind'], vscode.SymbolKind> = {
+  section: vscode.SymbolKind.Namespace,
+  table: vscode.SymbolKind.Namespace,
+  host: vscode.SymbolKind.Struct,
+  server: vscode.SymbolKind.Struct,
+}
 
 function log(message: string): void {
   const timestamp = new Date().toLocaleTimeString()
@@ -195,6 +203,36 @@ export function activate(context: vscode.ExtensionContext): void {
           return computeFoldingRanges(definition.id, document.getText()).map(
             ({ startLine, endLine }) =>
               new vscode.FoldingRange(startLine, endLine),
+          )
+        },
+      },
+    ),
+    vscode.languages.registerDocumentSymbolProvider(
+      registry.all().map((definition) => ({ language: definition.languageId })),
+      {
+        provideDocumentSymbols(document) {
+          const definition = definitionForDocument(document)
+          if (!definition) return []
+          return computeDocumentSymbols(definition.id, document.getText()).map(
+            (symbol) => {
+              const selection = new vscode.Range(
+                new vscode.Position(symbol.startLine, symbol.startCharacter),
+                new vscode.Position(
+                  symbol.startLine,
+                  symbol.headerEndCharacter,
+                ),
+              )
+              return new vscode.DocumentSymbol(
+                symbol.name,
+                '',
+                SYMBOL_KINDS[symbol.kind],
+                new vscode.Range(
+                  new vscode.Position(symbol.startLine, symbol.startCharacter),
+                  new vscode.Position(symbol.endLine, symbol.endCharacter),
+                ),
+                selection,
+              )
+            },
           )
         },
       },

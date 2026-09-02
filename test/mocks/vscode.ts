@@ -16,6 +16,8 @@ export const mockState = {
   formattingSelector: undefined as unknown,
   foldingProvider: undefined as { provideFoldingRanges: Handler } | undefined,
   foldingSelector: undefined as unknown,
+  symbolProvider: undefined as { provideDocumentSymbols: Handler } | undefined,
+  symbolSelector: undefined as unknown,
   openHandlers: [] as Handler[],
   saveHandlers: [] as Handler[],
   closeHandlers: [] as Handler[],
@@ -36,6 +38,8 @@ export function resetMockState(): void {
   mockState.formattingSelector = undefined
   mockState.foldingProvider = undefined
   mockState.foldingSelector = undefined
+  mockState.symbolProvider = undefined
+  mockState.symbolSelector = undefined
   mockState.openHandlers.length = 0
   mockState.saveHandlers.length = 0
   mockState.closeHandlers.length = 0
@@ -71,6 +75,28 @@ export class FoldingRange {
     public readonly start: number,
     public readonly end: number,
   ) {}
+}
+
+export class Position {
+  constructor(
+    public readonly line: number,
+    public readonly character: number,
+  ) {}
+}
+
+export class DocumentSymbol {
+  constructor(
+    public readonly name: string,
+    public readonly detail: string,
+    public readonly kind: number,
+    public readonly range: Range,
+    public readonly selectionRange: Range,
+  ) {}
+}
+
+export const SymbolKind = {
+  Namespace: 3,
+  Struct: 22,
 }
 
 export const workspace = {
@@ -154,6 +180,14 @@ export const languages = {
   ) {
     mockState.foldingSelector = selector
     mockState.foldingProvider = provider
+    return disposable()
+  },
+  registerDocumentSymbolProvider(
+    selector: unknown,
+    provider: { provideDocumentSymbols: Handler },
+  ) {
+    mockState.symbolSelector = selector
+    mockState.symbolProvider = provider
     return disposable()
   },
   async setTextDocumentLanguage(
