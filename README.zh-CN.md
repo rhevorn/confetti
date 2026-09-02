@@ -1,12 +1,12 @@
 # Confetti
 
-为 VS Code 提供 nginx、Apache、MySQL、tmux、dotenv、gitignore、TOML、YAML 等 15+ 种配置文件的智能识别、语法高亮和格式化能力，并提供代码折叠、大纲、snippets 和重复键诊断。
+为 VS Code 提供 `.env`、`.ini`、`.toml`、`.yml`、`.conf`、nginx、Apache、MySQL、tmux、gitignore、SSH 等 15+ 种配置文件的智能识别、语法高亮和格式化能力，并提供代码折叠、大纲、snippets 和重复键诊断。
 
 [English documentation](https://github.com/rhevorn/confetti/blob/main/README.md)
 
 ## 安装
 
-从 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=rhevorn.confetti) 安装 **Confetti**，也可以在 VS Code 扩展视图中搜索 `Confetti`、`config formatter`、`gitignore`、`nginx format` 或 `dotenv`。
+从 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=rhevorn.confetti) 安装 **Confetti**，也可以在 VS Code 扩展视图中搜索 `Confetti`、`env`、`ini`、`toml`、`yml`、`conf`、`config formatter` 或 `nginx format`。
 
 ## 为什么选择 Confetti？
 

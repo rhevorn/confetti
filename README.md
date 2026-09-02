@@ -1,12 +1,12 @@
 # Confetti
 
-Smart detection, syntax highlighting, and formatting for nginx, Apache, MySQL, tmux, dotenv, gitignore, TOML, YAML, and 15+ configuration file types in VS Code — plus folding, outlines, snippets, and duplicate-key diagnostics.
+Smart detection, syntax highlighting, and formatting for `.env`, `.ini`, `.toml`, `.yml`, `.conf`, nginx, Apache, MySQL, tmux, gitignore, SSH, and 15+ other configuration file types in VS Code — plus folding, outlines, snippets, and duplicate-key diagnostics.
 
 [中文文档](https://github.com/rhevorn/confetti/blob/main/README.zh-CN.md)
 
 ## Install
 
-Install **Confetti** from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=rhevorn.confetti), or search in the VS Code Extensions view for `Confetti`, `config formatter`, `gitignore`, `nginx format`, or `dotenv`.
+Install **Confetti** from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=rhevorn.confetti), or search in the VS Code Extensions view for `Confetti`, `env`, `ini`, `toml`, `yml`, `conf`, `config formatter`, or `nginx format`.
 
 ## Why Confetti?
 
