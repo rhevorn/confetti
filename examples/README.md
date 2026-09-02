@@ -20,6 +20,9 @@ These files are intentionally messy. They cover detection, TextMate scopes, form
 | `nginx/site.conf` | Ambiguous `.conf` by content | `server`, `location`, `proxy_pass` signals |
 | `nginx/spacing.conf` | Ambiguous `.conf` by content | Horizontal spacing, semicolons, braces, quoted and escaped spaces |
 | `.ssh/config` | `.ssh` path | Global options, `Host`, `Match`, paths, `%` tokens, block indentation |
+| `apache/httpd.conf` | Exact filename | Directives, XML-style section tags, strings containing spaces, booleans, nested indentation |
+| `apache/.htaccess` | Exact filename | Rewrite rules and flags, `Files` blocks, `Order`/`Require` |
+| `apache/site.conf` | Ambiguous `.conf` by content | `VirtualHost` tags, `ServerName` signals beating Nginx |
 | `ssh/sshd_config` | Exact filename | Server directives, numbers, booleans, paths |
 | `env/.env.local` | `.env.*` filename | Keys versus values, `export`, empty values, quotes, interpolation, booleans, numbers |
 | `ini/settings.ini` | `.ini` extension | Sections, `=` and `:` assignments, URLs containing `=`, comments, empty values |

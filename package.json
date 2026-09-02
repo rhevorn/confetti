@@ -36,6 +36,9 @@
     "syntax highlighting",
     "language detection",
     "nginx",
+    "apache",
+    "htaccess",
+    "httpd",
     "dotenv",
     "env",
     "toml",
@@ -138,6 +141,25 @@
           "nginx.conf"
         ],
         "configuration": "./language-configurations/nginx.json"
+      },
+      {
+        "id": "confetti-apache",
+        "aliases": [
+          "Apache Config",
+          "apache"
+        ],
+        "filenames": [
+          ".htaccess",
+          "httpd.conf",
+          "apache2.conf"
+        ],
+        "filenamePatterns": [
+          "*/apache2/*.conf",
+          "*/httpd/*.conf",
+          "*/apache2/sites-available/*",
+          "*/apache2/sites-enabled/*"
+        ],
+        "configuration": "./language-configurations/line-based.json"
       },
       {
         "id": "confetti-ssh",
@@ -352,6 +374,11 @@
         "language": "confetti-nginx",
         "scopeName": "source.confetti.nginx",
         "path": "./syntaxes/nginx.tmLanguage.json"
+      },
+      {
+        "language": "confetti-apache",
+        "scopeName": "source.confetti.apache",
+        "path": "./syntaxes/apache.tmLanguage.json"
       },
       {
         "language": "confetti-ssh",

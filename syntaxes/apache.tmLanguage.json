@@ -1,0 +1,35 @@
+{
+  "name": "Confetti Apache Config",
+  "scopeName": "source.confetti.apache",
+  "patterns": [
+    { "name": "comment.line.number-sign.apache", "match": "^\\s*#.*$" },
+    {
+      "match": "(</?)([A-Za-z][A-Za-z0-9]*)(?=[\\s/>])",
+      "captures": {
+        "1": { "name": "punctuation.definition.tag.apache" },
+        "2": { "name": "entity.name.tag.apache" }
+      }
+    },
+    { "name": "punctuation.definition.tag.apache", "match": "/?>" },
+    { "name": "variable.other.apache", "match": "%\\{[^}\\s]*\\}" },
+    {
+      "name": "keyword.other.directive.apache",
+      "match": "(?i)^\\s*(?:ServerName|ServerAdmin|ServerRoot|ServerAlias|DocumentRoot|Listen|LoadModule|DirectoryIndex|CustomLog|ErrorLog|LogFormat|LogLevel|AllowOverride|Options|Require|Order|Allow|Deny|AddType|AddHandler|SetEnv|UnsetEnv|PassEnv|Include|IncludeOptional|User|Group|PidFile|TypesConfig|KeepAlive|KeepAliveTimeout|Timeout|MaxRequestWorkers|DirectorySlash|FallbackResource|HostnameLookups|IndexOptions|IndexIgnore|ErrorDocument|Redirect|RedirectPermanent|Alias|AliasMatch|ScriptAlias|Header|RequestHeader|RewriteEngine|RewriteBase|RewriteCond|RewriteRule|RewriteOptions|SSLEngine|SSLCertificateFile|SSLCertificateKeyFile|Protocols|CacheEnable|ExpiresActive|BrowserMatch|Define|Mutex)\\b"
+    },
+    { "name": "constant.language.boolean.apache", "match": "(?i)\\b(?:on|off)\\b" },
+    {
+      "name": "constant.numeric.apache",
+      "match": "(?<![A-Za-z0-9_.-])\\d+(?:\\.\\d+)?\\b"
+    },
+    { "name": "string.unquoted.url.apache", "match": "https?://[^\\s#\"']+" },
+    {
+      "name": "string.quoted.double.apache",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.apache", "match": "\\\\." }
+      ]
+    },
+    { "name": "string.quoted.single.apache", "begin": "'", "end": "'" }
+  ]
+}

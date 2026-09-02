@@ -36,6 +36,21 @@ const examples: ExampleCase[] = [
     preservedText: 'exec $SHELL',
   },
   {
+    relativePath: 'apache/httpd.conf',
+    expectedType: 'apache',
+    preservedText: 'keep  two spaces',
+  },
+  {
+    relativePath: 'apache/.htaccess',
+    expectedType: 'apache',
+    preservedText: '^www\\.example\\.com$',
+  },
+  {
+    relativePath: 'apache/site.conf',
+    expectedType: 'apache',
+    preservedText: 'webmaster@example.com',
+  },
+  {
     relativePath: 'ssh/sshd_config',
     expectedType: 'ssh',
     preservedText: '.ssh/authorized_keys2',

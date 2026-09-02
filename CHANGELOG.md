@@ -4,6 +4,7 @@ All notable changes to Confetti are documented in this file.
 
 ## Unreleased
 
+- Add detection, highlighting, and formatting for Apache `httpd.conf`, `apache2.conf`, and `.htaccess` files, including content-based disambiguation from Nginx for ambiguous `.conf` files.
 - Expand Ignore detection to any `.*ignore` filename, including `.cursorignore`, `.vscodeignore`, `.vercelignore`, and related files.
 - Add detection, highlighting, and formatting for classic Yarn `.yarnrc` files.
 

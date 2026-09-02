@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { formatApache } from '../src/formatters/apache.js'
 import { formatBrowserslist } from '../src/formatters/browserslist.js'
 import { formatCrontab } from '../src/formatters/crontab.js'
 import { formatEnv } from '../src/formatters/env.js'
@@ -61,6 +62,37 @@ return 200 "ok";# keep   comment
   }
 }
 `)
+  })
+})
+
+describe('formatApache', () => {
+  it('indents sections and normalizes directive spacing', () => {
+    const messy = `# keep this comment
+<VirtualHost   *:80>
+ServerName   example.com
+<Directory   "/var/www/html">
+Options   FollowSymLinks
+Require   all   granted
+</Directory>
+</VirtualHost>
+`
+    expect(formatApache(messy)).toBe(`# keep this comment
+<VirtualHost *:80>
+  ServerName example.com
+  <Directory "/var/www/html">
+    Options FollowSymLinks
+    Require all granted
+  </Directory>
+</VirtualHost>
+`)
+  })
+
+  it('keeps strings, comments, and untagged directives intact', () => {
+    expect(
+      formatApache(
+        '  RewriteEngine   On   \n  # keep   comment  \nErrorLog   "logs/error   log"  \n',
+      ),
+    ).toBe('RewriteEngine On\n# keep   comment\nErrorLog "logs/error   log"\n')
   })
 })
 
@@ -240,6 +272,7 @@ describe('line-oriented formatters', () => {
 describe('formatter stability', () => {
   it.each([
     ['Nginx', formatNginx, 'server {\nlisten 80;\n}\n'],
+    ['Apache', formatApache, '<Directory />\nAllowOverride none\n</Directory>\n'],
     ['env', formatEnv, '  KEY = "a  b"  \n'],
     ['INI', formatIni, '[section]\n  key   = value\n'],
     ['SSH', formatSsh, 'Host work\nHostName example.com\n'],

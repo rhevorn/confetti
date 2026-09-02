@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { formatApache } from '../src/formatters/apache.js'
 import { formatBrowserslist } from '../src/formatters/browserslist.js'
 import { formatCrontab } from '../src/formatters/crontab.js'
 import { formatEnv } from '../src/formatters/env.js'
@@ -16,6 +17,7 @@ import { formatYarnrc } from '../src/formatters/yarnrc.js'
 
 const formatters = [
   ['Nginx', formatNginx, 'events {\r\n}\r\n'],
+  ['Apache', formatApache, '<Directory />\r\nAllowOverride none\r\n</Directory>\r\n'],
   ['env', formatEnv, 'KEY=value\r\n'],
   ['INI', formatIni, '[section]\r\nkey=value\r\n'],
   ['properties', formatProperties, 'key=value\r\n'],
@@ -178,6 +180,30 @@ describe('formatSsh edge cases', () => {
   it('matches Host and Match case-insensitively', () => {
     expect(formatSsh('host work\nuser deploy\n')).toBe(
       'host work\n  user deploy\n',
+    )
+  })
+})
+
+describe('formatApache edge cases', () => {
+  it('never creates negative indentation for unbalanced closing tags', () => {
+    expect(formatApache('</Directory>\n<Directory />\n')).toBe(
+      '</Directory>\n<Directory />\n',
+    )
+  })
+
+  it('leaves a malformed opening bracket readable without inventing a block', () => {
+    expect(formatApache('  <  not a real tag  \n')).toBe('< not a real tag\n')
+  })
+
+  it('collapses repeated blank lines without losing separation', () => {
+    expect(formatApache('<IfModule x>\n\n\n</IfModule>\n')).toBe(
+      '<IfModule x>\n\n</IfModule>\n',
+    )
+  })
+
+  it('keeps hash characters without a boundary inside values', () => {
+    expect(formatApache('Redirect 301 /a /b#anchor\n')).toBe(
+      'Redirect 301 /a /b#anchor\n',
     )
   })
 })

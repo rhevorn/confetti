@@ -1,4 +1,5 @@
 import { ConfigRegistry } from '../core/registry.js'
+import { apacheConfig } from './apache.js'
 import { browserslistConfig } from './browserslist.js'
 import { crontabConfig } from './crontab.js'
 import { envConfig } from './env.js'
@@ -20,6 +21,7 @@ import { yamlConfig } from './yaml.js'
 export function createDefaultRegistry(): ConfigRegistry {
   const registry = new ConfigRegistry()
   registry.register(nginxConfig)
+  registry.register(apacheConfig)
   registry.register(sshConfig)
   registry.register(envConfig)
   registry.register(iniConfig)

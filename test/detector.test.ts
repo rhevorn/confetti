@@ -65,6 +65,17 @@ describe('detectConfig', () => {
     ['hosts', '/etc/hosts', '127.0.0.1 localhost\n'],
     ['fstab', '/etc/fstab', 'UUID=demo / ext4 defaults 0 1\n'],
     ['crontab', '/etc/crontab', '0 2 * * * /usr/bin/backup\n'],
+    ['apache', '/etc/httpd/conf/httpd.conf', 'Listen 80\n'],
+    [
+      'apache',
+      '/srv/app/.htaccess',
+      'RewriteEngine On\nRewriteRule ^(.*)$ /index.php [L]\n',
+    ],
+    [
+      'apache',
+      '/srv/app/site.conf',
+      '<VirtualHost *:80>\nServerName example.com\n</VirtualHost>\n',
+    ],
   ])('detects %s configuration', (expected, filename, content) => {
     expect(detectConfig(registry, filename, content)?.definition.id).toBe(
       expected,
@@ -177,6 +188,43 @@ describe('detectConfig', () => {
   it('does not force a low-confidence result', () => {
     expect(
       detectConfig(registry, '/srv/application.conf', 'feature.color=blue\n'),
+    ).toBeUndefined()
+  })
+
+  it('recognizes Apache paths and disambiguates Apache from Nginx content', () => {
+    expect(
+      detectConfig(registry, '/etc/apache2/apache2.conf', '')?.definition.id,
+    ).toBe('apache')
+    expect(
+      detectConfig(registry, '/etc/apache2/sites-available/example.com', '')
+        ?.definition.id,
+    ).toBe('apache')
+    expect(
+      detectConfig(
+        registry,
+        '/srv/generic.conf',
+        '<IfModule mod_ssl.c>\nListen 443\n</IfModule>\n',
+      )?.definition.id,
+    ).toBe('apache')
+    expect(
+      detectConfig(
+        registry,
+        '/srv/generic.conf',
+        'server {\nlisten 80;\nlocation / {\nproxy_pass http://app;\n}\n}\n',
+      )?.definition.id,
+    ).toBe('nginx')
+  })
+
+  it('does not let weak Apache content alone cross the threshold', () => {
+    expect(
+      detectConfig(registry, '/srv/notes.txt', 'custom value without a tag\n'),
+    ).toBeUndefined()
+    expect(
+      detectConfig(
+        registry,
+        '/srv/notes.txt',
+        'Require all granted # a single weak signal\n',
+      ),
     ).toBeUndefined()
   })
 

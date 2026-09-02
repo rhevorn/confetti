@@ -25,6 +25,7 @@ Do not add AI features, accounts, cloud services, telemetry, Webviews, validatio
 ## Supported formats
 
 - Nginx
+- Apache config (`httpd.conf`, `apache2.conf`, `.htaccess`)
 - SSH config
 - Environment variables / dotenv
 - INI / EditorConfig

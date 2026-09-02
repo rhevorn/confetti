@@ -1,0 +1,17 @@
+RewriteEngine   On
+RewriteBase   /
+RewriteCond   %{HTTP_HOST}   ^www\.example\.com$   [NC]
+RewriteRule   ^(.*)$   https://example.com/$1   [R=301,L]
+
+# protect   sensitive files
+<Files   "wp-config.php">
+    Require   all   denied
+    Order   allow,deny
+</Files>
+
+<IfModule   mod_deflate.c>
+    AddOutputFilterByType   DEFLATE   text/html   text/css
+</IfModule>
+
+Options   -Indexes
+AddType   application/x-httpd-php   .php

@@ -142,6 +142,22 @@ describe('TextMate grammars', () => {
     expect(blockScopes).toContain('keyword.control.nginx')
   })
 
+  it('tokenizes Apache tags, directives, variables, and booleans', async () => {
+    const tagScopes = await scopesForLine(
+      'apache.tmLanguage.json',
+      '<VirtualHost *:80>',
+    )
+    const directiveScopes = await scopesForLine(
+      'apache.tmLanguage.json',
+      'RewriteCond %{HTTP_HOST} ^www On',
+    )
+    expect(tagScopes).toContain('entity.name.tag.apache')
+    expect(tagScopes).toContain('punctuation.definition.tag.apache')
+    expect(directiveScopes).toContain('keyword.other.directive.apache')
+    expect(directiveScopes).toContain('variable.other.apache')
+    expect(directiveScopes).toContain('constant.language.boolean.apache')
+  })
+
   it('tokenizes SSH blocks, directives, paths, and placeholders', async () => {
     const hostScopes = await scopesForLine('ssh.tmLanguage.json', 'Host work')
     const directiveScopes = await scopesForLine(
