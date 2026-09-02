@@ -2,17 +2,17 @@
 
 All notable changes to Confetti are documented in this file.
 
-## Unreleased
+## 1.3.0 - 2026-09-02
 
-- Add per-format settings `confetti.autoDetect.formats` and `confetti.format.formats` to restrict detection and formatting to specific format ids; an empty list keeps every format enabled.
-- Add a status bar indicator showing the detected format and confidence, clickable to open detection details.
-- Add Nginx snippets for server blocks, locations, reverse proxies, upstreams, HTTPS servers, and HTTP-to-HTTPS redirects.
-- Add duplicate-key diagnostics for dotenv files, INI-family sections (INI, Git Config, MySQL, pip, setup.cfg), and TOML tables, reported as warnings when files are opened, activated, or saved — never while typing. Controlled by `confetti.diagnostics.enable`.
-- Add document symbol providers powering the outline view for Nginx blocks, SSH hosts, TOML tables, and INI-family sections.
-- Add folding range providers for Nginx and Apache blocks, INI-family sections (INI, Git Config, MySQL, pip, setup.cfg), and SSH `Host`/`Match` blocks.
-- Add detection, highlighting, and formatting for tmux (`tmux.conf`), GNU screen (`.screenrc`), and GNU Readline (`.inputrc`) configuration files.
-- Add detection, highlighting, and formatting for MySQL `my.cnf`, pip `pip.conf`, and Python `setup.cfg` files, with setup.cfg multiline values preserved during formatting.
 - Add detection, highlighting, and formatting for Apache `httpd.conf`, `apache2.conf`, and `.htaccess` files, including content-based disambiguation from Nginx for ambiguous `.conf` files.
+- Add detection, highlighting, and formatting for MySQL `my.cnf`, pip `pip.conf`, and Python `setup.cfg` files, with setup.cfg multiline values preserved during formatting.
+- Add detection, highlighting, and formatting for tmux (`tmux.conf`), GNU screen (`.screenrc`), and GNU Readline (`.inputrc`) configuration files.
+- Add folding range providers for Nginx and Apache blocks, INI-family sections (INI, Git Config, MySQL, pip, setup.cfg), and SSH `Host`/`Match` blocks.
+- Add document symbol providers powering the outline view for Nginx blocks, SSH hosts, TOML tables, and INI-family sections.
+- Add duplicate-key diagnostics for dotenv files, INI-family sections (INI, Git Config, MySQL, pip, setup.cfg), and TOML tables, reported as warnings when files are opened, activated, or saved — never while typing. Controlled by `confetti.diagnostics.enable`.
+- Add Nginx snippets for server blocks, locations, reverse proxies, upstreams, HTTPS servers, and HTTP-to-HTTPS redirects.
+- Add a status bar indicator showing the detected format and confidence, clickable to open detection details.
+- Add per-format settings `confetti.autoDetect.formats` and `confetti.format.formats` to restrict detection and formatting to specific format ids; an empty list keeps every format enabled.
 - Expand Ignore detection to any `.*ignore` filename, including `.cursorignore`, `.vscodeignore`, `.vercelignore`, and related files.
 - Add detection, highlighting, and formatting for classic Yarn `.yarnrc` files.
 

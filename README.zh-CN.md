@@ -1,6 +1,6 @@
 # Confetti
 
-为 VS Code 提供 nginx、dotenv、gitignore、hosts、TOML、YAML 等 16+ 种配置文件的智能识别、语法高亮和格式化能力。
+为 VS Code 提供 nginx、Apache、MySQL、tmux、dotenv、gitignore、TOML、YAML 等 15+ 种配置文件的智能识别、语法高亮和格式化能力，并提供代码折叠、大纲、snippets 和重复键诊断。
 
 [English documentation](https://github.com/rhevorn/confetti/blob/main/README.md)
 
@@ -17,13 +17,14 @@ Confetti 用一个插件提供统一体验：
 - 根据文件名、路径和内容智能识别配置类型
 - 使用 TextMate Grammar 提供兼容不同主题的语法高亮
 - 使用每种格式独立的规则支持 Format Document
+- 提供代码折叠、大纲符号、snippets、重复键警告和状态栏识别指示器
 - 不需要账号、AI 服务、云端服务或网络连接
 
 无法可靠识别文件时，Confetti 不会强制修改语言模式。
 
 ## 性能与资源占用
 
-Confetti 不会在每次输入时持续扫描整个文档。检测只发生在打开、切换、保存文件或手动执行检测时；格式化只在 VS Code 或用户明确请求时执行。
+Confetti 不会在每次输入时持续扫描整个文档。检测、诊断和状态栏更新只发生在打开、切换、保存文件或手动执行检测时——绝不会在输入过程中运行；格式化只在 VS Code 或用户明确请求时执行。
 
 使用生成的 Nginx 配置进行核心基准测试：
 
@@ -34,7 +35,7 @@ Confetti 不会在每次输入时持续扫描整个文档。检测只发生在�
 
 资源占用情况：
 
-- 1.2.0 的 VSIX 约为 **137 KB**，没有运行时 npm 依赖。
+- 1.3.0 的 VSIX 约为 **175 KB**，没有运行时 npm 依赖。
 - 检测 1 MB 示例后，保留检测结果时堆内存增量约 **0.06 MB**；释放结果并执行 GC 后约为 **0.02 MB**。
 - 格式化 1 MB Nginx 示例后，立即测得的临时堆内存增量最高约 **75 MB**；释放结果并执行 GC 后，增量回到接近零。Tokenization 和格式化会处理完整文档，因此临时内存会随文件大小增长。
 - 检测缓存只保存很小的结果对象，并在文档关闭时删除。
@@ -46,32 +47,39 @@ Confetti 不会在每次输入时持续扫描整个文档。检测只发生在�
 
 ## 支持的格式
 
-| 格式               | 场景文件                                            | 高亮 | 格式化 |
-| ------------------ | --------------------------------------------------- | :--: | :----: |
-| Nginx              | `nginx.conf`，以及根据内容识别的 Nginx `.conf` 文件 |  ✅  |   ✅   |
-| SSH                | `~/.ssh/config`、`ssh_config`、`sshd_config`        |  ✅  |   ✅   |
-| 环境变量           | `.env`、`.env.local`、`.env.production`、`*.env`    |  ✅  |   ✅   |
-| INI / EditorConfig | `.ini`、`.cfg`、`.editorconfig`                     |  ✅  |   ✅   |
-| Java Properties    | `.properties`                                       |  ✅  |   ✅   |
-| TOML               | `.toml`，包括 `pyproject.toml`                      |  ✅  |   ✅   |
-| YAML               | `.yaml`、`.yml`、Docker Compose 和工作流文件        |  ✅  |   —    |
-| Git Config         | `.gitconfig`、`.gitmodules`、`.git/config`          |  ✅  |   ✅   |
-| npm Config         | `.npmrc`                                            |  ✅  |   ✅   |
-| Yarn Config        | 经典 `.yarnrc`（不含 `.yarnrc.yml`）                |  ✅  |   ✅   |
-| Ignore 文件        | `.gitignore`、`.cursorignore`、`.*ignore` 等        |  ✅  |   —    |
-| Git Attributes     | `.gitattributes`、`.git/info/attributes`            |  ✅  |   ✅   |
-| Browserslist       | `.browserslistrc`、`browserslist`                   |  ✅  |   ✅   |
-| 工具版本文件       | `.nvmrc`、`.node-version`、`.tool-versions` 等      |  ✅  |   —    |
-| Hosts              | `hosts`，包括 `/etc/hosts`                          |  ✅  |   ✅   |
-| 文件系统挂载表     | `fstab`，包括 `/etc/fstab`                          |  ✅  |   ✅   |
-| Crontab            | `crontab`、`/etc/cron.d/*`、cron spool 文件         |  ✅  |   ✅   |
+| 格式               | 场景文件                                                | 高亮 | 格式化 |
+| ------------------ | ------------------------------------------------------- | :--: | :----: |
+| Nginx              | `nginx.conf`，以及根据内容识别的 Nginx `.conf` 文件     |  ✅  |   ✅   |
+| Apache             | `httpd.conf`、`apache2.conf`、`.htaccess`、vhost 文件   |  ✅  |   ✅   |
+| SSH                | `~/.ssh/config`、`ssh_config`、`sshd_config`            |  ✅  |   ✅   |
+| 环境变量           | `.env`、`.env.local`、`.env.production`、`*.env`        |  ✅  |   ✅   |
+| INI / EditorConfig | `.ini`、`.cfg`、`.editorconfig`                         |  ✅  |   ✅   |
+| MySQL              | `my.cnf`、`.my.cnf`、`mysql`/`mariadb` 配置路径         |  ✅  |   ✅   |
+| pip                | `pip.conf`、`~/.pip/pip.conf`、`~/.config/pip/pip.conf` |  ✅  |   ✅   |
+| setup.cfg          | Python `setup.cfg`，多行值原样保留                      |  ✅  |   ✅   |
+| Java Properties    | `.properties`                                           |  ✅  |   ✅   |
+| TOML               | `.toml`，包括 `pyproject.toml`                          |  ✅  |   ✅   |
+| YAML               | `.yaml`、`.yml`、Docker Compose 和工作流文件            |  ✅  |   —    |
+| Git Config         | `.gitconfig`、`.gitmodules`、`.git/config`              |  ✅  |   ✅   |
+| npm Config         | `.npmrc`                                                |  ✅  |   ✅   |
+| Yarn Config        | 经典 `.yarnrc`（不含 `.yarnrc.yml`）                    |  ✅  |   ✅   |
+| Ignore 文件        | `.gitignore`、`.cursorignore`、`.*ignore` 等            |  ✅  |   —    |
+| Git Attributes     | `.gitattributes`、`.git/info/attributes`                |  ✅  |   ✅   |
+| Browserslist       | `.browserslistrc`、`browserslist`                       |  ✅  |   ✅   |
+| 工具版本文件       | `.nvmrc`、`.node-version`、`.tool-versions` 等          |  ✅  |   —    |
+| Hosts              | `hosts`，包括 `/etc/hosts`                              |  ✅  |   ✅   |
+| 文件系统挂载表     | `fstab`，包括 `/etc/fstab`                              |  ✅  |   ✅   |
+| Crontab            | `crontab`、`/etc/cron.d/*`、cron spool 文件             |  ✅  |   ✅   |
+| tmux               | `tmux.conf`、`~/.config/tmux/tmux.conf`                 |  ✅  |   ✅   |
+| GNU screen         | `.screenrc`                                             |  ✅  |   ✅   |
+| Readline           | `.inputrc`                                              |  ✅  |   ✅   |
 
 ## 快速开始
 
 1. 在 VS Code 扩展视图中搜索并安装 **Confetti**。
 2. 打开一个支持的配置文件。
 3. 当识别置信度达到内置安全阈值时，Confetti 会自动使用合适的语言模式。
-4. 可以在编辑器右下角查看当前语言名称。
+4. 可以在编辑器右下角查看当前语言名称，或查看显示识别格式和置信度的 Confetti 状态栏项。
 
 对于 `production.conf` 这类有歧义的文件，Confetti 会结合路径和文件内容进行判断，而不是只依赖扩展名。
 
@@ -89,6 +97,18 @@ Confetti 会根据不同格式高亮：
 - 路径、代码块、Anchor、Alias 和 Tag 等格式特有元素
 
 Grammar 使用标准 TextMate scope，最终颜色由当前 VS Code 主题决定，Confetti 不会硬编码颜色。
+
+## 编辑器功能
+
+除了识别、高亮和格式化之外，Confetti 还提供：
+
+- **代码折叠**：Nginx 和 Apache 代码块、INI 系 section、SSH `Host`/`Match` 块
+- **大纲符号**：Nginx 代码块、SSH 主机、TOML table、INI 系 section
+- **重复键警告**：dotenv、INI 系 section 和 TOML table 中的重复键会以警告标出，让悄悄覆盖前值的键一目了然
+- **Nginx snippets**：server 块、location、反向代理、upstream、HTTPS server 和跳转
+- **状态栏指示器**：显示识别的格式和置信度，点击可查看完整识别详情
+
+以上所有功能只在打开、切换或保存文件时运行——绝不会在输入过程中运行。Snippet 中的 Nginx 变量（如 `$host`）会原样插入。
 
 ## 格式化
 
@@ -120,12 +140,15 @@ Confetti 有意不为 YAML、Ignore 文件和工具版本文件注册 formatter�
 
 打开 VS Code 设置并搜索 `Confetti`。
 
-| 设置                     | 默认值 | 说明                                   |
-| ------------------------ | ------ | -------------------------------------- |
-| `confetti.autoDetect`    | `true` | 打开、切换或保存文件时自动识别配置类型 |
-| `confetti.format.enable` | `true` | 启用 Confetti 文档格式化               |
+| 设置                          | 默认值 | 说明                                          |
+| ----------------------------- | ------ | --------------------------------------------- |
+| `confetti.autoDetect`         | `true` | 打开、切换或保存文件时自动识别配置类型        |
+| `confetti.autoDetect.formats` | `[]`   | 限制自动识别的格式 id；空列表表示支持全部格式 |
+| `confetti.diagnostics.enable` | `true` | 高亮重复键；只在打开、切换和保存时运行        |
+| `confetti.format.enable`      | `true` | 启用 Confetti 文档格式化                      |
+| `confetti.format.formats`     | `[]`   | 限制格式化的格式 id；空列表表示支持全部格式   |
 
-两个设置都可以直接在 VS Code Settings UI 中通过复选框修改。
+两个 `boolean` 设置可以直接在 VS Code Settings UI 中通过复选框修改；两个 `.formats` 设置接受格式 id 列表（例如 `["nginx", "ssh"]`），空列表表示启用全部格式。
 
 ## 确认使用了哪个 formatter
 

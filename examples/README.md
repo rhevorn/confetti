@@ -11,6 +11,7 @@ These files are intentionally messy. They cover detection, TextMate scopes, form
 5. Run `Developer: Inspect Editor Tokens and Scopes`, then click representative keys and values.
 6. Run `Confetti: Format Config` and inspect the editor diff.
 7. Run it again. The second run must report `no changes` in `Confetti: Show Formatter Output`.
+8. Check folding, the outline view, and the status bar indicator on block- and section-based samples; `env/.env.local` must show a duplicate-key warning.
 
 ## Coverage matrix
 
@@ -24,7 +25,7 @@ These files are intentionally messy. They cover detection, TextMate scopes, form
 | `apache/.htaccess` | Exact filename | Rewrite rules and flags, `Files` blocks, `Order`/`Require` |
 | `apache/site.conf` | Ambiguous `.conf` by content | `VirtualHost` tags, `ServerName` signals beating Nginx |
 | `ssh/sshd_config` | Exact filename | Server directives, numbers, booleans, paths |
-| `env/.env.local` | `.env.*` filename | Keys versus values, `export`, empty values, quotes, interpolation, booleans, numbers |
+| `env/.env.local` | `.env.*` filename | Keys versus values, `export`, empty values, quotes, interpolation, booleans, numbers, duplicate-key warning |
 | `ini/settings.ini` | `.ini` extension | Sections, `=` and `:` assignments, URLs containing `=`, comments, empty values |
 | `ini/.editorconfig` | Exact filename | Glob sections and normalized `key = value` spacing |
 | `mysql/my.cnf` | Exact filename and `mysql`/`mariadb` paths | Sections, assignments, socket paths, booleans, numbers |

@@ -1,6 +1,6 @@
 # Confetti
 
-Smart detection, syntax highlighting, and formatting for nginx, dotenv, gitignore, hosts, TOML, YAML, and 16+ configuration file types in VS Code.
+Smart detection, syntax highlighting, and formatting for nginx, Apache, MySQL, tmux, dotenv, gitignore, TOML, YAML, and 15+ configuration file types in VS Code — plus folding, outlines, snippets, and duplicate-key diagnostics.
 
 [中文文档](https://github.com/rhevorn/confetti/blob/main/README.zh-CN.md)
 
@@ -17,13 +17,14 @@ Confetti provides one consistent experience:
 - Content-aware configuration type detection
 - Theme-compatible TextMate syntax highlighting
 - Format Document support with format-specific rules
+- Folding, outline symbols, snippets, duplicate-key warnings, and a status bar detection indicator
 - No account, AI service, cloud service, or network connection required
 
 Confetti does not force a language mode when a file cannot be identified reliably.
 
 ## Performance and resource use
 
-Confetti is designed to stay out of the typing path. It does not continuously rescan a document on every edit. Detection runs when a file is opened, activated, saved, or explicitly detected; formatting runs only when requested by VS Code or the user.
+Confetti is designed to stay out of the typing path. It does not continuously rescan a document on every edit. Detection, diagnostics, and status bar updates run when a file is opened, activated, saved, or explicitly detected — never while typing; formatting runs only when requested by VS Code or the user.
 
 Core benchmark results for the generated Nginx sample:
 
@@ -34,7 +35,7 @@ Core benchmark results for the generated Nginx sample:
 
 Resource characteristics:
 
-- The 1.2.0 VSIX is approximately **137 KB** and has no runtime npm dependencies.
+- The 1.3.0 VSIX is approximately **175 KB** and has no runtime npm dependencies.
 - Detection retained about **0.06 MB** of additional heap for a 1 MB sample; after releasing the result and running GC, the measured delta was about **0.02 MB**.
 - Formatting a 1 MB Nginx sample temporarily increased heap usage by up to **75 MB** immediately after the operation. The measured delta returned to approximately zero after the result was released and GC ran. Tokenization and formatting work on a complete document, so temporary allocation grows with file size.
 - Detection cache entries are small and are removed when their documents close.
@@ -49,9 +50,13 @@ Method: Apple Silicon (`darwin arm64`), Node.js 24.14.1, 10 warm-up runs; 100 me
 | Format                | Typical files / scenarios                               | Highlighting | Formatting |
 | --------------------- | ------------------------------------------------------- | :----------: | :--------: |
 | Nginx                 | `nginx.conf`, Nginx `.conf` files detected from content |      ✅      |     ✅     |
+| Apache                | `httpd.conf`, `apache2.conf`, `.htaccess`, vhost files  |      ✅      |     ✅     |
 | SSH                   | `~/.ssh/config`, `ssh_config`, `sshd_config`            |      ✅      |     ✅     |
 | Environment variables | `.env`, `.env.local`, `.env.production`, `*.env`        |      ✅      |     ✅     |
 | INI / EditorConfig    | `.ini`, `.cfg`, `.editorconfig`                         |      ✅      |     ✅     |
+| MySQL                 | `my.cnf`, `.my.cnf`, `mysql`/`mariadb` config paths     |      ✅      |     ✅     |
+| pip                   | `pip.conf`, `~/.pip/pip.conf`, `~/.config/pip/pip.conf` |      ✅      |     ✅     |
+| setup.cfg             | Python `setup.cfg` with multiline values preserved      |      ✅      |     ✅     |
 | Java Properties       | `.properties`                                           |      ✅      |     ✅     |
 | TOML                  | `.toml`, including `pyproject.toml`                     |      ✅      |     ✅     |
 | YAML                  | `.yaml`, `.yml`, Docker Compose and workflow files      |      ✅      |     —      |
@@ -65,13 +70,16 @@ Method: Apple Silicon (`darwin arm64`), Node.js 24.14.1, 10 warm-up runs; 100 me
 | Hosts                 | `hosts`, including `/etc/hosts`                         |      ✅      |     ✅     |
 | Filesystem table      | `fstab`, including `/etc/fstab`                         |      ✅      |     ✅     |
 | Crontab               | `crontab`, `/etc/cron.d/*`, spool cron files            |      ✅      |     ✅     |
+| tmux                  | `tmux.conf`, `~/.config/tmux/tmux.conf`                 |      ✅      |     ✅     |
+| GNU screen            | `.screenrc`                                             |      ✅      |     ✅     |
+| Readline              | `.inputrc`                                              |      ✅      |     ✅     |
 
 ## Getting started
 
 1. Install **Confetti** from the VS Code Extensions view.
 2. Open a supported configuration file.
 3. Confetti detects the type and applies a suitable language mode when confidence reaches the built-in safety threshold.
-4. Check the language name in the lower-right corner of the editor.
+4. Check the language name in the lower-right corner of the editor, or the Confetti status bar item showing the detected format and confidence.
 
 For ambiguous files such as `production.conf`, Confetti examines both the path and content instead of relying only on the extension.
 
@@ -89,6 +97,18 @@ Confetti highlights format-specific elements such as:
 - Paths, blocks, anchors, aliases, and tags where applicable
 
 The grammars use standard TextMate scopes, so colors follow your active VS Code theme. Confetti does not hard-code colors.
+
+## Editor features
+
+Beyond detection, highlighting, and formatting, Confetti provides:
+
+- **Folding ranges** for Nginx and Apache blocks, INI-family sections, and SSH `Host`/`Match` blocks
+- **Outline symbols** for Nginx blocks, SSH hosts, TOML tables, and INI-family sections
+- **Duplicate-key warnings** for dotenv files, INI-family sections, and TOML tables, so a key that quietly overrides an earlier one is visible
+- **Nginx snippets** for server blocks, locations, reverse proxies, upstreams, HTTPS servers, and redirects
+- A **status bar indicator** showing the detected format and confidence; click it to see full detection details
+
+All of these run when a file is opened, activated, or saved — never while typing. Nginx variables inside snippets (such as `$host`) are inserted literally.
 
 ## Formatting
 
@@ -120,12 +140,15 @@ Open the Command Palette with `Ctrl+Shift+P` or `Cmd+Shift+P` and search for:
 
 Open VS Code Settings and search for `Confetti`.
 
-| Setting                  | Default | Description                                                      |
-| ------------------------ | ------- | ---------------------------------------------------------------- |
-| `confetti.autoDetect`    | `true`  | Detect supported files when they are opened, activated, or saved |
-| `confetti.format.enable` | `true`  | Enable Confetti document formatting                              |
+| Setting                       | Default | Description                                                                       |
+| ----------------------------- | ------- | --------------------------------------------------------------------------------- |
+| `confetti.autoDetect`         | `true`  | Detect supported files when they are opened, activated, or saved                  |
+| `confetti.autoDetect.formats` | `[]`    | Restrict automatic detection to these format ids; an empty list means all formats |
+| `confetti.diagnostics.enable` | `true`  | Highlight duplicate keys; runs only on open, activate, and save                   |
+| `confetti.format.enable`      | `true`  | Enable Confetti document formatting                                               |
+| `confetti.format.formats`     | `[]`    | Restrict formatting to these format ids; an empty list means all formats          |
 
-Both settings are available as checkboxes in the VS Code Settings UI.
+The two `boolean` settings are available as checkboxes in the VS Code Settings UI; the two `.formats` settings accept format-id lists such as `["nginx", "ssh"]`, and an empty list keeps every format enabled.
 
 ## Confirm which formatter ran
 

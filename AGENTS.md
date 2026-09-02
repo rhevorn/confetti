@@ -9,8 +9,9 @@ Keep the product focused on:
 1. Configuration type detection
 2. TextMate syntax highlighting
 3. Format Document support
+4. Lightweight editor features that run only on open, activate, and save: folding ranges, outline symbols, duplicate-key diagnostics, snippets, and the status bar detection indicator
 
-Do not add AI features, accounts, cloud services, telemetry, Webviews, validation, completion, or diagnostics unless the user explicitly expands the product scope.
+Do not add AI features, accounts, cloud services, telemetry, Webviews, validation, or completion unless the user explicitly expands the product scope.
 
 ## Design principles
 
@@ -19,7 +20,8 @@ Do not add AI features, accounts, cloud services, telemetry, Webviews, validatio
 - Prefer format-specific detectors, grammars, and formatters over a generic rule that changes semantics.
 - Never hard-code syntax colors. Use standard TextMate scopes and let the active theme choose colors.
 - Do not add runtime npm dependencies unless there is a strong, documented reason.
-- Do not scan the full document on every edit. Detection belongs on open, active-editor change, save, or explicit command execution.
+- Do not scan the full document on every edit. Detection, diagnostics, and status bar updates belong on open, active-editor change, save, or explicit command execution — never while typing.
+- Keep editor features (folding, symbols, diagnostics) as pure computations in `src/features/`, adapted to VS Code API objects only in `src/extension.ts`.
 - Preserve compatibility with canonical VS Code language IDs for YAML, INI, and Java Properties.
 
 ## Supported formats
@@ -58,9 +60,11 @@ YAML, Ignore files, and tool version files are detection and highlighting only. 
 - `src/core/`: editor-independent registry, detection, formatting, and shared types
 - `src/configs/`: one `ConfigDefinition` per supported format
 - `src/formatters/`: one formatter per format with formatting support, plus carefully scoped shared helpers
+- `src/features/`: editor-independent computations for folding ranges, outline symbols, and duplicate-key diagnostics
 - `src/tokenizers/`: editor-independent token types and safe lexical scanning primitives
 - `src/extension.ts`: thin VS Code adapter, commands, providers, events, logging, and cache lifecycle
 - `syntaxes/`: self-contained TextMate grammar JSON files
+- `snippets/`: per-format snippet JSON files
 - `language-configurations/`: format-specific VS Code editor behavior
 - `examples/`: realistic files for manual Extension Development Host testing
 - `test/`: unit, integration, grammar-tokenization, manifest, example, performance-baseline, and VS Code adapter tests
@@ -88,11 +92,13 @@ Formatting:
 
 Extension behavior:
 
-- Keep `confetti.autoDetect` and `confetti.format.enable` available in the VS Code Settings UI.
+- Keep `confetti.autoDetect`, `confetti.autoDetect.formats`, `confetti.diagnostics.enable`, `confetti.format.enable`, and `confetti.format.formats` available in the VS Code Settings UI. Empty `.formats` lists mean all formats.
 - Keep the confidence threshold internal rather than user-configurable.
-- Release cached detection results when documents close.
+- Release cached detection results when documents close, and clear diagnostics for closed documents.
 - Log formatter invocation, selected format, result, elapsed time, and path to the Confetti output channel.
 - Keep the explicit **Confetti: Format Config** command so users can distinguish Confetti from other formatters.
+- Keep exactly one event handler per VS Code event (open, save, close, active-editor change); new features wire into the existing handlers instead of registering more listeners.
+- Wire folding, symbols, diagnostics, and the status bar through the existing handlers so nothing runs while typing.
 
 ## Adding or changing a format
 
@@ -101,12 +107,13 @@ When adding a format:
 1. Add a `ConfigDefinition` in `src/configs/`.
 2. Register it in `src/configs/index.ts`.
 3. Add a dedicated formatter in `src/formatters/` when formatting is supported.
-4. Add a TextMate grammar in `syntaxes/` using standard scopes.
-5. Add a format-specific language configuration when editor behavior differs.
-6. Update `package.json` language and grammar contributions.
-7. Add realistic examples.
-8. Add detector, formatter, idempotency, malformed-input, real TextMate tokenization, manifest, and example tests.
-9. Update both `README.md` and `README.zh-CN.md`.
+4. Extend the pure computations in `src/features/` when the format should fold, appear in the outline, or receive duplicate-key diagnostics.
+5. Add a TextMate grammar in `syntaxes/` using standard scopes, and snippets in `snippets/` when they help.
+6. Add a format-specific language configuration when editor behavior differs.
+7. Update `package.json` language and grammar contributions.
+8. Add realistic examples.
+9. Add detector, formatter, idempotency, malformed-input, real TextMate tokenization, manifest, and example tests.
+10. Update both `README.md` and `README.zh-CN.md`.
 
 Do not claim support until detection, highlighting, formatting, examples, and tests are all present where applicable.
 
@@ -141,6 +148,8 @@ Press `F5` in VS Code to launch the Extension Development Host. Open files under
 
 - The language mode is detected correctly.
 - Keys, values, sections, directives, strings, numbers, variables, and comments receive useful highlighting.
+- Folding, the outline view, the status bar indicator, and duplicate-key warnings work for the formats that support them.
+- Nginx snippets expand and insert variables such as `$host` literally.
 - **Format Document With...** lists Confetti where expected.
 - **Confetti: Format Config** applies the Confetti formatter directly.
 - **Confetti: Show Formatter Output** records the invocation.

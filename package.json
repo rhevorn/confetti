@@ -1,8 +1,8 @@
 {
   "name": "confetti",
   "displayName": "Confetti",
-  "description": "Detect, highlight, and format nginx, dotenv, gitignore, yarnrc, hosts, fstab, crontab, TOML, YAML, SSH, npmrc, and 16+ config files in one local extension.",
-  "version": "1.2.0",
+  "description": "Detect, highlight, and format nginx, Apache, MySQL, tmux, dotenv, gitignore, TOML, YAML, SSH, and 15+ config files in one local extension, with folding, outlines, snippets, and duplicate-key diagnostics.",
+  "version": "1.3.0",
   "private": true,
   "publisher": "rhevorn",
   "license": "MIT",
@@ -70,6 +70,7 @@
     "screenrc",
     "inputrc",
     "readline",
+    "snippets",
     "system config"
   ],
   "main": "./dist/extension.js",

@@ -57,7 +57,7 @@ function contributedPath(relativePath: string): string {
 
 describe('VS Code extension manifest', () => {
   it('contains complete Marketplace metadata for the stable release', () => {
-    expect(manifest.version).toBe('1.2.0')
+    expect(manifest.version).toBe('1.3.0')
     expect(manifest.publisher).toBe('rhevorn')
     expect(manifest.repository).toEqual({
       type: 'git',
@@ -81,10 +81,16 @@ describe('VS Code extension manifest', () => {
       'gitignore',
       'dotenv',
       'nginx',
+      'apache',
+      'my.cnf',
+      'tmux',
+      'screenrc',
+      'inputrc',
       'hosts',
       'fstab',
       'crontab',
       'format document',
+      'snippets',
       'yarnrc',
       'cursorignore',
     ]) {
