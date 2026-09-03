@@ -123,7 +123,7 @@ function braceFoldingRanges(content: string): FoldingRangeInfo[] {
       if (token.kind !== 'symbol') continue
       if (token.value === '{') {
         stack.push(index)
-      } else if (stack.length > 0) {
+      } else {
         const startLine = stack.pop()
         if (startLine !== undefined && index > startLine) {
           ranges.push({ startLine, endLine: index })

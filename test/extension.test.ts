@@ -120,6 +120,11 @@ describe('VS Code extension adapter', () => {
     expect(foldingSelector.map(({ language }) => language)).toContain(
       'confetti-env',
     )
+    for (const language of ['ini', 'properties', 'toml', 'dotenv']) {
+      expect(foldingSelector.map(({ language }) => language)).toContain(
+        language,
+      )
+    }
     expect(mockState.symbolProvider).toBeDefined()
     const symbolSelector = mockState.symbolSelector as Array<{
       language: string
@@ -130,6 +135,9 @@ describe('VS Code extension adapter', () => {
     expect(symbolSelector.map(({ language }) => language)).toContain(
       'confetti-env',
     )
+    for (const language of ['ini', 'properties', 'toml', 'dotenv']) {
+      expect(symbolSelector.map(({ language }) => language)).toContain(language)
+    }
     expect(mockState.outputLines[0]).toContain('Extension activated')
   })
 
@@ -333,6 +341,28 @@ describe('VS Code extension adapter', () => {
     expect(
       mockState.foldingProvider?.provideFoldingRanges(unsupported),
     ).toEqual([])
+  })
+
+  it('provides folding and symbols for canonical builtin language modes', () => {
+    activateExtension()
+
+    const canonical = document(
+      '/app/settings.ini',
+      '[client]\nport=3306\n[mysqld]\ndatadir=/data\n',
+      'ini',
+    )
+    const ranges = mockState.foldingProvider?.provideFoldingRanges(
+      canonical,
+    ) as Array<{ start: number; end: number }>
+    expect(ranges).toEqual([
+      { start: 0, end: 1 },
+      { start: 2, end: 3 },
+    ])
+
+    const symbols = mockState.symbolProvider?.provideDocumentSymbols(
+      canonical,
+    ) as Array<{ name: string }>
+    expect(symbols.map(({ name }) => name)).toEqual(['client', 'mysqld'])
   })
 
   it('provides document symbols for detected documents and none otherwise', () => {

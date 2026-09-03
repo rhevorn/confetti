@@ -25,6 +25,25 @@ interface CachedDetection {
 
 const detectionCache = new Map<string, CachedDetection>()
 
+const builtinLanguageSelectors = ['ini', 'properties', 'toml', 'dotenv'].map(
+  (language) => ({ language }),
+)
+
+// Providers cover both Confetti language modes and the canonical ids VS Code
+// or other extensions may already have active for supported formats.
+const languageSelectors = [
+  ...registry.all().map((definition) => ({ language: definition.languageId })),
+  ...builtinLanguageSelectors,
+]
+
+const formattingSelectors = [
+  ...registry
+    .all()
+    .filter((definition) => definition.formatter)
+    .map((definition) => ({ language: definition.languageId })),
+  ...builtinLanguageSelectors,
+]
+
 function log(message: string): void {
   const timestamp = new Date().toLocaleTimeString()
   outputChannel?.appendLine(`[${timestamp}] ${message}`)
@@ -273,59 +292,42 @@ export function activate(context: vscode.ExtensionContext): void {
         )
       }
     }),
-    vscode.languages.registerFoldingRangeProvider(
-      registry.all().map((definition) => ({ language: definition.languageId })),
-      {
-        provideFoldingRanges(document) {
-          const definition = definitionForDocument(document)
-          if (!definition) return []
-          return computeFoldingRanges(definition.id, document.getText()).map(
-            ({ startLine, endLine }) =>
-              new vscode.FoldingRange(startLine, endLine),
-          )
-        },
+    vscode.languages.registerFoldingRangeProvider(languageSelectors, {
+      provideFoldingRanges(document) {
+        const definition = definitionForDocument(document)
+        if (!definition) return []
+        return computeFoldingRanges(definition.id, document.getText()).map(
+          ({ startLine, endLine }) =>
+            new vscode.FoldingRange(startLine, endLine),
+        )
       },
-    ),
-    vscode.languages.registerDocumentSymbolProvider(
-      registry.all().map((definition) => ({ language: definition.languageId })),
-      {
-        provideDocumentSymbols(document) {
-          const definition = definitionForDocument(document)
-          if (!definition) return []
-          return computeDocumentSymbols(definition.id, document.getText()).map(
-            (symbol) => {
-              const selection = new vscode.Range(
+    }),
+    vscode.languages.registerDocumentSymbolProvider(languageSelectors, {
+      provideDocumentSymbols(document) {
+        const definition = definitionForDocument(document)
+        if (!definition) return []
+        return computeDocumentSymbols(definition.id, document.getText()).map(
+          (symbol) => {
+            const selection = new vscode.Range(
+              new vscode.Position(symbol.startLine, symbol.startCharacter),
+              new vscode.Position(symbol.startLine, symbol.headerEndCharacter),
+            )
+            return new vscode.DocumentSymbol(
+              symbol.name,
+              '',
+              SYMBOL_KINDS[symbol.kind],
+              new vscode.Range(
                 new vscode.Position(symbol.startLine, symbol.startCharacter),
-                new vscode.Position(
-                  symbol.startLine,
-                  symbol.headerEndCharacter,
-                ),
-              )
-              return new vscode.DocumentSymbol(
-                symbol.name,
-                '',
-                SYMBOL_KINDS[symbol.kind],
-                new vscode.Range(
-                  new vscode.Position(symbol.startLine, symbol.startCharacter),
-                  new vscode.Position(symbol.endLine, symbol.endCharacter),
-                ),
-                selection,
-              )
-            },
-          )
-        },
+                new vscode.Position(symbol.endLine, symbol.endCharacter),
+              ),
+              selection,
+            )
+          },
+        )
       },
-    ),
+    }),
     vscode.languages.registerDocumentFormattingEditProvider(
-      [
-        ...registry
-          .all()
-          .filter((definition) => definition.formatter)
-          .map((definition) => ({ language: definition.languageId })),
-        ...['ini', 'properties', 'toml', 'dotenv'].map((language) => ({
-          language,
-        })),
-      ],
+      formattingSelectors,
       {
         provideDocumentFormattingEdits(document) {
           return formattingEdits(document, 'Format Document provider')
