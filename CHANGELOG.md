@@ -6,6 +6,7 @@ All notable changes to Confetti are documented in this file.
 
 - Add detection, highlighting, and formatting for systemd unit files (`.service`, `.socket`, `.timer`, `.path`, `.mount`, `.target`, and drop-in directories), with backslash line continuations preserved during formatting.
 - Add detection, highlighting, and formatting for Python tooling INI files (`tox.ini`, `.flake8`, `pytest.ini`, `mypy.ini`, `.coveragerc`, `.isort.cfg`), with indented multiline values preserved during formatting.
+- Add detection, highlighting, and formatting for Caddyfiles, with brace-depth indentation, inline `{...}` placeholders left untouched, and heredoc bodies preserved byte-for-byte.
 
 ## 1.3.0 - 2026-09-02
 

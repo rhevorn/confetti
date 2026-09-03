@@ -126,6 +126,8 @@ describe('detectConfig', () => {
     ['pyini', '/app/pytest.ini', '[pytest]\naddopts = -ra\n'],
     ['pyini', '/app/mypy.ini', '[mypy]\nstrict = true\n'],
     ['pyini', '/app/.coveragerc', '[run]\nbranch = true\n'],
+    ['caddy', '/srv/www/Caddyfile', 'example.com {\nroot * /srv/www\n}\n'],
+    ['caddy', '/srv/Caddyfile', 'localhost:8080 {\nrespond hi\n}\n'],
   ])('detects %s configuration', (expected, filename, content) => {
     expect(detectConfig(registry, filename, content)?.definition.id).toBe(
       expected,
@@ -379,6 +381,17 @@ describe('detectConfig', () => {
         '[Service]\nExecStart=/usr/bin/app\nRestart=on-failure\n',
       )?.definition.id,
     ).toBe('ini')
+  })
+
+  it('detects Caddyfiles by exact filename with any content', () => {
+    expect(
+      detectConfig(registry, '/app/Caddyfile', 'nothing here\n')?.definition.id,
+    ).toBe('caddy')
+    expect(detectConfig(registry, '/srv/Caddyfile', '')?.confidence).toBe(100)
+    expect(
+      detectConfig(registry, '/app/caddyfile', 'example.com {}\n')?.definition
+        .id,
+    ).not.toBe('caddy')
   })
 
   it('prefers exact Python tooling filenames over the generic INI extension', () => {

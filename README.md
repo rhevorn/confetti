@@ -50,6 +50,7 @@ Method: Apple Silicon (`darwin arm64`), Node.js 24.14.1, 10 warm-up runs; 100 me
 | Format                | Typical files / scenarios                               | Highlighting | Formatting |
 | --------------------- | ------------------------------------------------------- | :----------: | :--------: |
 | Nginx                 | `nginx.conf`, Nginx `.conf` files detected from content |      ✅      |     ✅     |
+| Caddyfile             | `Caddyfile` with blocks, matchers, and heredocs         |      ✅      |     ✅     |
 | Apache                | `httpd.conf`, `apache2.conf`, `.htaccess`, vhost files  |      ✅      |     ✅     |
 | SSH                   | `~/.ssh/config`, `ssh_config`, `sshd_config`            |      ✅      |     ✅     |
 | Environment variables | `.env`, `.env.local`, `.env.production`, `*.env`        |      ✅      |     ✅     |

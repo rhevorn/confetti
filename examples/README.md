@@ -18,6 +18,7 @@ These files are intentionally messy. They cover detection, TextMate scopes, form
 | Sample | Detection | Highlight and formatting checks |
 | --- | --- | --- |
 | `nginx/nginx.conf` | Exact filename | Directives, blocks, variables, strings containing `#` and braces, nested indentation |
+| `caddy/Caddyfile` | Exact filename | Global options, site blocks, named matchers, `{...}` placeholders, snippet blocks, heredoc preserved byte-for-byte |
 | `nginx/site.conf` | Ambiguous `.conf` by content | `server`, `location`, `proxy_pass` signals |
 | `nginx/spacing.conf` | Ambiguous `.conf` by content | Horizontal spacing, semicolons, braces, quoted and escaped spaces |
 | `.ssh/config` | `.ssh` path | Global options, `Host`, `Match`, paths, `%` tokens, block indentation |

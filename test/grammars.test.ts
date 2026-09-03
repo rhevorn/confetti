@@ -211,6 +211,29 @@ describe('TextMate grammars', () => {
     expect(specifierScopes).toContain('variable.language.specifier.systemd')
   })
 
+  it('tokenizes Caddyfile sections, directives, matchers, and placeholders', async () => {
+    const sectionScopes = await scopesForLine(
+      'caddy.tmLanguage.json',
+      'example.com, www.example.com {',
+    )
+    const directiveScopes = await scopesForLine(
+      'caddy.tmLanguage.json',
+      'reverse_proxy localhost:9000',
+    )
+    const matcherScopes = await scopesForLine(
+      'caddy.tmLanguage.json',
+      '@static path *.css',
+    )
+    const placeholderScopes = await scopesForLine(
+      'caddy.tmLanguage.json',
+      'respond "Hello {http.request.host}"',
+    )
+    expect(sectionScopes).toContain('entity.name.section.caddy')
+    expect(directiveScopes).toContain('keyword.other.directive.caddy')
+    expect(matcherScopes).toContain('variable.other.matcher.caddy')
+    expect(placeholderScopes).toContain('variable.other.caddy')
+  })
+
   it('tokenizes Python tooling INI sections and assignments', async () => {
     const sectionScopes = await scopesForLine(
       'pyini.tmLanguage.json',

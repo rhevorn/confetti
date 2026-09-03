@@ -108,6 +108,22 @@ describe('computeFoldingRanges', () => {
     ])
   })
 
+  it('folds Caddyfile blocks while ignoring inline placeholders', () => {
+    const content = [
+      'example.com {',
+      '  handle /api/* {',
+      '    reverse_proxy localhost:9000',
+      '  }',
+      '  respond {http.request.host}',
+      '}',
+    ].join('\n')
+
+    expect(computeFoldingRanges('caddy', content)).toEqual([
+      { startLine: 1, endLine: 3 },
+      { startLine: 0, endLine: 5 },
+    ])
+  })
+
   it('drops sections that contain only blank and comment lines', () => {
     const content = '[a]\n# only a comment\n\n[b]\nkey = 1\n'
 

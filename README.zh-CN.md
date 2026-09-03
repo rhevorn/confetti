@@ -50,6 +50,7 @@ Confetti 不会在每次输入时持续扫描整个文档。检测、诊断和�
 | 格式               | 场景文件                                                | 高亮 | 格式化 |
 | ------------------ | ------------------------------------------------------- | :--: | :----: |
 | Nginx              | `nginx.conf`，以及根据内容识别的 Nginx `.conf` 文件     |  ✅  |   ✅   |
+| Caddyfile          | `Caddyfile`，支持代码块、matcher 和 heredoc             |  ✅  |   ✅   |
 | Apache             | `httpd.conf`、`apache2.conf`、`.htaccess`、vhost 文件   |  ✅  |   ✅   |
 | SSH                | `~/.ssh/config`、`ssh_config`、`sshd_config`            |  ✅  |   ✅   |
 | 环境变量           | `.env`、`.env.local`、`.env.production`、`*.env`        |  ✅  |   ✅   |

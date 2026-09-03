@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { formatApache } from '../src/formatters/apache.js'
 import { formatBrowserslist } from '../src/formatters/browserslist.js'
+import { formatCaddy } from '../src/formatters/caddy.js'
 import { formatCrontab } from '../src/formatters/crontab.js'
 import { formatEnv } from '../src/formatters/env.js'
 import { formatFstab } from '../src/formatters/fstab.js'
@@ -24,6 +25,7 @@ import { formatTmux } from '../src/formatters/tmux.js'
 import { formatYarnrc } from '../src/formatters/yarnrc.js'
 
 const formatters = [
+  ['Caddy', formatCaddy, 'example.com {\r\nrespond hi\r\n}\r\n'],
   ['Nginx', formatNginx, 'events {\r\n}\r\n'],
   [
     'Apache',

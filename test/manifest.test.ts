@@ -88,6 +88,7 @@ describe('VS Code extension manifest', () => {
       'conf',
       'nginx',
       'apache',
+      'caddy',
       'my.cnf',
       'tox.ini',
       'tmux',

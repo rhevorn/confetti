@@ -1,0 +1,37 @@
+# Global options
+{
+	admin off
+	email admin@example.com
+}
+
+example.com, www.example.com {
+	encode zstd gzip
+	root * /srv/www
+
+	@static path *.css *.js *.png
+	handle @static {
+		file_server
+	}
+
+	handle /api/* {
+		reverse_proxy localhost:9000
+	}
+
+	handle {
+		respond "Hello from {http.request.host} on {http.request.uri}"
+	}
+}
+
+:8080 {
+	import logging
+	respond <<HTML
+<!doctype html>
+<h1>Importing on port {env.PORT:-8080}</h1>
+HTML
+}
+
+(logging) {
+	header {
+		-X-Server
+	}
+}

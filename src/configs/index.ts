@@ -1,6 +1,7 @@
 import { ConfigRegistry } from '../core/registry.js'
 import { apacheConfig } from './apache.js'
 import { browserslistConfig } from './browserslist.js'
+import { caddyConfig } from './caddy.js'
 import { crontabConfig } from './crontab.js'
 import { envConfig } from './env.js'
 import { fstabConfig } from './fstab.js'
@@ -47,6 +48,7 @@ export function createDefaultRegistry(): ConfigRegistry {
   registry.register(ignoreConfig)
   registry.register(gitAttributesConfig)
   registry.register(browserslistConfig)
+  registry.register(caddyConfig)
   registry.register(versionsConfig)
   registry.register(hostsConfig)
   registry.register(fstabConfig)

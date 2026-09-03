@@ -1,0 +1,27 @@
+{
+  "name": "Confetti Caddyfile",
+  "scopeName": "source.confetti.caddy",
+  "patterns": [
+    {
+      "name": "meta.section.caddy",
+      "match": "^\\s*([^#\\r\\n]*?)\\s*(\\{)\\s*$",
+      "captures": {
+        "1": { "name": "entity.name.section.caddy" },
+        "2": { "name": "punctuation.definition.section.begin.caddy" }
+      }
+    },
+    {
+      "match": "^\\s*([A-Za-z_][A-Za-z0-9_-]*)\\b",
+      "captures": {
+        "1": { "name": "keyword.other.directive.caddy" }
+      }
+    },
+    { "name": "variable.other.matcher.caddy", "match": "@[A-Za-z0-9_-]+" },
+    { "name": "variable.other.caddy", "match": "\\{[^{}\\r\\n]*\\}" },
+    { "name": "comment.line.number-sign.caddy", "match": "#.*$" },
+    {
+      "name": "constant.numeric.caddy",
+      "match": "(?<![A-Za-z0-9_.-])\\d+(?:\\.\\d+)?\\b"
+    }
+  ]
+}

@@ -38,7 +38,6 @@
     "nginx",
     "apache",
     "htaccess",
-    "httpd",
     "dotenv",
     "env",
     "toml",
@@ -46,7 +45,6 @@
     "yml",
     "conf",
     "ini",
-    "editorconfig",
     "my.cnf",
     "mysql",
     "pip.conf",
@@ -73,7 +71,9 @@
     "systemd",
     "systemd unit",
     "tox.ini",
-    "flake8"
+    "flake8",
+    "caddy",
+    "caddyfile"
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
@@ -527,6 +527,17 @@
           "isort.cfg"
         ],
         "configuration": "./language-configurations/ini.json"
+      },
+      {
+        "id": "confetti-caddy",
+        "aliases": [
+          "Caddyfile",
+          "caddy"
+        ],
+        "filenames": [
+          "Caddyfile"
+        ],
+        "configuration": "./language-configurations/line-based.json"
       }
     ],
     "grammars": [
@@ -659,6 +670,11 @@
         "language": "confetti-pyini",
         "scopeName": "source.confetti.pyini",
         "path": "./syntaxes/pyini.tmLanguage.json"
+      },
+      {
+        "language": "confetti-caddy",
+        "scopeName": "source.confetti.caddy",
+        "path": "./syntaxes/caddy.tmLanguage.json"
       }
     ]
   },

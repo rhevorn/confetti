@@ -161,7 +161,7 @@ export function computeFoldingRanges(
   id: string,
   content: string,
 ): FoldingRangeInfo[] {
-  if (id === 'nginx') return braceFoldingRanges(content)
+  if (id === 'nginx' || id === 'caddy') return braceFoldingRanges(content)
   if (id === 'apache') return tagFoldingRanges(content)
   if (id === 'ssh') {
     return blockFoldingRanges(content, isSshBlockHeader, HASH_COMMENTS)

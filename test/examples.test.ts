@@ -196,6 +196,11 @@ const examples: ExampleCase[] = [
     preservedText: '"SECOND=2"',
   },
   {
+    relativePath: 'caddy/Caddyfile',
+    expectedType: 'caddy',
+    preservedText: 'Hello from {http.request.host}',
+  },
+  {
     relativePath: 'systemd/backup.timer',
     expectedType: 'systemd',
     preservedText: 'OnCalendar=*-*-* 02:30:00',

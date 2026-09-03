@@ -38,6 +38,7 @@ Do not add AI features, accounts, cloud services, telemetry, Webviews, validatio
 - Java Properties
 - TOML
 - YAML
+- Caddyfile
 - Git Config
 - npm config / npmrc
 - Yarn config / classic `.yarnrc`

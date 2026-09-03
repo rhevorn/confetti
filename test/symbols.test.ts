@@ -77,6 +77,37 @@ describe('computeDocumentSymbols', () => {
     expect(symbols[1]).toMatchObject({ name: 'testenv:lint', endLine: 3 })
   })
 
+  it('maps Caddyfile blocks to symbols without placeholder noise', () => {
+    const symbols = computeDocumentSymbols(
+      'caddy',
+      [
+        '# comment',
+        '{',
+        '  admin off',
+        '}',
+        'example.com {',
+        '  respond {http.request.host}',
+        '  handle /api/* {',
+        '    reverse_proxy localhost:9000',
+        '  }',
+        '}',
+      ].join('\n'),
+    )
+
+    expect(symbols).toHaveLength(2)
+    expect(symbols[0]).toMatchObject({
+      name: 'handle /api/*',
+      kind: 'server',
+      startLine: 6,
+      endLine: 8,
+    })
+    expect(symbols[1]).toMatchObject({
+      name: 'example.com',
+      startLine: 4,
+      endLine: 9,
+    })
+  })
+
   it('falls back to the header line for empty sections', () => {
     const symbols = computeDocumentSymbols(
       'ini',

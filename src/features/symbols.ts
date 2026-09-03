@@ -94,11 +94,60 @@ function headerSymbols(
   }))
 }
 
+/**
+ * Caddyfile blocks open with a brace at the end of a line and close with a
+ * line that starts with `}`. Placeholders such as {http.request.host} are
+ * balanced inline, so scanning whole lines for leading `}` and trailing `{`
+ * ignores them without pushing anything onto the stack.
+ */
+function caddySymbols(content: string): SymbolInfo[] {
+  const { lines } = normalizeLines(content)
+  const symbols: SymbolInfo[] = []
+  const stack: OpenBraceBlock[] = []
+
+  lines.forEach((line, index) => {
+    const trimmed = line.trim()
+    const code = trimmed.split('#', 1)[0].trimEnd()
+    if (code === '') return
+
+    if (code.startsWith('}')) {
+      const open = stack.pop()
+      if (open) {
+        symbols.push({
+          name: open.name,
+          kind: 'server',
+          startLine: open.line,
+          startCharacter: open.character,
+          endLine: index,
+          endCharacter: line.length,
+          headerEndCharacter: open.headerEnd,
+        })
+      }
+      return
+    }
+
+    if (!code.endsWith('{')) return
+    const name = code.slice(0, -1).trim()
+    if (name === '') return
+    // The header ends just past the opening brace.
+    const character = line.length - line.trimStart().length
+    stack.push({
+      name,
+      line: index,
+      character,
+      headerEnd: character + code.length,
+    })
+  })
+
+  return symbols
+}
+
 export function computeDocumentSymbols(
   id: string,
   content: string,
 ): SymbolInfo[] {
   if (id === 'nginx') return braceSymbols(content)
+  if (id === 'caddy') return caddySymbols(content)
   if (id === 'ssh') {
     return headerSymbols(
       content,

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { formatApache } from '../src/formatters/apache.js'
 import { formatBrowserslist } from '../src/formatters/browserslist.js'
+import { formatCaddy } from '../src/formatters/caddy.js'
 import { formatCrontab } from '../src/formatters/crontab.js'
 import { formatEnv } from '../src/formatters/env.js'
 import { formatFstab } from '../src/formatters/fstab.js'
@@ -22,6 +23,86 @@ import { formatSystemd } from '../src/formatters/systemd.js'
 import { formatToml } from '../src/formatters/toml.js'
 import { formatTmux } from '../src/formatters/tmux.js'
 import { formatYarnrc } from '../src/formatters/yarnrc.js'
+
+describe('formatCaddy', () => {
+  it('indents blocks and normalizes directive spacing without semicolons', () => {
+    const input = `example.com {
+root * /srv/www
+handle /api/*   {
+reverse_proxy   localhost:9000
+}
+handle {
+respond   "Hello"
+}
+}
+`
+    expect(formatCaddy(input)).toBe(`example.com {
+  root * /srv/www
+  handle /api/* {
+    reverse_proxy localhost:9000
+  }
+  handle {
+    respond "Hello"
+  }
+}
+`)
+  })
+
+  it('keeps inline placeholder braces from changing the depth', () => {
+    const input = `example.com {
+handle {
+respond {http.request.host} on {env.PORT}
+}
+}
+`
+    expect(formatCaddy(input)).toBe(`example.com {
+  handle {
+    respond {http.request.host} on {env.PORT}
+  }
+}
+`)
+  })
+
+  it('preserves heredoc bodies byte-for-byte until the terminator', () => {
+    const input = `:8080 {
+respond <<HTML
+<!doctype html>
+<h1>{env.TITLE}  keeps  spacing</h1>
+HTML
+}
+`
+    expect(formatCaddy(input)).toBe(`:8080 {
+  respond <<HTML
+<!doctype html>
+<h1>{env.TITLE}  keeps  spacing</h1>
+HTML
+}
+`)
+  })
+
+  it('indents standalone comments with their block and reattaches trailing ones', () => {
+    const input = `# top comment
+{
+admin off  # disable api
+# inside
+email   admin@example.com
+}
+`
+    expect(formatCaddy(input)).toBe(`# top comment
+{
+  admin off # disable api
+  # inside
+  email admin@example.com
+}
+`)
+  })
+
+  it('collapses repeated blank lines between directives', () => {
+    expect(formatCaddy('example.com {\n\n\nrespond hi\n}\n')).toBe(
+      'example.com {\n\n  respond hi\n}\n',
+    )
+  })
+})
 
 describe('formatNginx', () => {
   const messy = `# keep this comment
@@ -441,6 +522,7 @@ describe('line-oriented formatters', () => {
 
 describe('formatter stability', () => {
   it.each([
+    ['Caddy', formatCaddy, 'example.com {\n  respond hi\n}\n'],
     ['Nginx', formatNginx, 'server {\nlisten 80;\n}\n'],
     [
       'Apache',
