@@ -5,6 +5,7 @@ import { mockState, resetMockState } from './mocks/vscode.js'
 interface TestDocument {
   languageId: string
   fileName: string
+  version: number
   uri: { fsPath: string; scheme: string; toString(): string }
   getText(): string
   positionAt(offset: number): number
@@ -19,6 +20,7 @@ function document(
   return {
     languageId,
     fileName,
+    version: 1,
     uri: {
       fsPath: fileName,
       scheme,
@@ -43,6 +45,7 @@ function editor(
     ) {
       callback({
         replace(_range, text) {
+          testDocument.version += 1
           testDocument.getText = () => text
         },
       })
@@ -393,6 +396,29 @@ describe('VS Code extension adapter', () => {
     expect(mockState.informationMessages.at(-1)).toBe(
       'No supported configuration type was detected.',
     )
+  })
+
+  it('reuses the detection result across events until the document changes', async () => {
+    const testDocument = document('/app/notes.txt', 'plain text\n')
+    const originalGetText = testDocument.getText
+    let scans = 0
+    testDocument.getText = () => {
+      scans += 1
+      return originalGetText()
+    }
+    activateExtension()
+
+    await mockState.openHandlers[0]?.(testDocument)
+    expect(scans).toBe(1)
+
+    await mockState.saveHandlers[0]?.(testDocument)
+    await mockState.activeEditorHandlers[0]?.({ document: testDocument })
+    command('confetti.showDetectionInfo')()
+    expect(scans).toBe(1)
+
+    testDocument.version += 1
+    await mockState.saveHandlers[0]?.(testDocument)
+    expect(scans).toBe(2)
   })
 
   it('updates, disables, and clears duplicate-key diagnostics on existing handlers', async () => {

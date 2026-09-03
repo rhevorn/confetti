@@ -9,7 +9,6 @@ import { computeDocumentSymbols, type SymbolInfo } from './features/symbols.js'
 import { isCompatibleLanguageId } from './language-compatibility.js'
 
 const registry = createDefaultRegistry()
-const detectionCache = new Map<string, DetectionResult>()
 let outputChannel: vscode.OutputChannel | undefined
 
 const SYMBOL_KINDS: Record<SymbolInfo['kind'], vscode.SymbolKind> = {
@@ -18,6 +17,13 @@ const SYMBOL_KINDS: Record<SymbolInfo['kind'], vscode.SymbolKind> = {
   host: vscode.SymbolKind.Struct,
   server: vscode.SymbolKind.Struct,
 }
+
+interface CachedDetection {
+  version: number
+  result: DetectionResult | undefined
+}
+
+const detectionCache = new Map<string, CachedDetection>()
 
 function log(message: string): void {
   const timestamp = new Date().toLocaleTimeString()
@@ -34,14 +40,19 @@ function isEnabled(id: string, setting: string): boolean {
 }
 
 function detect(document: vscode.TextDocument): DetectionResult | undefined {
+  const cached = detectionCache.get(document.uri.toString())
+  if (cached && cached.version === document.version) return cached.result
+
   const result = detectConfig(
     registry,
     document.uri.fsPath || document.fileName,
     document.getText(),
   )
 
-  if (result) detectionCache.set(document.uri.toString(), result)
-  else detectionCache.delete(document.uri.toString())
+  detectionCache.set(document.uri.toString(), {
+    version: document.version,
+    result,
+  })
   return result
 }
 
@@ -143,6 +154,7 @@ async function autoDetect(document: vscode.TextDocument): Promise<void> {
 }
 
 export function activate(context: vscode.ExtensionContext): void {
+  detectionCache.clear()
   outputChannel = vscode.window.createOutputChannel('Confetti')
   const diagnosticCollection =
     vscode.languages.createDiagnosticCollection('confetti')
@@ -188,8 +200,7 @@ export function activate(context: vscode.ExtensionContext): void {
       statusBarItem.hide()
       return
     }
-    const result =
-      detectionCache.get(document.uri.toString()) ?? detect(document)
+    const result = detect(document)
     if (!result) {
       statusBarItem.hide()
       return
@@ -210,8 +221,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('confetti.showDetectionInfo', () => {
       const document = vscode.window.activeTextEditor?.document
       if (!document) return
-      const result =
-        detectionCache.get(document.uri.toString()) ?? detect(document)
+      const result = detect(document)
       const message = result
         ? `Detected: ${result.definition.displayName} — Confidence: ${result.confidence}%`
         : 'No supported configuration type was detected.'
