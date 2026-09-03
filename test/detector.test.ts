@@ -215,6 +215,49 @@ describe('detectConfig', () => {
     ).toBe('yaml')
   })
 
+  it('detects structurally matching files without content signals', () => {
+    const junk = 'nothing to see here\njust some words\n'
+
+    for (const [expected, filename, confidence] of [
+      ['browserslist', '/app/.browserslistrc', 100],
+      ['crontab', '/etc/crontab', 100],
+      ['env', '/app/.env', 100],
+      ['fstab', '/etc/fstab', 100],
+      ['gitattributes', '/app/.gitattributes', 100],
+      ['gitconfig', '/app/.gitconfig', 100],
+      ['hosts', '/etc/hosts', 100],
+      ['mysql', '/etc/mysql/my.cnf', 100],
+      ['npmrc', '/app/.npmrc', 100],
+      ['pip', '/home/user/.config/pip/pip.conf', 100],
+      ['ssh', '/etc/ssh/ssh_config', 100],
+      ['tmux', '/home/user/.tmux.conf', 70],
+    ] as const) {
+      const result = detectConfig(registry, filename, junk)
+      expect(result?.definition.id).toBe(expected)
+      expect(result?.confidence).toBe(confidence)
+    }
+
+    for (const [expected, filename] of [
+      ['yaml', '/app/config.yaml'],
+      ['properties', '/app/messages.properties'],
+    ] as const) {
+      expect(detectConfig(registry, filename, junk)?.definition.id).toBe(
+        expected,
+      )
+    }
+    expect(detectConfig(registry, '/app/config.toml', junk)).toBeUndefined()
+
+    // Environment-only crontab content leaves the schedule regex unmatched.
+    expect(
+      detectConfig(registry, '/etc/crontab', 'MAILTO=admin\n')?.definition.id,
+    ).toBe('crontab')
+
+    // Stem-less dotfiles reach detection with no usable extension.
+    for (const filename of ['/app/.properties', '/app/.toml', '/app/.yml']) {
+      expect(detectConfig(registry, filename, junk)).toBeUndefined()
+    }
+  })
+
   it('does not force a low-confidence result', () => {
     expect(
       detectConfig(registry, '/srv/application.conf', 'feature.color=blue\n'),
