@@ -1,0 +1,64 @@
+{
+  "name": "Confetti Python Tooling INI",
+  "scopeName": "source.confetti.pyini",
+  "patterns": [
+    {
+      "name": "comment.line.semicolon.pyini",
+      "match": "^\\s*[;#].*$"
+    },
+    {
+      "name": "meta.section.pyini",
+      "match": "^\\s*(\\[)([^\\]\\r\\n]+)(\\])",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.section.begin.pyini"
+        },
+        "2": {
+          "name": "entity.name.section.pyini"
+        },
+        "3": {
+          "name": "punctuation.definition.section.end.pyini"
+        }
+      }
+    },
+    {
+      "match": "^\\s*([^;#=:\\s][^=:\\r\\n]*?)(\\s*[=:])",
+      "captures": {
+        "1": {
+          "name": "variable.other.assignment.pyini"
+        },
+        "2": {
+          "name": "keyword.operator.assignment.pyini"
+        }
+      }
+    },
+    {
+      "name": "string.quoted.double.pyini",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.pyini",
+          "match": "\\\\."
+        }
+      ]
+    },
+    {
+      "name": "string.quoted.single.pyini",
+      "begin": "'",
+      "end": "'"
+    },
+    {
+      "name": "constant.language.boolean.pyini",
+      "match": "(?i)\\b(?:true|false|yes|no|on|off|null|none)\\b"
+    },
+    {
+      "name": "constant.numeric.pyini",
+      "match": "(?<![A-Za-z0-9_.-])[-+]?\\d+(?:\\.\\d+)?\\b"
+    },
+    {
+      "name": "string.unquoted.path.pyini",
+      "match": "(?<![\\w.])(?:/[\\w.-]+)+/?"
+    }
+  ]
+}

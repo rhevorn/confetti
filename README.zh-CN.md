@@ -57,6 +57,7 @@ Confetti 不会在每次输入时持续扫描整个文档。检测、诊断和�
 | MySQL              | `my.cnf`、`.my.cnf`、`mysql`/`mariadb` 配置路径         |  ✅  |   ✅   |
 | pip                | `pip.conf`、`~/.pip/pip.conf`、`~/.config/pip/pip.conf` |  ✅  |   ✅   |
 | setup.cfg          | Python `setup.cfg`，多行值原样保留                      |  ✅  |   ✅   |
+| Python 工具链 INI  | `tox.ini`、`.flake8`、`pytest.ini`、`mypy.ini` 等       |  ✅  |   ✅   |
 | Java Properties    | `.properties`                                           |  ✅  |   ✅   |
 | TOML               | `.toml`，包括 `pyproject.toml`                          |  ✅  |   ✅   |
 | YAML               | `.yaml`、`.yml`、Docker Compose 和工作流文件            |  ✅  |   —    |

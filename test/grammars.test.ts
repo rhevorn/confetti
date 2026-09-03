@@ -211,6 +211,20 @@ describe('TextMate grammars', () => {
     expect(specifierScopes).toContain('variable.language.specifier.systemd')
   })
 
+  it('tokenizes Python tooling INI sections and assignments', async () => {
+    const sectionScopes = await scopesForLine(
+      'pyini.tmLanguage.json',
+      '[testenv:lint]',
+    )
+    const assignmentScopes = await scopesForLine(
+      'pyini.tmLanguage.json',
+      'max-line-length = 100',
+    )
+    expect(sectionScopes).toContain('entity.name.section.pyini')
+    expect(assignmentScopes).toContain('variable.other.assignment.pyini')
+    expect(assignmentScopes).toContain('constant.numeric.pyini')
+  })
+
   it('tokenizes tmux commands, options, and format variables', async () => {
     const commandScopes = await scopesForLine(
       'tmux.tmLanguage.json',

@@ -92,6 +92,22 @@ describe('computeFoldingRanges', () => {
     ])
   })
 
+  it('folds Python tooling INI sections', () => {
+    const content = [
+      '[tox]',
+      'envlist = py312',
+      '',
+      '[testenv]',
+      'deps =',
+      '    pytest',
+    ].join('\n')
+
+    expect(computeFoldingRanges('pyini', content)).toEqual([
+      { startLine: 0, endLine: 1 },
+      { startLine: 3, endLine: 5 },
+    ])
+  })
+
   it('drops sections that contain only blank and comment lines', () => {
     const content = '[a]\n# only a comment\n\n[b]\nkey = 1\n'
 

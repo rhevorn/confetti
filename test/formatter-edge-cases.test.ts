@@ -15,6 +15,7 @@ import { formatPip } from '../src/formatters/pip.js'
 import { formatSetupCfg } from '../src/formatters/setupcfg.js'
 import { formatNpmrc } from '../src/formatters/npmrc.js'
 import { formatProperties } from '../src/formatters/properties.js'
+import { formatPyini } from '../src/formatters/pyini.js'
 import { formatScreen } from '../src/formatters/screen.js'
 import { formatSsh } from '../src/formatters/ssh.js'
 import { formatSystemd } from '../src/formatters/systemd.js'
@@ -36,6 +37,7 @@ const formatters = [
   ['screen', formatScreen, 'startup_message off\r\n'],
   ['inputrc', formatInputrc, 'set bell-style visible\r\n'],
   ['systemd', formatSystemd, '[Unit]\r\nDescription=Demo\r\n'],
+  ['pyini', formatPyini, '[tox]\r\nenvlist = py312\r\n'],
   ['env', formatEnv, 'KEY=value\r\n'],
   ['INI', formatIni, '[section]\r\nkey=value\r\n'],
   ['properties', formatProperties, 'key=value\r\n'],

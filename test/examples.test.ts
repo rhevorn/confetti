@@ -86,6 +86,16 @@ const examples: ExampleCase[] = [
     preservedText: 'Programming Language :: Python :: 3',
   },
   {
+    relativePath: 'python/tox.ini',
+    expectedType: 'pyini',
+    preservedText: '    pytest>=8',
+  },
+  {
+    relativePath: 'python/.flake8',
+    expectedType: 'pyini',
+    preservedText: 'tests/*: S101',
+  },
+  {
     relativePath: 'properties/messages.properties',
     expectedType: 'properties',
     preservedText: 'second part keeps its indentation',

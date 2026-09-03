@@ -29,8 +29,8 @@
     "Snippets"
   ],
   "keywords": [
-    "config",
     "config files",
+    "config",
     "formatter",
     "format document",
     "syntax highlighting",
@@ -61,7 +61,6 @@
     "browserslist",
     "cursorignore",
     "vscodeignore",
-    "vercelignore",
     "nvmrc",
     "tool versions",
     "hosts",
@@ -70,10 +69,11 @@
     "tmux",
     "screenrc",
     "inputrc",
-    "readline",
     "snippets",
     "systemd",
-    "systemd unit"
+    "systemd unit",
+    "tox.ini",
+    "flake8"
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
@@ -509,6 +509,24 @@
           "*/systemd/user/*"
         ],
         "configuration": "./language-configurations/ini.json"
+      },
+      {
+        "id": "confetti-pyini",
+        "aliases": [
+          "Python Tooling INI",
+          "pyini"
+        ],
+        "filenames": [
+          "tox.ini",
+          ".flake8",
+          ".mypy.ini",
+          "mypy.ini",
+          ".coveragerc",
+          "pytest.ini",
+          ".isort.cfg",
+          "isort.cfg"
+        ],
+        "configuration": "./language-configurations/ini.json"
       }
     ],
     "grammars": [
@@ -636,6 +654,11 @@
         "language": "confetti-systemd",
         "scopeName": "source.confetti.systemd",
         "path": "./syntaxes/systemd.tmLanguage.json"
+      },
+      {
+        "language": "confetti-pyini",
+        "scopeName": "source.confetti.pyini",
+        "path": "./syntaxes/pyini.tmLanguage.json"
       }
     ]
   },

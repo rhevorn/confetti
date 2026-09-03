@@ -34,6 +34,7 @@ Do not add AI features, accounts, cloud services, telemetry, Webviews, validatio
 - MySQL config (`my.cnf`, `.my.cnf`)
 - pip config (`pip.conf`)
 - setup.cfg
+- Python tooling INI files (`tox.ini`, `.flake8`, `pytest.ini`, `mypy.ini`, `.coveragerc`, `.isort.cfg`)
 - Java Properties
 - TOML
 - YAML

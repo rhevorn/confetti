@@ -79,6 +79,20 @@ describe('computeDiagnostics', () => {
     ])
   })
 
+  it('flags duplicate keys inside Python tooling INI sections', () => {
+    const content = '[flake8]\nmax-line-length = 100\nmax-line-length = 120\n'
+
+    expect(computeDiagnostics('pyini', content)).toEqual([
+      {
+        message:
+          'Duplicate key "max-line-length" in section "flake8" (also defined on line 2)',
+        line: 2,
+        startCharacter: 0,
+        endCharacter: 'max-line-length'.length,
+      },
+    ])
+  })
+
   it('ignores semicolon comments while tracking INI sections', () => {
     const content = '; key = first\n[sec]\nkey = a\n; key = b\nkey = c\n'
 

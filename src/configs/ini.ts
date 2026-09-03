@@ -14,7 +14,10 @@ export const iniConfig: ConfigDefinition = {
     let score = extension === '.ini' ? 60 : extension === '.cfg' ? 20 : 0
     if (/^\s*\[[^\]\r\n]+\]\s*(?:[;#].*)?$/m.test(content)) score += 35
     if (/^\s*[A-Za-z0-9_.-]+\s*[=:]\s*.*$/m.test(content)) score += 30
-    return Math.min(score, 100)
+    // Keep extension + content below an exact-filename match so dedicated
+    // INI-family definitions (tox.ini, pytest.ini, ...) always win with
+    // structural 100; an empty .ini still reaches 10 + 60 = 70.
+    return Math.min(score, 89)
   },
   languageId: 'confetti-ini',
   formatter: formatIni,

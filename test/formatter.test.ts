@@ -15,6 +15,7 @@ import { formatPip } from '../src/formatters/pip.js'
 import { formatSetupCfg } from '../src/formatters/setupcfg.js'
 import { formatNpmrc } from '../src/formatters/npmrc.js'
 import { formatProperties } from '../src/formatters/properties.js'
+import { formatPyini } from '../src/formatters/pyini.js'
 import { formatScreen } from '../src/formatters/screen.js'
 import { formatSsh } from '../src/formatters/ssh.js'
 import { formatSystemd } from '../src/formatters/systemd.js'
@@ -203,6 +204,35 @@ describe('formatSystemd', () => {
 
   it('trims non-assignment lines such as stray directives', () => {
     expect(formatSystemd('  just some words  \n')).toBe('just some words\n')
+  })
+})
+
+describe('formatPyini', () => {
+  it('normalizes assignments and preserves multiline tool values', () => {
+    const input = [
+      '  [tox]  ',
+      'envlist   =  py312',
+      'deps   =',
+      '    pytest>=8',
+      '    coverage',
+      '',
+      '[testenv:lint]',
+      'commands   =',
+      '    ruff check src',
+    ].join('\n')
+    const expected = [
+      '[tox]',
+      'envlist = py312',
+      'deps =',
+      '    pytest>=8',
+      '    coverage',
+      '',
+      '[testenv:lint]',
+      'commands =',
+      '    ruff check src',
+    ].join('\n')
+    expect(formatPyini(input)).toBe(expected)
+    expect(formatPyini(expected)).toBe(expected)
   })
 })
 
@@ -428,6 +458,7 @@ describe('formatter stability', () => {
       formatSystemd,
       '[Service]\n  ExecStart=/usr/bin/app \\\n    --flag\n',
     ],
+    ['Python Tooling INI', formatPyini, '[tox]\n  deps =\n    keep me\n'],
     ['env', formatEnv, '  KEY = "a  b"  \n'],
     ['INI', formatIni, '[section]\n  key   = value\n'],
     ['SSH', formatSsh, 'Host work\nHostName example.com\n'],

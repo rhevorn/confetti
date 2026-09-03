@@ -121,6 +121,11 @@ describe('detectConfig', () => {
       '/srv/backup.timer',
       '[Timer]\nOnCalendar=daily\nPersistent=true\n',
     ],
+    ['pyini', '/app/tox.ini', '[tox]\nenvlist = py312\n'],
+    ['pyini', '/app/.flake8', '[flake8]\nmax-line-length = 100\n'],
+    ['pyini', '/app/pytest.ini', '[pytest]\naddopts = -ra\n'],
+    ['pyini', '/app/mypy.ini', '[mypy]\nstrict = true\n'],
+    ['pyini', '/app/.coveragerc', '[run]\nbranch = true\n'],
   ])('detects %s configuration', (expected, filename, content) => {
     expect(detectConfig(registry, filename, content)?.definition.id).toBe(
       expected,
@@ -374,6 +379,21 @@ describe('detectConfig', () => {
         '[Service]\nExecStart=/usr/bin/app\nRestart=on-failure\n',
       )?.definition.id,
     ).toBe('ini')
+  })
+
+  it('prefers exact Python tooling filenames over the generic INI extension', () => {
+    // The generic INI definition reaches 10 + 89 for content-rich .ini files,
+    // so exact filenames such as tox.ini win with structural 100.
+    const content = '[tox]\nenvlist = py312\ndeps = pytest\n'
+    const tox = detectConfig(registry, '/app/tox.ini', content)
+    expect(tox?.definition.id).toBe('pyini')
+    expect(tox?.confidence).toBe(100)
+    expect(
+      detectConfig(registry, '/app/other.ini', content)?.definition.id,
+    ).toBe('ini')
+    expect(
+      detectConfig(registry, '/app/tox.ini', 'nothing here\n')?.definition.id,
+    ).toBe('pyini')
   })
 
   it('keeps tmux content detection below the hijacking threshold', () => {

@@ -14,6 +14,7 @@ import { mysqlConfig } from './mysql.js'
 import { nginxConfig } from './nginx.js'
 import { npmrcConfig } from './npmrc.js'
 import { pipConfig } from './pip.js'
+import { pyiniConfig } from './pyini.js'
 import { propertiesConfig } from './properties.js'
 import { screenConfig } from './screen.js'
 import { setupCfgConfig } from './setupcfg.js'
@@ -35,6 +36,7 @@ export function createDefaultRegistry(): ConfigRegistry {
   registry.register(iniConfig)
   registry.register(mysqlConfig)
   registry.register(pipConfig)
+  registry.register(pyiniConfig)
   registry.register(setupCfgConfig)
   registry.register(propertiesConfig)
   registry.register(tomlConfig)

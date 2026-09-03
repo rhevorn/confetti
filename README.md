@@ -57,6 +57,7 @@ Method: Apple Silicon (`darwin arm64`), Node.js 24.14.1, 10 warm-up runs; 100 me
 | MySQL                 | `my.cnf`, `.my.cnf`, `mysql`/`mariadb` config paths     |      ✅      |     ✅     |
 | pip                   | `pip.conf`, `~/.pip/pip.conf`, `~/.config/pip/pip.conf` |      ✅      |     ✅     |
 | setup.cfg             | Python `setup.cfg` with multiline values preserved      |      ✅      |     ✅     |
+| Python tooling INI    | `tox.ini`, `.flake8`, `pytest.ini`, `mypy.ini`, …       |      ✅      |     ✅     |
 | Java Properties       | `.properties`                                           |      ✅      |     ✅     |
 | TOML                  | `.toml`, including `pyproject.toml`                     |      ✅      |     ✅     |
 | YAML                  | `.yaml`, `.yml`, Docker Compose and workflow files      |      ✅      |     —      |

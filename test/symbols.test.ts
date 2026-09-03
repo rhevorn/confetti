@@ -61,6 +61,22 @@ describe('computeDocumentSymbols', () => {
     expect(symbols[1]).toMatchObject({ name: 'Service', endLine: 3 })
   })
 
+  it('maps Python tooling INI sections to section symbols', () => {
+    const symbols = computeDocumentSymbols(
+      'pyini',
+      '[tox]\nenvlist = py312\n[testenv:lint]\ncommands = ruff check src\n',
+    )
+
+    expect(symbols).toHaveLength(2)
+    expect(symbols[0]).toMatchObject({
+      name: 'tox',
+      kind: 'section',
+      startLine: 0,
+      endLine: 1,
+    })
+    expect(symbols[1]).toMatchObject({ name: 'testenv:lint', endLine: 3 })
+  })
+
   it('falls back to the header line for empty sections', () => {
     const symbols = computeDocumentSymbols(
       'ini',
