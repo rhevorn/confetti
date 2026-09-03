@@ -25,6 +25,22 @@ describe('computeDiagnostics', () => {
     expect(computeDiagnostics('env', 'KEY=1\nkey=2\n')).toEqual([])
   })
 
+  it('highlights the key itself when it is a substring of export', () => {
+    const result = computeDiagnostics('env', 'port=1\nexport port=2\n')
+
+    expect(result).toHaveLength(1)
+    expect(result[0]?.startCharacter).toBe('export '.length)
+    expect(result[0]?.endCharacter).toBe('export '.length + 'port'.length)
+  })
+
+  it('highlights indented duplicate dotenv keys at their column', () => {
+    const result = computeDiagnostics('env', 'KEY=1\n  KEY=2\n')
+
+    expect(result).toHaveLength(1)
+    expect(result[0]?.startCharacter).toBe(2)
+    expect(result[0]?.endCharacter).toBe(5)
+  })
+
   it('flags duplicate keys inside the same INI section only', () => {
     const content = [
       '[client]',
