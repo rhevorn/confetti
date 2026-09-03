@@ -192,6 +192,25 @@ describe('TextMate grammars', () => {
     expect(setupCfgScopes).toContain('variable.other.assignment.setupcfg')
   })
 
+  it('tokenizes systemd sections, assignments, paths, and specifiers', async () => {
+    const sectionScopes = await scopesForLine(
+      'systemd.tmLanguage.json',
+      '[Service]',
+    )
+    const assignmentScopes = await scopesForLine(
+      'systemd.tmLanguage.json',
+      'ExecStart=/usr/bin/node server.js --port 8080',
+    )
+    const specifierScopes = await scopesForLine(
+      'systemd.tmLanguage.json',
+      'ExecStart=/usr/bin/app --instance %i --literal %%',
+    )
+    expect(sectionScopes).toContain('entity.name.section.systemd')
+    expect(assignmentScopes).toContain('variable.other.assignment.systemd')
+    expect(assignmentScopes).toContain('string.unquoted.path.systemd')
+    expect(specifierScopes).toContain('variable.language.specifier.systemd')
+  })
+
   it('tokenizes tmux commands, options, and format variables', async () => {
     const commandScopes = await scopesForLine(
       'tmux.tmLanguage.json',

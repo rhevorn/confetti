@@ -50,6 +50,7 @@ Do not add AI features, accounts, cloud services, telemetry, Webviews, validatio
 - tmux config (`tmux.conf`)
 - GNU screen config (`.screenrc`)
 - GNU Readline config (`.inputrc`)
+- systemd unit files (`.service`, `.socket`, `.timer`, `.path`, `.mount`, `.target`, and drop-in directories)
 
 Redis is intentionally not supported.
 

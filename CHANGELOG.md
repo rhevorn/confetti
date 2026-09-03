@@ -2,6 +2,10 @@
 
 All notable changes to Confetti are documented in this file.
 
+## Unreleased
+
+- Add detection, highlighting, and formatting for systemd unit files (`.service`, `.socket`, `.timer`, `.path`, `.mount`, `.target`, and drop-in directories), with backslash line continuations preserved during formatting.
+
 ## 1.3.0 - 2026-09-02
 
 - Add detection, highlighting, and formatting for Apache `httpd.conf`, `apache2.conf`, and `.htaccess` files, including content-based disambiguation from Nginx for ambiguous `.conf` files.

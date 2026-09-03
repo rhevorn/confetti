@@ -106,6 +106,21 @@ describe('detectConfig', () => {
       '/home/user/.inputrc',
       'set editing-mode emacs\n"\\C-a": beginning-of-line\n',
     ],
+    [
+      'systemd',
+      '/etc/systemd/system/web.service',
+      '[Unit]\nDescription=Demo\n[Service]\nExecStart=/usr/bin/web\n',
+    ],
+    [
+      'systemd',
+      '/home/user/.config/systemd/user/app.service',
+      '[Service]\nExecStart=/usr/bin/app\n',
+    ],
+    [
+      'systemd',
+      '/srv/backup.timer',
+      '[Timer]\nOnCalendar=daily\nPersistent=true\n',
+    ],
   ])('detects %s configuration', (expected, filename, content) => {
     expect(detectConfig(registry, filename, content)?.definition.id).toBe(
       expected,
@@ -327,6 +342,36 @@ describe('detectConfig', () => {
         registry,
         '/app/other.cfg',
         '[metadata]\nname = demo\nversion = 1.0.0\n',
+      )?.definition.id,
+    ).toBe('ini')
+  })
+
+  it('detects systemd units by extension and drop-in directories by path', () => {
+    // The unit extension alone carries the structural match; the content
+    // signals only decide whether the file is a real unit at all.
+    const unit = '[Unit]\nDescription=Demo\n[Service]\nExecStart=/usr/bin/app\n'
+    expect(
+      detectConfig(registry, '/app/monitor.service', unit)?.definition.id,
+    ).toBe('systemd')
+    expect(
+      detectConfig(registry, '/app/monitor.service', 'not a unit\n'),
+    ).toBeUndefined()
+    // Drop-in overrides live in .conf files matched by path alone.
+    expect(
+      detectConfig(
+        registry,
+        '/etc/systemd/system/web.service.d/override.conf',
+        '',
+      )?.definition.id,
+    ).toBe('systemd')
+  })
+
+  it('keeps generic INI files with systemd-looking content as INI', () => {
+    expect(
+      detectConfig(
+        registry,
+        '/app/settings.ini',
+        '[Service]\nExecStart=/usr/bin/app\nRestart=on-failure\n',
       )?.definition.id,
     ).toBe('ini')
   })

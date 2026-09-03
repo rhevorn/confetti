@@ -92,6 +92,7 @@ describe('VS Code extension manifest', () => {
       'tmux',
       'screenrc',
       'inputrc',
+      'systemd',
       'hosts',
       'fstab',
       'crontab',

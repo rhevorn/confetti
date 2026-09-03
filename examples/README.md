@@ -38,6 +38,8 @@ These files are intentionally messy. They cover detection, TextMate scopes, form
 | `tmux/tmux.conf` | Exact filename | Commands, `-g` flags, `#{...}` format variables, quoted strings |
 | `screen/.screenrc` | Exact filename | Directives, status format strings, escapes |
 | `inputrc/.inputrc` | Exact filename | `set` options, quoted key sequences, function names, `$if` conditionals |
+| `systemd/web.service` | `.service` extension and content signals | Sections, directives, backslash continuation, `%` specifiers, hardening options |
+| `systemd/backup.timer` | `.timer` extension and content signals | Calendar schedules, booleans, timer directives |
 | `yaml/compose.yaml` | `.yaml` extension | Maps, sequences, anchors, aliases, tags, flow collections, block scalars |
 | `unknown/application.conf` | None expected | Must remain outside all Confetti language modes |
 

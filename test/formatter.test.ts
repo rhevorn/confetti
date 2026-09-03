@@ -17,6 +17,7 @@ import { formatNpmrc } from '../src/formatters/npmrc.js'
 import { formatProperties } from '../src/formatters/properties.js'
 import { formatScreen } from '../src/formatters/screen.js'
 import { formatSsh } from '../src/formatters/ssh.js'
+import { formatSystemd } from '../src/formatters/systemd.js'
 import { formatToml } from '../src/formatters/toml.js'
 import { formatTmux } from '../src/formatters/tmux.js'
 import { formatYarnrc } from '../src/formatters/yarnrc.js'
@@ -165,6 +166,43 @@ describe('formatSetupCfg', () => {
     ).toBe(
       'requires =\n    keep me\n# comment\nneeds =\n\nafter blank\n[metadata]\nindented fresh\n',
     )
+  })
+})
+
+describe('formatSystemd', () => {
+  it('normalizes assignments to the no-space key=value convention', () => {
+    expect(
+      formatSystemd(
+        '  [Service]  \n  ExecStart   =  /usr/bin/app   --flag  \nDescription="A  demo"\n',
+      ),
+    ).toBe(
+      '[Service]\nExecStart=/usr/bin/app   --flag\nDescription="A  demo"\n',
+    )
+  })
+
+  it('preserves continuation lines verbatim until the parity clears', () => {
+    const input =
+      'Environment="FIRST=1"   \\\n          "SECOND=2"\nRestart   =  on-failure\n'
+    const expected =
+      'Environment="FIRST=1"   \\\n          "SECOND=2"\nRestart=on-failure\n'
+    expect(formatSystemd(input)).toBe(expected)
+    expect(formatSystemd(expected)).toBe(expected)
+  })
+
+  it('treats a doubled backslash as a literal, not a continuation', () => {
+    expect(
+      formatSystemd('ExecStart=/usr/bin/app   \\\\\nDescription   =  demo\n'),
+    ).toBe('ExecStart=/usr/bin/app   \\\\\nDescription=demo\n')
+  })
+
+  it('keeps comments and blank lines trimmed but untouched', () => {
+    expect(
+      formatSystemd('  # keep comment  \n; legacy comment\n\n[Unit]\n'),
+    ).toBe('# keep comment\n; legacy comment\n\n[Unit]\n')
+  })
+
+  it('trims non-assignment lines such as stray directives', () => {
+    expect(formatSystemd('  just some words  \n')).toBe('just some words\n')
   })
 })
 
@@ -385,6 +423,11 @@ describe('formatter stability', () => {
     ['tmux', formatTmux, 'set -g   mouse   on\n'],
     ['screen', formatScreen, 'startup_message   off\n'],
     ['inputrc', formatInputrc, 'set   editing-mode   emacs\n'],
+    [
+      'systemd',
+      formatSystemd,
+      '[Service]\n  ExecStart=/usr/bin/app \\\n    --flag\n',
+    ],
     ['env', formatEnv, '  KEY = "a  b"  \n'],
     ['INI', formatIni, '[section]\n  key   = value\n'],
     ['SSH', formatSsh, 'Host work\nHostName example.com\n'],

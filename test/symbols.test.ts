@@ -45,6 +45,22 @@ describe('computeDocumentSymbols', () => {
     })
   })
 
+  it('maps systemd unit sections to section symbols', () => {
+    const symbols = computeDocumentSymbols(
+      'systemd',
+      '[Unit]\nDescription=Demo\n[Service]\nExecStart=/usr/bin/app\n',
+    )
+
+    expect(symbols).toHaveLength(2)
+    expect(symbols[0]).toMatchObject({
+      name: 'Unit',
+      kind: 'section',
+      startLine: 0,
+      endLine: 1,
+    })
+    expect(symbols[1]).toMatchObject({ name: 'Service', endLine: 3 })
+  })
+
   it('falls back to the header line for empty sections', () => {
     const symbols = computeDocumentSymbols(
       'ini',

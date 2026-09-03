@@ -16,7 +16,9 @@ export const INI_SECTION_FORMATS = new Set([
   'gitconfig',
   'mysql',
   'pip',
+  'pyini',
   'setupcfg',
+  'systemd',
 ])
 
 export const isIniSectionHeader: HeaderPredicate = (line) =>

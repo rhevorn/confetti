@@ -73,6 +73,25 @@ describe('computeFoldingRanges', () => {
     ])
   })
 
+  it('folds systemd unit sections', () => {
+    const content = [
+      '[Unit]',
+      'Description=Demo',
+      '',
+      '[Service]',
+      'ExecStart=/usr/bin/app',
+      '',
+      '[Install]',
+      'WantedBy=multi-user.target',
+    ].join('\n')
+
+    expect(computeFoldingRanges('systemd', content)).toEqual([
+      { startLine: 0, endLine: 1 },
+      { startLine: 3, endLine: 4 },
+      { startLine: 6, endLine: 7 },
+    ])
+  })
+
   it('drops sections that contain only blank and comment lines', () => {
     const content = '[a]\n# only a comment\n\n[b]\nkey = 1\n'
 

@@ -180,6 +180,16 @@ const examples: ExampleCase[] = [
     expectedType: 'inputrc',
     preservedText: 'exchange-point-and-mark',
   },
+  {
+    relativePath: 'systemd/web.service',
+    expectedType: 'systemd',
+    preservedText: '"SECOND=2"',
+  },
+  {
+    relativePath: 'systemd/backup.timer',
+    expectedType: 'systemd',
+    preservedText: 'OnCalendar=*-*-* 02:30:00',
+  },
   { relativePath: 'unknown/application.conf' },
 ]
 

@@ -73,6 +73,7 @@ Method: Apple Silicon (`darwin arm64`), Node.js 24.14.1, 10 warm-up runs; 100 me
 | tmux                  | `tmux.conf`, `~/.config/tmux/tmux.conf`                 |      ✅      |     ✅     |
 | GNU screen            | `.screenrc`                                             |      ✅      |     ✅     |
 | Readline              | `.inputrc`                                              |      ✅      |     ✅     |
+| systemd units         | `.service`, `.socket`, `.timer`, `systemd/system/*`     |      ✅      |     ✅     |
 
 ## Getting started
 

@@ -18,6 +18,7 @@ import { propertiesConfig } from './properties.js'
 import { screenConfig } from './screen.js'
 import { setupCfgConfig } from './setupcfg.js'
 import { sshConfig } from './ssh.js'
+import { systemdConfig } from './systemd.js'
 import { tmuxConfig } from './tmux.js'
 import { tomlConfig } from './toml.js'
 import { versionsConfig } from './versions.js'
@@ -29,6 +30,7 @@ export function createDefaultRegistry(): ConfigRegistry {
   registry.register(nginxConfig)
   registry.register(apacheConfig)
   registry.register(sshConfig)
+  registry.register(systemdConfig)
   registry.register(envConfig)
   registry.register(iniConfig)
   registry.register(mysqlConfig)

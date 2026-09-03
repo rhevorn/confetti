@@ -1,0 +1,30 @@
+[Unit]
+Description=Confetti demo web service
+Documentation=https://example.com/docs/web
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=web
+Group=web
+WorkingDirectory=/srv/web
+Environment=NODE_ENV=production
+Environment="FIRST=1" \
+          "SECOND=2"
+ExecStart=/usr/bin/node /srv/web/server.js --port 8080
+ExecStartPre=/usr/bin/node /srv/web/migrate.js
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5s
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ReadWritePaths=/srv/web/data
+
+[Install]
+WantedBy=multi-user.target

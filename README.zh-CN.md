@@ -73,6 +73,7 @@ Confetti 不会在每次输入时持续扫描整个文档。检测、诊断和�
 | tmux               | `tmux.conf`、`~/.config/tmux/tmux.conf`                 |  ✅  |   ✅   |
 | GNU screen         | `.screenrc`                                             |  ✅  |   ✅   |
 | Readline           | `.inputrc`                                              |  ✅  |   ✅   |
+| systemd unit       | `.service`、`.socket`、`.timer`、`systemd/system/*`     |  ✅  |   ✅   |
 
 ## 快速开始
 

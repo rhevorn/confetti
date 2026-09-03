@@ -1,0 +1,72 @@
+{
+  "name": "Confetti systemd Unit",
+  "scopeName": "source.confetti.systemd",
+  "patterns": [
+    {
+      "name": "comment.line.number-sign.systemd",
+      "match": "^\\s*[;#].*$"
+    },
+    {
+      "name": "meta.section.systemd",
+      "match": "^\\s*(\\[)([^\\]\\r\\n]+)(\\])",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.section.begin.systemd"
+        },
+        "2": {
+          "name": "entity.name.section.systemd"
+        },
+        "3": {
+          "name": "punctuation.definition.section.end.systemd"
+        }
+      }
+    },
+    {
+      "match": "^\\s*([^;#=:\\s][^=:\\r\\n]*?)(\\s*[=:])",
+      "captures": {
+        "1": {
+          "name": "variable.other.assignment.systemd"
+        },
+        "2": {
+          "name": "keyword.operator.assignment.systemd"
+        }
+      }
+    },
+    {
+      "name": "string.quoted.double.systemd",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.systemd",
+          "match": "\\\\."
+        }
+      ]
+    },
+    {
+      "name": "string.quoted.single.systemd",
+      "begin": "'",
+      "end": "'"
+    },
+    {
+      "name": "string.unquoted.path.systemd",
+      "match": "(?<![\\w%])/(?:[\\w.+-]+/)*[\\w.+-]+"
+    },
+    {
+      "name": "constant.language.boolean.systemd",
+      "match": "(?i)\\b(?:true|false|yes|no|on|off)\\b"
+    },
+    {
+      "name": "variable.language.specifier.systemd",
+      "match": "%[A-Za-z%]"
+    },
+    {
+      "name": "constant.numeric.systemd",
+      "match": "(?<![A-Za-z0-9_.%])-?\\d+(?:\\.\\d+)?\\b"
+    },
+    {
+      "name": "string.unquoted.url.systemd",
+      "match": "https?://[^\\s#\"']+"
+    }
+  ]
+}

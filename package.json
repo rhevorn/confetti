@@ -29,7 +29,6 @@
     "Snippets"
   ],
   "keywords": [
-    "configuration",
     "config",
     "config files",
     "formatter",
@@ -73,7 +72,8 @@
     "inputrc",
     "readline",
     "snippets",
-    "system config"
+    "systemd",
+    "systemd unit"
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
@@ -489,6 +489,26 @@
           "**/crontabs/*"
         ],
         "configuration": "./language-configurations/line-based.json"
+      },
+      {
+        "id": "confetti-systemd",
+        "aliases": [
+          "systemd Unit",
+          "systemd"
+        ],
+        "extensions": [
+          ".service",
+          ".socket",
+          ".timer",
+          ".path",
+          ".mount",
+          ".target"
+        ],
+        "filenamePatterns": [
+          "*/systemd/system/*",
+          "*/systemd/user/*"
+        ],
+        "configuration": "./language-configurations/ini.json"
       }
     ],
     "grammars": [
@@ -611,6 +631,11 @@
         "language": "confetti-inputrc",
         "scopeName": "source.confetti.inputrc",
         "path": "./syntaxes/inputrc.tmLanguage.json"
+      },
+      {
+        "language": "confetti-systemd",
+        "scopeName": "source.confetti.systemd",
+        "path": "./syntaxes/systemd.tmLanguage.json"
       }
     ]
   },
