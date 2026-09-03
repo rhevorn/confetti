@@ -108,6 +108,7 @@ describe('VS Code extension adapter', () => {
     expect(mockState.openHandlers).toHaveLength(1)
     expect(mockState.saveHandlers).toHaveLength(1)
     expect(mockState.closeHandlers).toHaveLength(1)
+    expect(mockState.changeHandlers).toHaveLength(1)
     expect(mockState.activeEditorHandlers).toHaveLength(1)
     expect(mockState.foldingProvider).toBeDefined()
     const foldingSelector = mockState.foldingSelector as Array<{
@@ -451,6 +452,21 @@ describe('VS Code extension adapter', () => {
     const unsupported = document('/app/notes.txt', 'plain text\n')
     await mockState.saveHandlers[0]?.(unsupported)
     expect(mockState.diagnostics?.has(unsupported.uri)).toBe(false)
+  })
+
+  it('clears stale diagnostics on edits and recomputes them on save', async () => {
+    activateExtension()
+    const duplicateDocument = document('/app/.env', 'KEY=1\nKEY=2\n')
+    const uri = duplicateDocument.uri
+
+    await mockState.openHandlers[0]?.(duplicateDocument)
+    expect(mockState.diagnostics?.get(uri)).toHaveLength(1)
+
+    mockState.changeHandlers[0]?.({ document: duplicateDocument })
+    expect(mockState.diagnostics?.has(uri)).toBe(false)
+
+    await mockState.saveHandlers[0]?.(duplicateDocument)
+    expect(mockState.diagnostics?.get(uri)).toHaveLength(1)
   })
 
   it('honors per-format whitelists for auto-detection', async () => {

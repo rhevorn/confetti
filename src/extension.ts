@@ -347,6 +347,12 @@ export function activate(context: vscode.ExtensionContext): void {
       diagnosticCollection.delete(document.uri)
       updateStatusBar(vscode.window.activeTextEditor?.document)
     }),
+    // Diagnostics do not follow edits, so drop stale ranges immediately. This
+    // stays O(1) — no rescan ever runs while typing; fresh diagnostics are
+    // computed on the next save or editor switch.
+    vscode.workspace.onDidChangeTextDocument((event) => {
+      diagnosticCollection.delete(event.document.uri)
+    }),
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) {
         void autoDetect(editor.document)

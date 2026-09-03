@@ -97,7 +97,7 @@ Extension behavior:
 - Release cached detection results when documents close, and clear diagnostics for closed documents.
 - Log formatter invocation, selected format, result, elapsed time, and path to the Confetti output channel.
 - Keep the explicit **Confetti: Format Config** command so users can distinguish Confetti from other formatters.
-- Keep exactly one event handler per VS Code event (open, save, close, active-editor change); new features wire into the existing handlers instead of registering more listeners.
+- Keep exactly one event handler per VS Code event (open, save, close, active-editor change, document change); new features wire into the existing handlers instead of registering more listeners. The document-change handler must stay O(1) — it only drops stale diagnostics, and never rescans content while typing.
 - Wire folding, symbols, diagnostics, and the status bar through the existing handlers so nothing runs while typing.
 
 ## Adding or changing a format

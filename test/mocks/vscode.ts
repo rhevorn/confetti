@@ -21,6 +21,7 @@ export const mockState = {
   openHandlers: [] as Handler[],
   saveHandlers: [] as Handler[],
   closeHandlers: [] as Handler[],
+  changeHandlers: [] as Handler[],
   activeEditorHandlers: [] as Handler[],
   activeEditor: undefined as MockEditor | undefined,
   informationMessages: [] as string[],
@@ -54,6 +55,7 @@ export function resetMockState(): void {
   mockState.openHandlers.length = 0
   mockState.saveHandlers.length = 0
   mockState.closeHandlers.length = 0
+  mockState.changeHandlers.length = 0
   mockState.activeEditorHandlers.length = 0
   mockState.activeEditor = undefined
   mockState.informationMessages.length = 0
@@ -155,6 +157,10 @@ export const workspace = {
   },
   onDidCloseTextDocument(handler: Handler) {
     mockState.closeHandlers.push(handler)
+    return disposable()
+  },
+  onDidChangeTextDocument(handler: Handler) {
+    mockState.changeHandlers.push(handler)
     return disposable()
   },
 }
