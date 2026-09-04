@@ -35,7 +35,7 @@ Core benchmark results for the generated Nginx sample:
 
 Resource characteristics:
 
-- The 1.3.0 VSIX is approximately **175 KB** and has no runtime npm dependencies.
+- The 1.4.0 VSIX is approximately **204 KB** and has no runtime npm dependencies.
 - Detection retained about **0.06 MB** of additional heap for a 1 MB sample; after releasing the result and running GC, the measured delta was about **0.02 MB**.
 - Formatting a 1 MB Nginx sample temporarily increased heap usage by up to **75 MB** immediately after the operation. The measured delta returned to approximately zero after the result was released and GC ran. Tokenization and formatting work on a complete document, so temporary allocation grows with file size.
 - Detection cache entries are small and are removed when their documents close.
