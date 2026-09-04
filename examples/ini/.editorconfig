@@ -3,10 +3,10 @@ root = true
 [*.{ts,tsx}]
 indent_style = space
 indent_size = 2
-insert_final_newline = true
+    insert_final_newline = true
 charset = utf-8
 end_of_line = lf
-trim_trailing_whitespace = true
+trim_trailing_whitespace =   true
 
 [Makefile]
 indent_style = tab

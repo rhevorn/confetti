@@ -25,7 +25,7 @@
       "match": "^\\s*([^;#=:\\s][^=:\\r\\n]*?)(\\s*[=:])",
       "captures": {
         "1": {
-          "name": "variable.other.assignment.systemd"
+          "name": "support.type.property-name.systemd"
         },
         "2": {
           "name": "keyword.operator.assignment.systemd"

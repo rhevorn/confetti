@@ -1,5 +1,8 @@
 import { normalizeLines } from '../formatters/shared.js'
 import { tokenizeLine } from '../tokenizers/scanner.js'
+import { tomlHeaders } from '../tokenizers/toml-headers.js'
+import { caddyBlocks } from './caddy.js'
+import { maskNginxStrings } from '../tokenizers/nginx.js'
 import {
   HASH_COMMENTS,
   INI_COMMENTS,
@@ -27,22 +30,14 @@ interface OpenBraceBlock {
   headerEnd: number
 }
 
-const isTomlTableHeader: HeaderPredicate = (line) =>
-  (line.startsWith('[[') && line.endsWith(']]')) ||
-  (line.startsWith('[') && line.endsWith(']') && line.length > 2)
-
-function tomlTableName(header: string): string {
-  if (header.startsWith('[[')) return header.slice(2, -2)
-  return header.slice(1, -1)
-}
-
 function braceSymbols(content: string): SymbolInfo[] {
   const { lines } = normalizeLines(content)
+  const maskedLines = normalizeLines(maskNginxStrings(content).masked).lines
   const symbols: SymbolInfo[] = []
   const stack: OpenBraceBlock[] = []
 
   lines.forEach((line, index) => {
-    const tokens = tokenizeLine(line, {
+    const tokens = tokenizeLine(maskedLines[index], {
       symbols: ['{', '}'],
       comments: HASH_COMMENTS,
     })
@@ -94,52 +89,27 @@ function headerSymbols(
   }))
 }
 
-/**
- * Caddyfile blocks open with a brace at the end of a line and close with a
- * line that starts with `}`. Placeholders such as {http.request.host} are
- * balanced inline, so scanning whole lines for leading `}` and trailing `{`
- * ignores them without pushing anything onto the stack.
- */
-function caddySymbols(content: string): SymbolInfo[] {
+function tomlSymbols(content: string): SymbolInfo[] {
   const { lines } = normalizeLines(content)
-  const symbols: SymbolInfo[] = []
-  const stack: OpenBraceBlock[] = []
-
-  lines.forEach((line, index) => {
-    const trimmed = line.trim()
-    const code = trimmed.split('#', 1)[0].trimEnd()
-    if (code === '') return
-
-    if (code.startsWith('}')) {
-      const open = stack.pop()
-      if (open) {
-        symbols.push({
-          name: open.name,
-          kind: 'server',
-          startLine: open.line,
-          startCharacter: open.character,
-          endLine: index,
-          endCharacter: line.length,
-          headerEndCharacter: open.headerEnd,
-        })
-      }
-      return
+  const headers = tomlHeaders(content)
+  return headers.map((header, index) => {
+    let endLine = (headers[index + 1]?.line ?? lines.length) - 1
+    while (
+      endLine > header.line &&
+      (lines[endLine].trim() === '' ||
+        lines[endLine].trimStart().startsWith('#'))
+    )
+      endLine -= 1
+    return {
+      name: header.name,
+      kind: 'table',
+      startLine: header.line,
+      startCharacter: header.start,
+      headerEndCharacter: header.end,
+      endLine,
+      endCharacter: lines[endLine].length,
     }
-
-    if (!code.endsWith('{')) return
-    const name = code.slice(0, -1).trim()
-    if (name === '') return
-    // The header ends just past the opening brace.
-    const character = line.length - line.trimStart().length
-    stack.push({
-      name,
-      line: index,
-      character,
-      headerEnd: character + code.length,
-    })
   })
-
-  return symbols
 }
 
 export function computeDocumentSymbols(
@@ -147,7 +117,8 @@ export function computeDocumentSymbols(
   content: string,
 ): SymbolInfo[] {
   if (id === 'nginx') return braceSymbols(content)
-  if (id === 'caddy') return caddySymbols(content)
+  if (id === 'caddy')
+    return caddyBlocks(content).filter((block) => block.name !== '')
   if (id === 'ssh') {
     return headerSymbols(
       content,
@@ -157,15 +128,7 @@ export function computeDocumentSymbols(
       HASH_COMMENTS,
     )
   }
-  if (id === 'toml') {
-    return headerSymbols(
-      content,
-      isTomlTableHeader,
-      tomlTableName,
-      'table',
-      HASH_COMMENTS,
-    )
-  }
+  if (id === 'toml') return tomlSymbols(content)
   if (INI_SECTION_FORMATS.has(id)) {
     return headerSymbols(
       content,

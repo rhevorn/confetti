@@ -213,6 +213,9 @@
           "ssh_config",
           "sshd_config"
         ],
+        "filenamePatterns": [
+          "**/.ssh/config"
+        ],
         "configuration": "./language-configurations/ssh.json"
       },
       {

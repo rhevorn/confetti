@@ -1,5 +1,5 @@
-import { formatIni } from './ini.js'
+import { formatSetupCfg } from './setupcfg.js'
 
 export function formatPip(content: string): string {
-  return formatIni(content)
+  return formatSetupCfg(content)
 }

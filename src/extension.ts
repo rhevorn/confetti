@@ -178,6 +178,55 @@ export function activate(context: vscode.ExtensionContext): void {
   const diagnosticCollection =
     vscode.languages.createDiagnosticCollection('confetti')
   log('Extension activated')
+  const foldingChanged = new vscode.EventEmitter<void>()
+
+  const featureCache = new Map<
+    string,
+    {
+      version: number
+      folding: vscode.FoldingRange[]
+      symbols: vscode.DocumentSymbol[]
+    }
+  >()
+  const updateFeatures = (document: vscode.TextDocument): void => {
+    const definition = definitionForDocument(document)
+    const text = definition ? document.getText() : ''
+    featureCache.set(document.uri.toString(), {
+      version: document.version,
+      folding: definition
+        ? computeFoldingRanges(definition.id, text).map(
+            ({ startLine, endLine }) =>
+              new vscode.FoldingRange(startLine, endLine),
+          )
+        : [],
+      symbols: definition
+        ? computeDocumentSymbols(definition.id, text).map(
+            (symbol) =>
+              new vscode.DocumentSymbol(
+                symbol.name,
+                '',
+                SYMBOL_KINDS[symbol.kind],
+                new vscode.Range(
+                  new vscode.Position(symbol.startLine, symbol.startCharacter),
+                  new vscode.Position(symbol.endLine, symbol.endCharacter),
+                ),
+                new vscode.Range(
+                  new vscode.Position(symbol.startLine, symbol.startCharacter),
+                  new vscode.Position(
+                    symbol.startLine,
+                    symbol.headerEndCharacter,
+                  ),
+                ),
+              ),
+          )
+        : [],
+    })
+    foldingChanged.fire()
+  }
+  const cachedFeatures = (document: vscode.TextDocument) => {
+    const cached = featureCache.get(document.uri.toString())
+    return cached?.version === document.version ? cached : undefined
+  }
 
   const updateDiagnostics = (document: vscode.TextDocument): void => {
     const uri = document.uri
@@ -233,9 +282,15 @@ export function activate(context: vscode.ExtensionContext): void {
     outputChannel,
     diagnosticCollection,
     statusBarItem,
+    foldingChanged,
     vscode.commands.registerCommand('confetti.detectConfigType', async () => {
       const document = vscode.window.activeTextEditor?.document
-      if (document) await detectAndApply(document, true)
+      if (document) {
+        await detectAndApply(document, true)
+        updateFeatures(document)
+        updateDiagnostics(document)
+        updateStatusBar(document)
+      }
     }),
     vscode.commands.registerCommand('confetti.showDetectionInfo', () => {
       const document = vscode.window.activeTextEditor?.document
@@ -293,37 +348,14 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }),
     vscode.languages.registerFoldingRangeProvider(languageSelectors, {
+      onDidChangeFoldingRanges: foldingChanged.event,
       provideFoldingRanges(document) {
-        const definition = definitionForDocument(document)
-        if (!definition) return []
-        return computeFoldingRanges(definition.id, document.getText()).map(
-          ({ startLine, endLine }) =>
-            new vscode.FoldingRange(startLine, endLine),
-        )
+        return cachedFeatures(document)?.folding ?? []
       },
     }),
     vscode.languages.registerDocumentSymbolProvider(languageSelectors, {
       provideDocumentSymbols(document) {
-        const definition = definitionForDocument(document)
-        if (!definition) return []
-        return computeDocumentSymbols(definition.id, document.getText()).map(
-          (symbol) => {
-            const selection = new vscode.Range(
-              new vscode.Position(symbol.startLine, symbol.startCharacter),
-              new vscode.Position(symbol.startLine, symbol.headerEndCharacter),
-            )
-            return new vscode.DocumentSymbol(
-              symbol.name,
-              '',
-              SYMBOL_KINDS[symbol.kind],
-              new vscode.Range(
-                new vscode.Position(symbol.startLine, symbol.startCharacter),
-                new vscode.Position(symbol.endLine, symbol.endCharacter),
-              ),
-              selection,
-            )
-          },
-        )
+        return cachedFeatures(document)?.symbols ?? []
       },
     }),
     vscode.languages.registerDocumentFormattingEditProvider(
@@ -336,16 +368,19 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
     vscode.workspace.onDidOpenTextDocument((document) => {
       void autoDetect(document)
+      updateFeatures(document)
       updateDiagnostics(document)
       updateStatusBar(document)
     }),
     vscode.workspace.onDidSaveTextDocument((document) => {
       void autoDetect(document)
+      updateFeatures(document)
       updateDiagnostics(document)
       updateStatusBar(document)
     }),
     vscode.workspace.onDidCloseTextDocument((document) => {
       detectionCache.delete(document.uri.toString())
+      featureCache.delete(document.uri.toString())
       diagnosticCollection.delete(document.uri)
       updateStatusBar(vscode.window.activeTextEditor?.document)
     }),
@@ -353,11 +388,13 @@ export function activate(context: vscode.ExtensionContext): void {
     // stays O(1) — no rescan ever runs while typing; fresh diagnostics are
     // computed on the next save or editor switch.
     vscode.workspace.onDidChangeTextDocument((event) => {
+      featureCache.delete(event.document.uri.toString())
       diagnosticCollection.delete(event.document.uri)
     }),
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) {
         void autoDetect(editor.document)
+        updateFeatures(editor.document)
         updateDiagnostics(editor.document)
       }
       updateStatusBar(editor?.document)
@@ -366,6 +403,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   if (vscode.window.activeTextEditor) {
     void autoDetect(vscode.window.activeTextEditor.document)
+    updateFeatures(vscode.window.activeTextEditor.document)
     updateDiagnostics(vscode.window.activeTextEditor.document)
     updateStatusBar(vscode.window.activeTextEditor.document)
   }

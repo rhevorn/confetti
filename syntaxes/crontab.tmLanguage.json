@@ -6,7 +6,7 @@
     {
       "match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)(\\s*=)",
       "captures": {
-        "1": { "name": "variable.other.assignment.crontab" },
+        "1": { "name": "support.type.property-name.crontab" },
         "2": { "name": "keyword.operator.assignment.crontab" }
       }
     },

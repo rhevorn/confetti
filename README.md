@@ -1,6 +1,6 @@
 # Confetti
 
-Smart detection, syntax highlighting, and formatting for `.env`, `.ini`, `.toml`, `.yml`, `.conf`, nginx, Apache, MySQL, tmux, gitignore, SSH, and 15+ other configuration file types in VS Code — plus folding, outlines, snippets, and duplicate-key diagnostics.
+Smart detection, syntax highlighting, and formatting for `env`, `ini`, `toml`, `yml`, `conf`, nginx, Apache, MySQL, tmux, gitignore, SSH, and 15+ other configuration file types in VS Code — plus folding, outlines, snippets, and duplicate-key diagnostics.
 
 [中文文档](https://github.com/rhevorn/confetti/blob/main/README.zh-CN.md)
 
@@ -101,6 +101,10 @@ Confetti highlights format-specific elements such as:
 
 The grammars use standard TextMate scopes, so colors follow your active VS Code theme. Confetti does not hard-code colors.
 
+Assignment keys use property-name scopes for compatibility with Dark/Light 2026 and Dark+/Light+. This includes keys inside TOML inline tables and npmrc registry/authentication and array keys; YAML list mappings also highlight their keys.
+
+YAML literal (`|`) and folded (`>`) block values retain string highlighting across lines, including indentation and chomping indicators; key/comment highlighting resumes outside the block. YAML formatting remains intentionally disabled.
+
 ## Editor features
 
 Beyond detection, highlighting, and formatting, Confetti provides:
@@ -111,9 +115,17 @@ Beyond detection, highlighting, and formatting, Confetti provides:
 - **Nginx snippets** for server blocks, locations, reverse proxies, upstreams, HTTPS servers, and redirects
 - A **status bar indicator** showing the detected format and confidence; click it to see full detection details
 
-All of these run when a file is opened, activated, or saved — never while typing. Nginx variables inside snippets (such as `$host`) are inserted literally.
+Folding, outlines, and diagnostics are computed when a file is opened, activated, saved, or explicitly detected. Provider requests only read cached results; editing invalidates the cache without scanning. Save, switch back to the file, or run **Confetti: Detect Config Type** to refresh these features. Nginx variables inside snippets (such as `$host`) are inserted literally.
+
+Duplicate warnings are format-aware: quoted dotenv values and Python INI continuations are not treated as keys; TOML subtables belong to their current array element. For systemd, only a small set of known scalar settings is checked. Repeated list directives such as `Environment` and `ExecStart` are not flagged. These checks are not full configuration validation.
 
 ## Formatting
+
+Caddy quoted strings and heredoc bodies, dotenv multiline values, and Python INI value contents are preserved. Python INI keys are aligned left and continuation values use four spaces; spaces inside values, comments, and blank lines are retained. In tox `[testenv]` / `[testenv:...]` sections, clearly malformed `deps` lists with same-level bare package entries can recover their missing continuation indentation. Valid sibling assignments are not reclassified solely because they resemble version requirements. Incomplete Caddy strings/heredocs and backslash continuations are left unchanged rather than reformatted speculatively.
+
+Nginx documents containing multiline quoted values are left unchanged by the formatter. Nginx and Caddy folding/outline ranges ignore braces inside quoted payloads; Caddy highlighting also keeps multiline strings and heredocs in their literal scopes. TOML outlines ignore table-like text inside multiline strings.
+
+In `[flake8]`, an accidentally indented assignment after an integer option such as `max-complexity` is restored to a separate key. This recovery does not apply inside multiline options such as `exclude` or `per-file-ignores`.
 
 Use either of these methods:
 

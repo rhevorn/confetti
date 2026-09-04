@@ -1,11 +1,11 @@
 # Tables and scalar values
 [project]
 name = "confetti-demo"
-version = "0.1.0"
+  version = "0.1.0"
 requires-python = ">=3.12"
-keywords = ["config", "formatter", "highlighting"]
+keywords =  ["config", "formatter", "highlighting"]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+     "Development Status :: 3 - Alpha",
   "Programming Language :: Python :: 3", # supported runtime
 ]
 
@@ -20,7 +20,7 @@ released_at = 2026-08-26T12:30:00Z
 hex_mask = 0xFF_A0
 dotted.key = "value"
 "quoted key" = 'literal # value'
-matrix = [[1, 2],[3, 4]]
+matrix = [[1, 2], [3, 4]]
 inline = { mode = "safe", retries = 3, metadata = { owner = "team", enabled = true } }
 description = """
 Confetti keeps multiline  string content intact.

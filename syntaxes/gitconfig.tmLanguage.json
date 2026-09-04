@@ -16,7 +16,7 @@
     {
       "match": "^\\s*([A-Za-z][A-Za-z0-9-]*)(\\s*=)?",
       "captures": {
-        "1": { "name": "variable.other.assignment.gitconfig" },
+        "1": { "name": "support.type.property-name.gitconfig" },
         "2": { "name": "keyword.operator.assignment.gitconfig" }
       }
     },

@@ -7,7 +7,7 @@
       "name": "meta.assignment.properties",
       "begin": "^\\s*((?:\\\\.|[^\\s=:])(?:\\\\.|[^=:])*?)(\\s*[=:]\\s*|\\s+)(?=\\S|$)",
       "beginCaptures": {
-        "1": { "name": "variable.other.assignment.properties" },
+        "1": { "name": "support.type.property-name.properties" },
         "2": { "name": "keyword.operator.assignment.properties" }
       },
       "end": "$",

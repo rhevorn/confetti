@@ -62,19 +62,17 @@ describe('computeDiagnostics', () => {
   })
 
   it('flags duplicate keys inside systemd unit sections', () => {
-    const content = [
-      '[Service]',
-      'ExecStart=/usr/bin/app',
-      'ExecStart=/usr/bin/other',
-    ].join('\n')
+    const content = ['[Service]', 'Restart=always', 'Restart=on-failure'].join(
+      '\n',
+    )
 
     expect(computeDiagnostics('systemd', content)).toEqual([
       {
         message:
-          'Duplicate key "ExecStart" in section "Service" (also defined on line 2)',
+          'Duplicate key "Restart" in section "Service" (also defined on line 2)',
         line: 2,
         startCharacter: 0,
-        endCharacter: 'ExecStart'.length,
+        endCharacter: 'Restart'.length,
       },
     ])
   })

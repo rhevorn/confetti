@@ -1,7 +1,7 @@
 [flake8]
 max-line-length = 100
 max-complexity = 12
-select = C,E,F,W,B
+    select =    C,E,F,W,B
 extend-ignore = E203, W503
 exclude =
     .git,

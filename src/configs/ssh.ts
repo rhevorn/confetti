@@ -5,7 +5,7 @@ export const sshConfig: ConfigDefinition = {
   id: 'ssh',
   displayName: 'SSH Config',
   filenames: ['ssh_config', 'sshd_config'],
-  patterns: ['*/.ssh/config', '*/ssh/ssh*_config'],
+  patterns: ['.ssh/config', '*/.ssh/config', '*/ssh/ssh*_config'],
   detect(filename, content) {
     let score = filename.includes('/.ssh/') ? 45 : 0
     if (/^\s*(?:Host|Match)\s+\S+/m.test(content)) score += 35

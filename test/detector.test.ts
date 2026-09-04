@@ -7,6 +7,38 @@ import { ConfigRegistry } from '../src/core/registry.js'
 const registry = createDefaultRegistry()
 
 describe('detectConfig', () => {
+  it.each([
+    '.ssh/config',
+    './.ssh/config',
+    '/Users/example/.ssh/config',
+    String.raw`C:\Users\example\.ssh\config`,
+  ])(
+    'recognizes SSH config by its exact path, even when empty: %s',
+    (filename) => {
+      for (const content of [
+        '',
+        '# SSH settings\n',
+        'Host work\n  User deploy\n',
+      ]) {
+        expect(detectConfig(registry, filename, content)?.definition.id).toBe(
+          'ssh',
+        )
+      }
+    },
+  )
+
+  it.each([
+    'config',
+    '/app/config',
+    '.ssh/config.backup',
+    '/app/.ssh/config.d/other',
+  ])('does not hijack unrelated config paths: %s', (filename) => {
+    expect(
+      detectConfig(registry, filename, 'Host work\n  User deploy\n')?.definition
+        .id,
+    ).not.toBe('ssh')
+  })
+
   it('uses a fixed confidence threshold', () => {
     expect(MIN_CONFIDENCE).toBe(70)
   })

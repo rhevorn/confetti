@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { activate, deactivate } from '../src/extension.js'
 import { mockState, resetMockState } from './mocks/vscode.js'
 
@@ -328,6 +328,7 @@ describe('VS Code extension adapter', () => {
       'server {\n  location /api {\n    proxy_pass http://backend;\n  }\n}\n',
       'confetti-nginx',
     )
+    mockState.openHandlers[0]?.(supported)
     const supportedRanges = mockState.foldingProvider?.provideFoldingRanges(
       supported,
     ) as Array<{ start: number; end: number }>
@@ -351,6 +352,7 @@ describe('VS Code extension adapter', () => {
       '[client]\nport=3306\n[mysqld]\ndatadir=/data\n',
       'ini',
     )
+    mockState.openHandlers[0]?.(canonical)
     const ranges = mockState.foldingProvider?.provideFoldingRanges(
       canonical,
     ) as Array<{ start: number; end: number }>
@@ -373,6 +375,7 @@ describe('VS Code extension adapter', () => {
       'server {\n  listen 80;\n}\n',
       'confetti-nginx',
     )
+    mockState.openHandlers[0]?.(supported)
     const symbols = mockState.symbolProvider?.provideDocumentSymbols(
       supported,
     ) as Array<{
@@ -390,6 +393,55 @@ describe('VS Code extension adapter', () => {
     expect(
       mockState.symbolProvider?.provideDocumentSymbols(unsupported),
     ).toEqual([])
+  })
+
+  it('serves structural caches without reading documents during provider requests or edits', async () => {
+    const doc = document('/app/settings.ini', '[one]\nx=1\n', 'ini')
+    const read = vi.fn(doc.getText)
+    doc.getText = read
+    mockState.activeEditor = editor(doc) as never
+    activateExtension()
+    const calls = read.mock.calls.length
+    const foldingChanged = vi.fn()
+    const subscription =
+      mockState.foldingProvider?.onDidChangeFoldingRanges?.(foldingChanged)
+    for (let index = 0; index < 20; index += 1) {
+      expect(mockState.foldingProvider?.provideFoldingRanges(doc)).toHaveLength(
+        1,
+      )
+      expect(
+        mockState.symbolProvider?.provideDocumentSymbols(doc),
+      ).toHaveLength(1)
+    }
+    expect(read).toHaveBeenCalledTimes(calls)
+    doc.version += 1
+    // Reject stale versions even before VS Code delivers the change event.
+    expect(mockState.foldingProvider?.provideFoldingRanges(doc)).toEqual([])
+    expect(mockState.symbolProvider?.provideDocumentSymbols(doc)).toEqual([])
+    mockState.changeHandlers[0]?.({ document: doc })
+    for (let index = 0; index < 20; index += 1) {
+      expect(mockState.foldingProvider?.provideFoldingRanges(doc)).toEqual([])
+      expect(mockState.symbolProvider?.provideDocumentSymbols(doc)).toEqual([])
+    }
+    expect(read).toHaveBeenCalledTimes(calls)
+    read.mockReturnValue('[two]\nx=1\n[three]\nx=2\n')
+    mockState.saveHandlers[0]?.(doc)
+    expect(foldingChanged).toHaveBeenCalledTimes(1)
+    expect(mockState.symbolProvider?.provideDocumentSymbols(doc)).toHaveLength(
+      2,
+    )
+    mockState.closeHandlers[0]?.(doc)
+    expect(mockState.foldingProvider?.provideFoldingRanges(doc)).toEqual([])
+    expect(mockState.symbolProvider?.provideDocumentSymbols(doc)).toEqual([])
+    await command('confetti.detectConfigType')()
+    expect(foldingChanged).toHaveBeenCalledTimes(2)
+    expect(mockState.symbolProvider?.provideDocumentSymbols(doc)).toHaveLength(
+      2,
+    )
+    mockState.changeHandlers[0]?.({ document: doc })
+    mockState.activeEditorHandlers[0]?.({ document: doc })
+    expect(mockState.foldingProvider?.provideFoldingRanges(doc)).toHaveLength(2)
+    subscription?.dispose()
   })
 
   it('honors auto-detect settings and file schemes on editor events', async () => {

@@ -1,5 +1,7 @@
 import { normalizeLines } from '../formatters/shared.js'
 import { tokenizeLine } from '../tokenizers/scanner.js'
+import { caddyBlocks } from './caddy.js'
+import { maskNginxStrings } from '../tokenizers/nginx.js'
 
 export interface FoldingRangeInfo {
   startLine: number
@@ -112,7 +114,7 @@ function blockFoldingRanges(
 }
 
 function braceFoldingRanges(content: string): FoldingRangeInfo[] {
-  const { lines } = normalizeLines(content)
+  const { lines } = normalizeLines(maskNginxStrings(content).masked)
   const ranges: FoldingRangeInfo[] = []
   const stack: number[] = []
 
@@ -161,7 +163,11 @@ export function computeFoldingRanges(
   id: string,
   content: string,
 ): FoldingRangeInfo[] {
-  if (id === 'nginx' || id === 'caddy') return braceFoldingRanges(content)
+  if (id === 'nginx') return braceFoldingRanges(content)
+  if (id === 'caddy')
+    return caddyBlocks(content)
+      .filter((block) => block.endLine > block.startLine)
+      .map(({ startLine, endLine }) => ({ startLine, endLine }))
   if (id === 'apache') return tagFoldingRanges(content)
   if (id === 'ssh') {
     return blockFoldingRanges(content, isSshBlockHeader, HASH_COMMENTS)

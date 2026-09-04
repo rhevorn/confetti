@@ -15,7 +15,7 @@
     {
       "match": "^\\s*([^;#=:\\s][^=:\\r\\n]*?)(\\s*[=:])",
       "captures": {
-        "1": { "name": "variable.other.assignment.setupcfg" },
+        "1": { "name": "support.type.property-name.setupcfg" },
         "2": { "name": "keyword.operator.assignment.setupcfg" }
       }
     },

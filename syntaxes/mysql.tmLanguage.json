@@ -15,7 +15,7 @@
     {
       "match": "^\\s*([^;#=:\\s][^=:\\r\\n]*?)(\\s*[=:])",
       "captures": {
-        "1": { "name": "variable.other.assignment.mysql" },
+        "1": { "name": "support.type.property-name.mysql" },
         "2": { "name": "keyword.operator.assignment.mysql" }
       }
     },

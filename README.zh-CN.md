@@ -1,6 +1,6 @@
 # Confetti
 
-为 VS Code 提供 `.env`、`.ini`、`.toml`、`.yml`、`.conf`、nginx、Apache、MySQL、tmux、gitignore、SSH 等 15+ 种配置文件的智能识别、语法高亮和格式化能力，并提供代码折叠、大纲、snippets 和重复键诊断。
+为 VS Code 提供 `env`、`ini`、`toml`、`yml`、`conf`、nginx、Apache、MySQL、tmux、gitignore、SSH 等 15+ 种配置文件的智能识别、语法高亮和格式化能力，并提供代码折叠、大纲、snippets 和重复键诊断。
 
 [English documentation](https://github.com/rhevorn/confetti/blob/main/README.md)
 
@@ -57,7 +57,7 @@ Confetti 不会在每次输入时持续扫描整个文档。检测、诊断和�
 | INI / EditorConfig | `.ini`、`.cfg`、`.editorconfig`                         |  ✅  |   ✅   |
 | MySQL              | `my.cnf`、`.my.cnf`、`mysql`/`mariadb` 配置路径         |  ✅  |   ✅   |
 | pip                | `pip.conf`、`~/.pip/pip.conf`、`~/.config/pip/pip.conf` |  ✅  |   ✅   |
-| setup.cfg          | Python `setup.cfg`，多行值原样保留                      |  ✅  |   ✅   |
+| setup.cfg          | Python `setup.cfg`，保留多行值内容                      |  ✅  |   ✅   |
 | Python 工具链 INI  | `tox.ini`、`.flake8`、`pytest.ini`、`mypy.ini` 等       |  ✅  |   ✅   |
 | Java Properties    | `.properties`                                           |  ✅  |   ✅   |
 | TOML               | `.toml`，包括 `pyproject.toml`                          |  ✅  |   ✅   |
@@ -101,6 +101,10 @@ Confetti 会根据不同格式高亮：
 
 Grammar 使用标准 TextMate scope，最终颜色由当前 VS Code 主题决定，Confetti 不会硬编码颜色。
 
+赋值 key 使用属性名 scope，兼容 Dark/Light 2026 和 Dark+/Light+。TOML 内联表中的 key、npmrc 的 registry/认证和数组 key，以及 YAML 列表映射中的 key 也会高亮。
+
+YAML 的字面量块（`|`）和折叠块（`>`）会跨行保持字符串高亮，支持缩进标记和末尾换行控制标记；退出正文后恢复 key、注释等高亮。YAML 格式化仍保持禁用。
+
 ## 编辑器功能
 
 除了识别、高亮和格式化之外，Confetti 还提供：
@@ -111,9 +115,17 @@ Grammar 使用标准 TextMate scope，最终颜色由当前 VS Code 主题决定
 - **Nginx snippets**：server 块、location、反向代理、upstream、HTTPS server 和跳转
 - **状态栏指示器**：显示识别的格式和置信度，点击可查看完整识别详情
 
-以上所有功能只在打开、切换或保存文件时运行——绝不会在输入过程中运行。Snippet 中的 Nginx 变量（如 `$host`）会原样插入。
+折叠、大纲和诊断只在打开、切换、保存文件或手动检测时计算。Provider 请求只读取缓存；编辑会使缓存失效，但不会扫描文档。保存、切回该文件或执行 **Confetti: Detect Config Type** 可刷新这些功能。Snippet 中的 Nginx 变量（如 `$host`）会原样插入。
+
+重复警告会区分格式语义：dotenv 引号内的多行值和 Python INI 续行不会被当成键；TOML 子表属于当前数组元素。systemd 只检查少量已知的单值配置项，不会对 `Environment`、`ExecStart` 等可重复指令报警。这些检查不等同于完整配置校验。
 
 ## 格式化
+
+保留 Caddy 引号字符串和 heredoc 正文、dotenv 多行值、Python INI 值的内容。Python INI 的 key 统一顶格、续行统一缩进 4 个空格，保留值内部的空格、注释和空行。tox 的 `[testenv]` / `[testenv:...]` 中，包含同级裸包名的明显错误 `deps` 列表可恢复缺失的续行缩进；不会仅凭合法同级赋值看起来像版本约束，就把它改成依赖项。遇到未闭合的 Caddy 字符串、heredoc 或反斜杠续行时，保持原样，不猜测其布局。
+
+包含跨行引号值的 Nginx 文档会保持原样，不执行格式化。Nginx 和 Caddy 的折叠、大纲不会把字符串正文中的大括号当成代码块；Caddy 高亮也会保留跨行字符串和 heredoc 的字面量状态。TOML 大纲会忽略多行字符串中形似表头的文本。
+
+在 `[flake8]` 中，`max-complexity` 等整数配置项之后误缩进的赋值行，会恢复为独立 key。此恢复规则不会应用到 `exclude`、`per-file-ignores` 等多行配置值内部。
 
 可以通过以下方式使用：
 

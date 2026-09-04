@@ -6,6 +6,7 @@ import { createDefaultRegistry } from '../src/configs/index.js'
 interface LanguageContribution {
   id: string
   filenames?: string[]
+  filenamePatterns?: string[]
   extensions?: string[]
   configuration: string
 }
@@ -56,6 +57,13 @@ function contributedPath(relativePath: string): string {
 }
 
 describe('VS Code extension manifest', () => {
+  it('associates .ssh/config without associating every file named config', () => {
+    const ssh = manifest.contributes.languages.find(
+      (language) => language.id === 'confetti-ssh',
+    )
+    expect(ssh?.filenamePatterns).toContain('**/.ssh/config')
+    expect(ssh?.filenames).not.toContain('config')
+  })
   it('contains complete Marketplace metadata for the stable release', () => {
     expect(manifest.version).toBe('1.3.0')
     expect(manifest.publisher).toBe('rhevorn')

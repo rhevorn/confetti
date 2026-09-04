@@ -25,7 +25,7 @@
       "match": "^\\s*([^;#=:\\s][^=:\\r\\n]*?)(\\s*[=:])",
       "captures": {
         "1": {
-          "name": "variable.other.assignment.pyini"
+          "name": "support.type.property-name.pyini"
         },
         "2": {
           "name": "keyword.operator.assignment.pyini"

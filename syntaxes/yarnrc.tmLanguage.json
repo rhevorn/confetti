@@ -6,7 +6,7 @@
     {
       "match": "^\\s*((?:\"[^\"]+\"|'[^']+'|[^\\s#]+))(\\s+)",
       "captures": {
-        "1": { "name": "variable.other.assignment.yarnrc" },
+        "1": { "name": "support.type.property-name.yarnrc" },
         "2": { "name": "punctuation.separator.key-value.yarnrc" }
       }
     },

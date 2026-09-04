@@ -2,12 +2,19 @@
   "name": "Confetti npm Config",
   "scopeName": "source.confetti.npmrc",
   "patterns": [
-    { "name": "comment.line.npmrc", "match": "^\\s*[#;].*$" },
     {
-      "match": "^\\s*((?:@[^:\\s=]+:)?[A-Za-z0-9_.-]+)(\\s*=)",
+      "name": "comment.line.npmrc",
+      "match": "^\\s*[#;].*$"
+    },
+    {
+      "match": "^\\s*((?:(?:@[^:\\s=]+:)?[A-Za-z0-9_.-]+|//[^\\s=]+)(?:\\[\\])*)(\\s*=)",
       "captures": {
-        "1": { "name": "variable.other.assignment.npmrc" },
-        "2": { "name": "keyword.operator.assignment.npmrc" }
+        "1": {
+          "name": "support.type.property-name.npmrc"
+        },
+        "2": {
+          "name": "keyword.operator.assignment.npmrc"
+        }
       }
     },
     {
@@ -22,15 +29,25 @@
       "name": "constant.numeric.npmrc",
       "match": "(?<![A-Za-z0-9_.-])[-+]?\\d+(?:\\.\\d+)?\\b"
     },
-    { "name": "string.unquoted.url.npmrc", "match": "https?://[^\\s#;]+" },
+    {
+      "name": "string.unquoted.url.npmrc",
+      "match": "https?://[^\\s#;]+"
+    },
     {
       "name": "string.quoted.double.npmrc",
       "begin": "\"",
       "end": "\"",
       "patterns": [
-        { "name": "constant.character.escape.npmrc", "match": "\\\\." }
+        {
+          "name": "constant.character.escape.npmrc",
+          "match": "\\\\."
+        }
       ]
     },
-    { "name": "string.quoted.single.npmrc", "begin": "'", "end": "'" }
+    {
+      "name": "string.quoted.single.npmrc",
+      "begin": "'",
+      "end": "'"
+    }
   ]
 }

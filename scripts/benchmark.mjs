@@ -6,6 +6,7 @@ import { URL } from 'node:url'
 import { createDefaultRegistry } from '../dist/configs/index.js'
 import { detectConfig } from '../dist/core/detector.js'
 import { formatConfig } from '../dist/core/formatter.js'
+import { envRecords } from '../dist/tokenizers/env.js'
 
 const registry = createDefaultRegistry()
 const output = []
@@ -117,6 +118,18 @@ if (fs.existsSync(vsixPath)) {
   output.push(
     '',
     `VSIX size: ${formatMegabytes(fs.statSync(vsixPath).size)} MB`,
+  )
+}
+
+output.push(
+  '',
+  'Dotenv short-line quoted-value scan (10 warmups, 20 measured runs):',
+)
+for (const bytes of [100 * 1024, 1024 * 1024]) {
+  const lines = ['KEY="', ...Array(Math.ceil(bytes / 9)).fill('12345678'), '"']
+  const timing = measure(() => envRecords(lines), 20)
+  output.push(
+    `- ${formatMegabytes(Buffer.byteLength(lines.join('\n')))} MB: median ${formatMilliseconds(timing.median)} ms, p95 ${formatMilliseconds(timing.p95)} ms`,
   )
 }
 

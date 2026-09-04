@@ -39,6 +39,164 @@ async function scopesForLine(
 }
 
 describe('TextMate grammars', () => {
+  it.each([1, 2, 3, 4, 5, 6, 7, 8, 9])(
+    'honors explicit YAML scalar indentation %i rather than consuming a shallower sibling',
+    async (indent) => {
+      const grammar = await loadGrammar('yaml.tmLanguage.json')
+      const header = grammar.tokenizeLine(`  script: |${indent}-`)
+      const body = grammar.tokenizeLine(
+        ' '.repeat(2 + indent) + '# literal',
+        header.ruleStack,
+      )
+      expect(body.tokens.flatMap((token) => token.scopes)).toContain(
+        'string.unquoted.block.yaml',
+      )
+      expect(body.tokens.flatMap((token) => token.scopes)).not.toContain(
+        'comment.line.number-sign.yaml',
+      )
+      const sibling = grammar.tokenizeLine('  next: ok', body.ruleStack)
+      expect(sibling.tokens.flatMap((token) => token.scopes)).not.toContain(
+        'string.unquoted.block.yaml',
+      )
+      expect(sibling.tokens.flatMap((token) => token.scopes)).toContain(
+        'entity.name.tag.yaml',
+      )
+    },
+  )
+
+  it.each(['|', '>', '|-', '>+', '|2', '|2-', '|+2', '>2+', '>-2'])(
+    'keeps YAML %s scalar bodies literal and recovers at a sibling key',
+    async (indicator) => {
+      const grammar = await loadGrammar('yaml.tmLanguage.json')
+      let state = grammar.tokenizeLine(
+        `script: ${indicator} # header comment`,
+      ).ruleStack
+      for (const line of [
+        '  - name: literal text',
+        '  # literal comment',
+        '',
+        '  {key: value}',
+      ]) {
+        const result = grammar.tokenizeLine(line, state)
+        state = result.ruleStack
+        for (const token of result.tokens) {
+          expect(token.scopes).toContain('string.unquoted.block.yaml')
+          expect(token.scopes).not.toContain('entity.name.tag.yaml')
+          expect(token.scopes).not.toContain('comment.line.number-sign.yaml')
+        }
+      }
+      const resumed = grammar.tokenizeLine('next: ok', state)
+      expect(resumed.tokens.flatMap((token) => token.scopes)).toContain(
+        'entity.name.tag.yaml',
+      )
+      expect(resumed.tokens.flatMap((token) => token.scopes)).not.toContain(
+        'string.unquoted.block.yaml',
+      )
+    },
+  )
+
+  it.each([
+    ['  script: |', '    # literal', '  next: ok'],
+    ['- script: >', '    - name: literal', '  next: ok'],
+    ['  - script: |2-', '      # literal', '    next: ok'],
+    ['- |2', '  # literal', '- next: ok'],
+    ['  - >-2', '    # literal', '  - next: ok'],
+  ])('tracks YAML scalar indentation for %s', async (header, body, next) => {
+    const grammar = await loadGrammar('yaml.tmLanguage.json')
+    const opening = grammar.tokenizeLine(header)
+    const content = grammar.tokenizeLine(body, opening.ruleStack)
+    expect(content.tokens.flatMap((token) => token.scopes)).toContain(
+      'string.unquoted.block.yaml',
+    )
+    expect(content.tokens.flatMap((token) => token.scopes)).not.toContain(
+      'comment.line.number-sign.yaml',
+    )
+    const resumed = grammar.tokenizeLine(next, content.ruleStack)
+    expect(resumed.tokens.flatMap((token) => token.scopes)).not.toContain(
+      'string.unquoted.block.yaml',
+    )
+    expect(resumed.tokens.flatMap((token) => token.scopes)).toContain(
+      'entity.name.tag.yaml',
+    )
+  })
+
+  it.each([
+    [
+      'env',
+      'KEY="first',
+      '# literal { KEY=not-a-key',
+      'last"',
+      'AFTER=ok',
+      'string.quoted.double.env',
+      'support.type.property-name.env',
+    ],
+    [
+      'toml',
+      'value = """first',
+      '[fake] # literal',
+      'last"""',
+      '[real]',
+      'string.quoted',
+      'entity.name.section',
+    ],
+    [
+      'caddy',
+      ':8080 {\nrespond "first',
+      '# literal { }',
+      'last"',
+      'respond ok',
+      'string.quoted.double.caddy',
+      'keyword.other.directive.caddy',
+    ],
+    [
+      'caddy',
+      ':8080 {\nrespond `first',
+      '# literal { }',
+      'last`',
+      'respond ok',
+      'string.quoted.raw.caddy',
+      'keyword.other.directive.caddy',
+    ],
+    [
+      'caddy',
+      ':8080 {\nrespond <<HTML',
+      '# literal { }',
+      'HTML 200',
+      'respond ok',
+      'string.unquoted.heredoc.caddy',
+      'keyword.other.directive.caddy',
+    ],
+  ])(
+    'retains %s multiline state and recovers after its closing delimiter (%s)',
+    async (id, opening, body, closing, after, stringScope, nextScope) => {
+      const grammar = await loadGrammar(`${id}.tmLanguage.json`)
+      let state
+      for (const line of opening.split('\n'))
+        state = grammar.tokenizeLine(line, state).ruleStack
+      const inside = grammar.tokenizeLine(body, state)
+      expect(
+        inside.tokens.every((token) =>
+          token.scopes.some((scope) => scope.startsWith(stringScope)),
+        ),
+      ).toBe(true)
+      expect(
+        inside.tokens
+          .flatMap((token) => token.scopes)
+          .some((scope) => scope.startsWith('comment.')),
+      ).toBe(false)
+      const end = grammar.tokenizeLine(closing, inside.ruleStack)
+      const resumed = grammar.tokenizeLine(after, end.ruleStack)
+      expect(
+        resumed.tokens
+          .flatMap((token) => token.scopes)
+          .some((scope) => scope.startsWith(nextScope)),
+      ).toBe(true)
+      expect(resumed.tokens.flatMap((token) => token.scopes)).not.toContain(
+        stringScope,
+      )
+    },
+  )
+
   for (const filename of fs.readdirSync(syntaxDirectory)) {
     if (!filename.endsWith('.tmLanguage.json')) continue
 
@@ -70,7 +228,7 @@ describe('TextMate grammars', () => {
     )
 
     expect(assignment?.beginCaptures?.['2']?.name).toBe(
-      'variable.other.assignment.env',
+      'support.type.property-name.env',
     )
     expect(assignment?.beginCaptures?.['3']?.name).toBe(
       'keyword.operator.assignment.env',
@@ -91,7 +249,7 @@ describe('TextMate grammars', () => {
       path.join(syntaxDirectory, 'properties.tmLanguage.json'),
       'utf8',
     )
-    expect(grammar).toContain('variable.other.assignment.properties')
+    expect(grammar).toContain('support.type.property-name.properties')
     expect(grammar).toContain('string.unquoted.properties')
     expect(grammar).toContain('string.unquoted.continuation.properties')
   })
@@ -101,7 +259,7 @@ describe('TextMate grammars', () => {
       'env.tmLanguage.json',
       'API_URL="https://${HOST}/v1"',
     )
-    expect(scopes).toContain('variable.other.assignment.env')
+    expect(scopes).toContain('support.type.property-name.env')
     expect(scopes).toContain('keyword.operator.assignment.env')
     expect(scopes).toContain('string.quoted.double.env')
     expect(scopes).toContain('variable.other.braced.env')
@@ -112,7 +270,7 @@ describe('TextMate grammars', () => {
       'properties.tmLanguage.json',
       'server.port=8080',
     )
-    expect(scopes).toContain('variable.other.assignment.properties')
+    expect(scopes).toContain('support.type.property-name.properties')
     expect(scopes).toContain('keyword.operator.assignment.properties')
     expect(scopes).toContain('string.unquoted.properties')
     expect(scopes).toContain('constant.numeric.properties')
@@ -184,12 +342,12 @@ describe('TextMate grammars', () => {
       'name = confetti-demo',
     )
     expect(mysqlSectionScopes).toContain('entity.name.section.mysql')
-    expect(mysqlScopes).toContain('variable.other.assignment.mysql')
+    expect(mysqlScopes).toContain('support.type.property-name.mysql')
     expect(mysqlScopes).toContain('string.unquoted.path.mysql')
     expect(pipSectionScopes).toContain('entity.name.section.pip')
     expect(pipScopes).toContain('string.unquoted.url.pip')
     expect(setupCfgSectionScopes).toContain('entity.name.section.setupcfg')
-    expect(setupCfgScopes).toContain('variable.other.assignment.setupcfg')
+    expect(setupCfgScopes).toContain('support.type.property-name.setupcfg')
   })
 
   it('tokenizes systemd sections, assignments, paths, and specifiers', async () => {
@@ -206,7 +364,7 @@ describe('TextMate grammars', () => {
       'ExecStart=/usr/bin/app --instance %i --literal %%',
     )
     expect(sectionScopes).toContain('entity.name.section.systemd')
-    expect(assignmentScopes).toContain('variable.other.assignment.systemd')
+    expect(assignmentScopes).toContain('support.type.property-name.systemd')
     expect(assignmentScopes).toContain('string.unquoted.path.systemd')
     expect(specifierScopes).toContain('variable.language.specifier.systemd')
   })
@@ -234,6 +392,27 @@ describe('TextMate grammars', () => {
     expect(placeholderScopes).toContain('variable.other.caddy')
   })
 
+  it('distinguishes Caddy hash fragments, quoted braces, escaped quotes and real comments', async () => {
+    const grammar = await loadGrammar('caddy.tmLanguage.json')
+    for (const line of [
+      'redir https://example.test/#fragment',
+      'respond "text # literal {"',
+      'respond `text # literal {`',
+      'respond "escaped \\"quote # literal"',
+    ]) {
+      const scopes = grammar
+        .tokenizeLine(line)
+        .tokens.flatMap((token) => token.scopes)
+      expect(scopes).not.toContain('comment.line.number-sign.caddy')
+      expect(scopes).not.toContain('meta.section.caddy')
+    }
+    const scopes = grammar
+      .tokenizeLine('example.test { # real comment')
+      .tokens.flatMap((token) => token.scopes)
+    expect(scopes).toContain('comment.line.number-sign.caddy')
+    expect(scopes).toContain('entity.name.section.caddy')
+  })
+
   it('tokenizes Python tooling INI sections and assignments', async () => {
     const sectionScopes = await scopesForLine(
       'pyini.tmLanguage.json',
@@ -244,7 +423,7 @@ describe('TextMate grammars', () => {
       'max-line-length = 100',
     )
     expect(sectionScopes).toContain('entity.name.section.pyini')
-    expect(assignmentScopes).toContain('variable.other.assignment.pyini')
+    expect(assignmentScopes).toContain('support.type.property-name.pyini')
     expect(assignmentScopes).toContain('constant.numeric.pyini')
   })
 
@@ -320,7 +499,7 @@ describe('TextMate grammars', () => {
       'enabled = true 8080',
     )
     expect(sectionScopes).toContain('entity.name.section.ini')
-    expect(valueScopes).toContain('variable.other.assignment.ini')
+    expect(valueScopes).toContain('support.type.property-name.ini')
     expect(valueScopes).toContain('keyword.operator.assignment.ini')
     expect(valueScopes).toContain('constant.language.boolean.ini')
     expect(valueScopes).toContain('constant.numeric.ini')
@@ -335,7 +514,7 @@ describe('TextMate grammars', () => {
       'npmrc.tmLanguage.json',
       '_authToken=${NPM_TOKEN}',
     )
-    expect(keyScopes).toContain('variable.other.assignment.npmrc')
+    expect(keyScopes).toContain('support.type.property-name.npmrc')
     expect(keyScopes).toContain('keyword.operator.assignment.npmrc')
     expect(keyScopes).toContain('string.unquoted.url.npmrc')
     expect(variableScopes).toContain('variable.other.npmrc')
@@ -354,7 +533,7 @@ describe('TextMate grammars', () => {
       'yarnrc.tmLanguage.json',
       '"--install.ignore-engines" true',
     )
-    expect(quotedScopes).toContain('variable.other.assignment.yarnrc')
+    expect(quotedScopes).toContain('support.type.property-name.yarnrc')
     expect(quotedScopes).toContain('string.quoted.double.yarnrc')
     expect(urlScopes).toContain('string.unquoted.url.yarnrc')
     expect(flagScopes).toContain('constant.language.boolean.yarnrc')
@@ -374,7 +553,7 @@ describe('TextMate grammars', () => {
       'enabled = true # 42',
     )
     expect(tableScopes).toContain('entity.name.section.toml')
-    expect(valueScopes).toContain('variable.other.assignment.toml')
+    expect(valueScopes).toContain('support.type.property-name.toml')
     expect(valueScopes).toContain('keyword.operator.assignment.toml')
     expect(valueScopes).toContain('constant.numeric.datetime.toml')
     expect(mixedScopes).toContain('constant.language.boolean.toml')
@@ -493,7 +672,7 @@ describe('TextMate grammars', () => {
       'crontab.tmLanguage.json',
       '0 2 * * mon-fri /usr/bin/task',
     )
-    expect(assignmentScopes).toContain('variable.other.assignment.crontab')
+    expect(assignmentScopes).toContain('support.type.property-name.crontab')
     expect(assignmentScopes).toContain('keyword.operator.assignment.crontab')
     expect(scheduleScopes).toContain('keyword.control.schedule.crontab')
     expect(scheduleScopes).toContain('string.quoted.double.crontab')

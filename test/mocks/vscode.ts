@@ -14,7 +14,12 @@ export const mockState = {
   formattingProvider: undefined as
     { provideDocumentFormattingEdits: Handler } | undefined,
   formattingSelector: undefined as unknown,
-  foldingProvider: undefined as { provideFoldingRanges: Handler } | undefined,
+  foldingProvider: undefined as
+    | {
+        provideFoldingRanges: Handler
+        onDidChangeFoldingRanges?: (listener: () => void) => { dispose(): void }
+      }
+    | undefined,
   foldingSelector: undefined as unknown,
   symbolProvider: undefined as { provideDocumentSymbols: Handler } | undefined,
   symbolSelector: undefined as unknown,
@@ -91,6 +96,20 @@ export class FoldingRange {
     public readonly start: number,
     public readonly end: number,
   ) {}
+}
+
+export class EventEmitter<T> {
+  private listeners = new Set<(value: T) => void>()
+  readonly event = (listener: (value: T) => void) => {
+    this.listeners.add(listener)
+    return { dispose: () => this.listeners.delete(listener) }
+  }
+  fire(value: T): void {
+    for (const listener of this.listeners) listener(value)
+  }
+  dispose(): void {
+    this.listeners.clear()
+  }
 }
 
 export class Position {

@@ -1,5 +1,6 @@
 import { tokenizeLine, trimTokenWhitespace } from '../tokenizers/scanner.js'
 import type { Token } from '../tokenizers/types.js'
+import { maskNginxStrings } from '../tokenizers/nginx.js'
 import { joinLines, normalizeLines } from './shared.js'
 
 function formatSegment(tokens: readonly Token[]): string {
@@ -26,6 +27,9 @@ function formatSegment(tokens: readonly Token[]): string {
 
 export function formatNginx(content: string): string {
   const { lines, hasFinalNewline } = normalizeLines(content)
+  // A line-based layout pass cannot safely reindent a quoted multiline value.
+  if (maskNginxStrings(lines.join('\n')).multiline)
+    return joinLines(lines, hasFinalNewline)
   const output: string[] = []
   let depth = 0
 

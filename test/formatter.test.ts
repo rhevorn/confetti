@@ -240,13 +240,13 @@ describe('formatSetupCfg', () => {
     ).toBe('[metadata]\nlong_description: file: README.md\n')
   })
 
-  it('ends a multiline value at a comment, blank line, or section header', () => {
+  it('keeps multiline values across comments and blanks until a real section', () => {
     expect(
       formatSetupCfg(
         'requires =\n    keep me\n# comment\nneeds =\n\n    after blank\n[metadata]\n    indented fresh\n',
       ),
     ).toBe(
-      'requires =\n    keep me\n# comment\nneeds =\n\nafter blank\n[metadata]\nindented fresh\n',
+      'requires =\n    keep me\n# comment\nneeds =\n\n    after blank\n[metadata]\nindented fresh\n',
     )
   })
 })
