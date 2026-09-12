@@ -4,6 +4,21 @@ Run the normal suite with `npm test`, or include source coverage with
 `npm run test:coverage`. These tests never start a server or execute configuration
 commands, and do not install tools automatically.
 
+## Real VS Code Extension Host
+
+Run `npm run test:vscode` to build Confetti and launch the integration suite in
+an isolated Extension Development Host. The runner reuses the locally installed
+stable VS Code when available and otherwise lets `@vscode/test-electron`
+download the stable release. Set `CONFETTI_VSCODE_EXECUTABLE` to test a specific
+installation, or `CONFETTI_VSCODE_VERSION` to download and test a specific
+release such as the minimum supported `1.90.0`.
+
+The suite verifies real extension activation, explicit detection despite an
+automatic-detection whitelist, Format Document edits, folding ranges, outline
+symbols, duplicate-key diagnostics, and immediate settings updates. It uses an
+isolated user-data and extensions directory, and restores every setting it
+changes.
+
 ## Native parser comparisons
 
 `native-parsers.test.ts` compares parsed configuration values before and after
@@ -28,7 +43,7 @@ npx vitest run test/native-parsers.test.ts
 
 The Python comparison is batched through stdin. All subprocesses have timeouts.
 No runtime dependencies are added to the extension. Native Nginx/Caddy parser
-comparisons and a real VS Code Extension Host suite are not included here.
+comparisons are not included here.
 
 ## Reproducible generated inputs
 

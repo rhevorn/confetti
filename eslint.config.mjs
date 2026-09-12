@@ -11,4 +11,18 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': 'error',
     },
   },
+  {
+    files: ['test/vscode/**/*.cjs'],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        module: 'readonly',
+        require: 'readonly',
+        setTimeout: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
 )

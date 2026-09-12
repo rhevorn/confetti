@@ -1,5 +1,6 @@
 dist
 coverage
+.vscode-test
 node_modules
 *.vsix
 examples
