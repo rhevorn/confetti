@@ -5,7 +5,7 @@ export const systemdConfig: ConfigDefinition = {
   id: 'systemd',
   displayName: 'systemd Unit',
   extensions: ['.service', '.socket', '.timer', '.path', '.mount', '.target'],
-  patterns: ['*/systemd/system/*', '*/systemd/user/*'],
+  patterns: ['**/systemd/system/**', '**/systemd/user/**'],
   detect(_filename, content) {
     let score = 0
     if (

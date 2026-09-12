@@ -12,10 +12,28 @@ function escapeRegExp(value: string): string {
 }
 
 function matchesPattern(filename: string, pattern: string): boolean {
-  const expression = pattern
-    .split('*')
-    .map((part) => escapeRegExp(part))
-    .join('.*')
+  let expression = ''
+
+  for (let index = 0; index < pattern.length; index += 1) {
+    const character = pattern[index]
+    if (character !== '*') {
+      expression += escapeRegExp(character)
+      continue
+    }
+
+    if (pattern[index + 1] !== '*') {
+      expression += '[^/]*'
+      continue
+    }
+
+    index += 1
+    if (pattern[index + 1] === '/') {
+      index += 1
+      expression += '(?:.*/)?'
+    } else {
+      expression += '.*'
+    }
+  }
 
   return new RegExp(`^${expression}$`, 'i').test(filename)
 }

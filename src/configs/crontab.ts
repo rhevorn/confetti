@@ -5,7 +5,7 @@ export const crontabConfig: ConfigDefinition = {
   id: 'crontab',
   displayName: 'Crontab',
   filenames: ['crontab'],
-  patterns: ['*/cron.d/*', '*/crontabs/*', '*/spool/cron/*'],
+  patterns: ['**/cron.d/*', '**/crontabs/*', '**/spool/cron/*'],
   detect(_filename, content) {
     let score = 0
     if (

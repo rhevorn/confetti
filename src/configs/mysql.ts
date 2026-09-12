@@ -5,7 +5,7 @@ export const mysqlConfig: ConfigDefinition = {
   id: 'mysql',
   displayName: 'MySQL Config',
   filenames: ['my.cnf', '.my.cnf'],
-  patterns: ['*/mysql/*.cnf', '*/mariadb/*.cnf'],
+  patterns: ['**/mysql/*.cnf', '**/mariadb/*.cnf'],
   detect(_filename, content) {
     let score = 0
     if (

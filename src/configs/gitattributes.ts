@@ -5,7 +5,7 @@ export const gitAttributesConfig: ConfigDefinition = {
   id: 'gitattributes',
   displayName: 'Git Attributes',
   filenames: ['.gitattributes'],
-  patterns: ['*/.git/info/attributes'],
+  patterns: ['**/.git/info/attributes'],
   detect(_filename, content) {
     let score = 0
     if (

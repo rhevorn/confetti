@@ -587,7 +587,7 @@ describe('detectConfig', () => {
       id: 'full-path',
       displayName: 'Full Path',
       languageId: 'full-path',
-      patterns: ['*/config/*.custom'],
+      patterns: ['**/config/*.custom'],
     })
     patternRegistry.register({
       id: 'basename',
@@ -604,6 +604,46 @@ describe('detectConfig', () => {
       detectConfig(patternRegistry, '/app/other/SPECIAL.conf', '')?.definition
         .id,
     ).toBe('basename')
+    expect(
+      detectConfig(patternRegistry, 'config/value.custom', '')?.definition.id,
+    ).toBe('full-path')
+    expect(
+      detectConfig(patternRegistry, '/deep/app/config/value.custom', '')
+        ?.definition.id,
+    ).toBe('full-path')
+    expect(
+      detectConfig(patternRegistry, '/app/config/nested/value.custom', ''),
+    ).toBeUndefined()
+  })
+
+  it('distinguishes single-star and double-star path matching', () => {
+    const globRegistry = new ConfigRegistry()
+    globRegistry.register({
+      id: 'single',
+      displayName: 'Single',
+      languageId: 'single',
+      patterns: ['config/*.conf'],
+    })
+    globRegistry.register({
+      id: 'recursive',
+      displayName: 'Recursive',
+      languageId: 'recursive',
+      patterns: ['**/nested/**'],
+    })
+
+    expect(
+      detectConfig(globRegistry, 'config/app.conf', '')?.definition.id,
+    ).toBe('single')
+    expect(
+      detectConfig(globRegistry, 'config/deep/app.conf', ''),
+    ).toBeUndefined()
+    expect(
+      detectConfig(globRegistry, 'nested/app.conf', '')?.definition.id,
+    ).toBe('recursive')
+    expect(
+      detectConfig(globRegistry, '/workspace/nested/deep/app.conf', '')
+        ?.definition.id,
+    ).toBe('recursive')
   })
 
   it('clamps detector scores and ignores zero-confidence candidates', () => {

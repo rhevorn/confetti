@@ -5,7 +5,7 @@ export const tmuxConfig: ConfigDefinition = {
   id: 'tmux',
   displayName: 'tmux Config',
   filenames: ['tmux.conf'],
-  patterns: ['*/.tmux.conf', '*/.config/tmux/tmux.conf'],
+  patterns: ['**/.tmux.conf', '**/.config/tmux/tmux.conf'],
   detect(_filename, content) {
     let score = 0
     if (/^\s*(?:set|setw|set-option|set-window-option)\s+-g\b/m.test(content)) {

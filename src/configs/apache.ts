@@ -7,10 +7,10 @@ export const apacheConfig: ConfigDefinition = {
   filenames: ['.htaccess', 'httpd.conf', 'apache2.conf'],
   extensions: ['.conf'],
   patterns: [
-    '*/apache2/*.conf',
-    '*/httpd/*.conf',
-    '*/apache2/sites-available/*',
-    '*/apache2/sites-enabled/*',
+    '**/apache2/*.conf',
+    '**/httpd/*.conf',
+    '**/apache2/sites-available/*',
+    '**/apache2/sites-enabled/*',
   ],
   detect(_filename, content) {
     let score = 0

@@ -5,7 +5,7 @@ export const yarnrcConfig: ConfigDefinition = {
   id: 'yarnrc',
   displayName: 'Yarn Config',
   filenames: ['.yarnrc'],
-  patterns: ['*/.yarnrc'],
+  patterns: ['**/.yarnrc'],
   detect(_filename, content) {
     let score = 0
     if (

@@ -6,7 +6,7 @@ export const envConfig: ConfigDefinition = {
   id: 'env',
   displayName: 'Environment Variables',
   filenames: ['.env'],
-  patterns: ['*/.env.*'],
+  patterns: ['**/.env.*'],
   detect(filename, content) {
     const basename = path.basename(filename)
     let score = basename.startsWith('.env.') ? 30 : 0

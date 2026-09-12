@@ -5,7 +5,7 @@ export const gitConfig: ConfigDefinition = {
   id: 'gitconfig',
   displayName: 'Git Config',
   filenames: ['.gitconfig', '.gitmodules'],
-  patterns: ['*/.git/config', '*/.config/git/config'],
+  patterns: ['**/.git/config', '**/.config/git/config'],
   detect(filename, content) {
     let score = filename.endsWith('/.git/config') ? 35 : 0
     if (

@@ -5,7 +5,7 @@ export const pipConfig: ConfigDefinition = {
   id: 'pip',
   displayName: 'pip Config',
   filenames: ['pip.conf'],
-  patterns: ['*/.pip/pip.conf', '*/.config/pip/pip.conf'],
+  patterns: ['**/.pip/pip.conf', '**/.config/pip/pip.conf'],
   detect(_filename, content) {
     let score = 0
     if (

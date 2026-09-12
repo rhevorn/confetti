@@ -5,7 +5,7 @@ export const npmrcConfig: ConfigDefinition = {
   id: 'npmrc',
   displayName: 'npm Config',
   filenames: ['.npmrc'],
-  patterns: ['*/.npmrc'],
+  patterns: ['**/.npmrc'],
   detect(_filename, content) {
     let score = 0
     if (

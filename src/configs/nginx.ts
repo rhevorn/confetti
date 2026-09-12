@@ -6,7 +6,7 @@ export const nginxConfig: ConfigDefinition = {
   displayName: 'Nginx',
   filenames: ['nginx.conf'],
   extensions: ['.conf'],
-  patterns: ['*/nginx/*.conf', '*/nginx/conf.d/*.conf'],
+  patterns: ['**/nginx/*.conf', '**/nginx/conf.d/*.conf'],
   detect(_filename, content) {
     let score = 0
     if (/\b(?:http|events|server|upstream)\s*\{/.test(content)) score += 45

@@ -20,7 +20,7 @@ export const ignoreConfig: ConfigDefinition = {
     '.gcloudignore',
     '.terraformignore',
   ],
-  patterns: ['.*ignore', '*.gitignore', '*/.git/info/exclude'],
+  patterns: ['.*ignore', '*.gitignore', '**/.git/info/exclude'],
   detect(_filename, content) {
     let score = 0
     if (/^\s*!?\*{1,2}\//m.test(content)) score += 35
