@@ -143,7 +143,7 @@ describe('VS Code extension manifest', () => {
       Object.keys(manifest.contributes.configuration.properties).sort(),
     ).toEqual([
       'confetti.autoDetect',
-      'confetti.autoDetect.formats',
+      'confetti.autoDetectFormats',
       'confetti.diagnostics.enable',
       'confetti.format.enable',
       'confetti.format.formats',

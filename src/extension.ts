@@ -133,6 +133,7 @@ function formattingEdits(
 async function detectAndApply(
   document: vscode.TextDocument,
   showMessage = false,
+  respectAutoDetectFormats = false,
 ): Promise<DetectionResult | undefined> {
   const result = detect(document)
   if (!result) {
@@ -145,7 +146,8 @@ async function detectAndApply(
   }
 
   if (
-    isEnabled(result.definition.id, 'autoDetect.formats') &&
+    (!respectAutoDetectFormats ||
+      isEnabled(result.definition.id, 'autoDetectFormats')) &&
     !isCompatibleLanguageId(
       result.definition.id,
       result.definition.languageId,
@@ -169,7 +171,7 @@ async function detectAndApply(
 async function autoDetect(document: vscode.TextDocument): Promise<void> {
   if (!settings().get('autoDetect', true) || document.uri.scheme !== 'file')
     return
-  await detectAndApply(document)
+  await detectAndApply(document, false, true)
 }
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -390,6 +392,30 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.workspace.onDidChangeTextDocument((event) => {
       featureCache.delete(event.document.uri.toString())
       diagnosticCollection.delete(event.document.uri)
+      foldingChanged.fire()
+    }),
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (!event.affectsConfiguration('confetti')) return
+
+      if (event.affectsConfiguration('confetti.diagnostics.enable')) {
+        if (!settings().get('diagnostics.enable', true)) {
+          diagnosticCollection.clear()
+        } else {
+          for (const document of vscode.workspace.textDocuments) {
+            updateDiagnostics(document)
+          }
+        }
+      }
+
+      const activeDocument = vscode.window.activeTextEditor?.document
+      if (
+        activeDocument &&
+        (event.affectsConfiguration('confetti.autoDetect') ||
+          event.affectsConfiguration('confetti.autoDetectFormats'))
+      ) {
+        void autoDetect(activeDocument)
+      }
+      updateStatusBar(activeDocument)
     }),
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) {

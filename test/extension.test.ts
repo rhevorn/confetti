@@ -109,6 +109,7 @@ describe('VS Code extension adapter', () => {
     expect(mockState.saveHandlers).toHaveLength(1)
     expect(mockState.closeHandlers).toHaveLength(1)
     expect(mockState.changeHandlers).toHaveLength(1)
+    expect(mockState.configurationHandlers).toHaveLength(1)
     expect(mockState.activeEditorHandlers).toHaveLength(1)
     expect(mockState.foldingProvider).toBeDefined()
     const foldingSelector = mockState.foldingSelector as Array<{
@@ -426,7 +427,7 @@ describe('VS Code extension adapter', () => {
     expect(read).toHaveBeenCalledTimes(calls)
     read.mockReturnValue('[two]\nx=1\n[three]\nx=2\n')
     mockState.saveHandlers[0]?.(doc)
-    expect(foldingChanged).toHaveBeenCalledTimes(1)
+    expect(foldingChanged).toHaveBeenCalledTimes(2)
     expect(mockState.symbolProvider?.provideDocumentSymbols(doc)).toHaveLength(
       2,
     )
@@ -434,7 +435,7 @@ describe('VS Code extension adapter', () => {
     expect(mockState.foldingProvider?.provideFoldingRanges(doc)).toEqual([])
     expect(mockState.symbolProvider?.provideDocumentSymbols(doc)).toEqual([])
     await command('confetti.detectConfigType')()
-    expect(foldingChanged).toHaveBeenCalledTimes(2)
+    expect(foldingChanged).toHaveBeenCalledTimes(3)
     expect(mockState.symbolProvider?.provideDocumentSymbols(doc)).toHaveLength(
       2,
     )
@@ -552,7 +553,7 @@ describe('VS Code extension adapter', () => {
   })
 
   it('honors per-format whitelists for auto-detection', async () => {
-    mockState.configuration.set('autoDetect.formats', ['nginx'])
+    mockState.configuration.set('autoDetectFormats', ['nginx'])
     activateExtension()
 
     const sshDocument = document(
@@ -567,6 +568,63 @@ describe('VS Code extension adapter', () => {
     const nginxDocument = document('/etc/nginx/nginx.conf', 'events {\n}\n')
     await mockState.openHandlers[0]?.(nginxDocument)
     expect(nginxDocument.languageId).toBe('confetti-nginx')
+  })
+
+  it('lets an explicit detection command override the auto-detect whitelist', async () => {
+    mockState.configuration.set('autoDetectFormats', ['nginx'])
+    const sshDocument = document(
+      '/etc/ssh/ssh_config',
+      'Host work\n  User deploy\n',
+    )
+    mockState.activeEditor = editor(sshDocument) as never
+    activateExtension()
+
+    await command('confetti.detectConfigType')()
+
+    expect(sshDocument.languageId).toBe('confetti-ssh')
+    expect(mockState.languageChanges.at(-1)?.languageId).toBe('confetti-ssh')
+  })
+
+  it('applies Confetti setting changes immediately', async () => {
+    const duplicateDocument = document('/app/.env', 'KEY=1\nKEY=2\n')
+    mockState.activeEditor = editor(duplicateDocument) as never
+    mockState.textDocuments.push(duplicateDocument)
+    activateExtension()
+    expect(mockState.diagnostics?.get(duplicateDocument.uri)).toHaveLength(1)
+
+    const affectsConfiguration = (section: string) =>
+      section === 'confetti' || section === 'confetti.diagnostics.enable'
+    mockState.configuration.set('diagnostics.enable', false)
+    mockState.configurationHandlers[0]?.({ affectsConfiguration })
+    expect(mockState.diagnostics?.has(duplicateDocument.uri)).toBe(false)
+
+    mockState.configuration.set('diagnostics.enable', true)
+    mockState.configurationHandlers[0]?.({ affectsConfiguration })
+    expect(mockState.diagnostics?.get(duplicateDocument.uri)).toHaveLength(1)
+
+    duplicateDocument.languageId = 'plaintext'
+    mockState.configurationHandlers[0]?.({
+      affectsConfiguration: (section: string) =>
+        section === 'confetti' || section === 'confetti.autoDetect',
+    })
+    expect(duplicateDocument.languageId).toBe('confetti-env')
+
+    duplicateDocument.languageId = 'plaintext'
+    mockState.configurationHandlers[0]?.({
+      affectsConfiguration: (section: string) =>
+        section === 'confetti' || section === 'confetti.autoDetectFormats',
+    })
+    expect(duplicateDocument.languageId).toBe('confetti-env')
+
+    mockState.activeEditor = undefined
+    mockState.configurationHandlers[0]?.({
+      affectsConfiguration: (section: string) => section === 'confetti',
+    })
+
+    mockState.configurationHandlers[0]?.({
+      affectsConfiguration: () => false,
+    })
+    expect(mockState.diagnostics?.get(duplicateDocument.uri)).toHaveLength(1)
   })
 
   it('honors per-format whitelists for formatting', () => {

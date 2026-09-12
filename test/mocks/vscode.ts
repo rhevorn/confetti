@@ -27,7 +27,9 @@ export const mockState = {
   saveHandlers: [] as Handler[],
   closeHandlers: [] as Handler[],
   changeHandlers: [] as Handler[],
+  configurationHandlers: [] as Handler[],
   activeEditorHandlers: [] as Handler[],
+  textDocuments: [] as MockDocument[],
   activeEditor: undefined as MockEditor | undefined,
   informationMessages: [] as string[],
   warningMessages: [] as string[],
@@ -61,7 +63,9 @@ export function resetMockState(): void {
   mockState.saveHandlers.length = 0
   mockState.closeHandlers.length = 0
   mockState.changeHandlers.length = 0
+  mockState.configurationHandlers.length = 0
   mockState.activeEditorHandlers.length = 0
+  mockState.textDocuments.length = 0
   mockState.activeEditor = undefined
   mockState.informationMessages.length = 0
   mockState.warningMessages.length = 0
@@ -155,6 +159,9 @@ export const DiagnosticSeverity = {
 }
 
 export const workspace = {
+  get textDocuments(): MockDocument[] {
+    return mockState.textDocuments
+  },
   getConfiguration() {
     return {
       get<T>(key: string, defaultValue: T): T {
@@ -180,6 +187,10 @@ export const workspace = {
   },
   onDidChangeTextDocument(handler: Handler) {
     mockState.changeHandlers.push(handler)
+    return disposable()
+  },
+  onDidChangeConfiguration(handler: Handler) {
+    mockState.configurationHandlers.push(handler)
     return disposable()
   },
 }

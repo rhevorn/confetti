@@ -136,7 +136,7 @@
           "default": true,
           "description": "Automatically detect supported configuration files when they are opened, activated, or saved."
         },
-        "confetti.autoDetect.formats": {
+        "confetti.autoDetectFormats": {
           "type": "array",
           "items": {
             "type": "string"
@@ -196,10 +196,10 @@
           "apache2.conf"
         ],
         "filenamePatterns": [
-          "*/apache2/*.conf",
-          "*/httpd/*.conf",
-          "*/apache2/sites-available/*",
-          "*/apache2/sites-enabled/*"
+          "**/apache2/*.conf",
+          "**/httpd/*.conf",
+          "**/apache2/sites-available/*",
+          "**/apache2/sites-enabled/*"
         ],
         "configuration": "./language-configurations/line-based.json"
       },
@@ -255,8 +255,8 @@
           ".my.cnf"
         ],
         "filenamePatterns": [
-          "*/mysql/*.cnf",
-          "*/mariadb/*.cnf"
+          "**/mysql/*.cnf",
+          "**/mariadb/*.cnf"
         ],
         "configuration": "./language-configurations/ini.json"
       },
@@ -270,8 +270,8 @@
           "pip.conf"
         ],
         "filenamePatterns": [
-          "*/.pip/pip.conf",
-          "*/.config/pip/pip.conf"
+          "**/.pip/pip.conf",
+          "**/.config/pip/pip.conf"
         ],
         "configuration": "./language-configurations/ini.json"
       },
@@ -450,8 +450,8 @@
           "tmux.conf"
         ],
         "filenamePatterns": [
-          "*/.tmux.conf",
-          "*/.config/tmux/tmux.conf"
+          "**/.tmux.conf",
+          "**/.config/tmux/tmux.conf"
         ],
         "configuration": "./language-configurations/line-based.json"
       },
@@ -508,8 +508,8 @@
           ".target"
         ],
         "filenamePatterns": [
-          "*/systemd/system/*",
-          "*/systemd/user/*"
+          "**/systemd/system/**",
+          "**/systemd/user/**"
         ],
         "configuration": "./language-configurations/ini.json"
       },
