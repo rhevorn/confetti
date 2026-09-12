@@ -95,7 +95,7 @@ Formatting:
 
 Extension behavior:
 
-- Keep `confetti.autoDetect`, `confetti.autoDetect.formats`, `confetti.diagnostics.enable`, `confetti.format.enable`, and `confetti.format.formats` available in the VS Code Settings UI. Empty `.formats` lists mean all formats.
+- Keep `confetti.autoDetect`, `confetti.autoDetectFormats`, `confetti.diagnostics.enable`, `confetti.format.enable`, and `confetti.format.formats` available in the VS Code Settings UI. Empty format lists mean all formats. Do not declare a `confetti.autoDetect.formats` child key because VS Code treats it as conflicting with the boolean `confetti.autoDetect` parent key.
 - Keep the confidence threshold internal rather than user-configurable.
 - Release cached detection results when documents close, and clear diagnostics for closed documents.
 - Log formatter invocation, selected format, result, elapsed time, and path to the Confetti output channel.
@@ -126,6 +126,7 @@ Do not claim support until detection, highlighting, formatting, examples, and te
 npm install
 npm test
 npm run test:coverage
+npm run test:vscode
 npm run typecheck
 npm run lint
 npm run format:check
@@ -135,6 +136,8 @@ npm run package
 ```
 
 Use `npm run check` as the normal quality gate. Use `npm run package` before release-related changes.
+Use `npm run test:vscode` for the real Extension Development Host integration
+suite before a release; it is intentionally separate from the fast unit-test gate.
 
 ## Test requirements
 

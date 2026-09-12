@@ -2,6 +2,15 @@
 
 All notable changes to Confetti are documented in this file.
 
+## 1.4.1 - 2026-09-11
+
+- Let the explicit **Confetti: Detect Config Type** command apply a detected language even when that format is excluded from automatic detection.
+- Apply Confetti setting changes immediately, including clearing and restoring duplicate-key diagnostics without waiting for another file event.
+- Invalidate stale folding ranges as soon as a document changes while keeping the typing-path handler O(1).
+- Use path-aware `*` and `**` matching for detectors, including relative paths and nested systemd drop-in files.
+- Rename the non-functional `confetti.autoDetect.formats` setting to `confetti.autoDetectFormats`; VS Code treats a child setting as conflicting with the boolean `confetti.autoDetect` key.
+- Add a real VS Code Extension Host integration test command for detection, formatting, folding, symbols, diagnostics, and settings behavior.
+
 ## 1.4.0 - 2026-09-04
 
 - Add detection, highlighting, and formatting for systemd unit files (`.service`, `.socket`, `.timer`, `.path`, `.mount`, `.target`, and drop-in directories), with backslash line continuations preserved during formatting.
@@ -19,7 +28,7 @@ All notable changes to Confetti are documented in this file.
 - Add duplicate-key diagnostics for dotenv files, INI-family sections (INI, Git Config, MySQL, pip, setup.cfg), and TOML tables, reported as warnings when files are opened, activated, or saved — never while typing. Controlled by `confetti.diagnostics.enable`.
 - Add Nginx snippets for server blocks, locations, reverse proxies, upstreams, HTTPS servers, and HTTP-to-HTTPS redirects.
 - Add a status bar indicator showing the detected format and confidence, clickable to open detection details.
-- Add per-format settings `confetti.autoDetect.formats` and `confetti.format.formats` to restrict detection and formatting to specific format ids; an empty list keeps every format enabled.
+- Add per-format settings (then named `confetti.autoDetect.formats` and `confetti.format.formats`) to restrict detection and formatting to specific format ids; an empty list keeps every format enabled.
 - Expand Ignore detection to any `.*ignore` filename, including `.cursorignore`, `.vscodeignore`, `.vercelignore`, and related files.
 - Add detection, highlighting, and formatting for classic Yarn `.yarnrc` files.
 

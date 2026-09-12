@@ -35,7 +35,7 @@ Confetti 不会在每次输入时持续扫描整个文档。检测、诊断和�
 
 资源占用情况：
 
-- 1.4.0 的 VSIX 约为 **204 KB**，没有运行时 npm 依赖。
+- 1.4.1 的 VSIX 约为 **204 KB**，没有运行时 npm 依赖。
 - 检测 1 MB 示例后，保留检测结果时堆内存增量约 **0.06 MB**；释放结果并执行 GC 后约为 **0.02 MB**。
 - 格式化 1 MB Nginx 示例后，立即测得的临时堆内存增量最高约 **75 MB**；释放结果并执行 GC 后，增量回到接近零。Tokenization 和格式化会处理完整文档，因此临时内存会随文件大小增长。
 - 检测缓存只保存很小的结果对象，并在文档关闭时删除。
@@ -158,12 +158,12 @@ Confetti 有意不为 YAML、Ignore 文件和工具版本文件注册 formatter�
 | 设置                          | 默认值 | 说明                                          |
 | ----------------------------- | ------ | --------------------------------------------- |
 | `confetti.autoDetect`         | `true` | 打开、切换或保存文件时自动识别配置类型        |
-| `confetti.autoDetect.formats` | `[]`   | 限制自动识别的格式 id；空列表表示支持全部格式 |
+| `confetti.autoDetectFormats`  | `[]`   | 限制自动识别的格式 id；空列表表示支持全部格式 |
 | `confetti.diagnostics.enable` | `true` | 高亮重复键；只在打开、切换和保存时运行        |
 | `confetti.format.enable`      | `true` | 启用 Confetti 文档格式化                      |
 | `confetti.format.formats`     | `[]`   | 限制格式化的格式 id；空列表表示支持全部格式   |
 
-两个 `boolean` 设置可以直接在 VS Code Settings UI 中通过复选框修改；两个 `.formats` 设置接受格式 id 列表（例如 `["nginx", "ssh"]`），空列表表示启用全部格式。
+三个 `boolean` 设置可以直接在 VS Code Settings UI 中通过复选框修改；`confetti.autoDetectFormats` 和 `confetti.format.formats` 接受格式 id 列表（例如 `["nginx", "ssh"]`），空列表表示启用全部格式。
 
 ## 确认使用了哪个 formatter
 

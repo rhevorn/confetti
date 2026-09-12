@@ -2,7 +2,7 @@
   "name": "confetti",
   "displayName": "Confetti",
   "description": "Detect, highlight, and format .env, .ini, .toml, .yml, .conf, nginx, Apache, MySQL, tmux, gitignore, SSH, and 15+ other config files in one local extension, with folding, outlines, snippets, and duplicate-key diagnostics.",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "private": true,
   "publisher": "rhevorn",
   "license": "MIT",
