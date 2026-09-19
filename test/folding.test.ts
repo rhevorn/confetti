@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { computeFoldingRanges } from '../src/features/folding.js'
+import { computeDocumentSymbols } from '../src/features/symbols.js'
 
 describe('computeFoldingRanges', () => {
   it('folds nested nginx blocks and ignores braces in strings and comments', () => {
@@ -149,9 +150,98 @@ describe('computeFoldingRanges', () => {
     ])
   })
 
+  it('folds TOML tables', () => {
+    expect(computeFoldingRanges('toml', '[a]\nx = 1\n[b]\ny = 2\n')).toEqual([
+      { startLine: 0, endLine: 1 },
+      { startLine: 2, endLine: 3 },
+    ])
+    expect(
+      computeFoldingRanges(
+        'toml',
+        '[project.urls]\nhome = "x"\n["quoted"]\nv = 1\n',
+      ),
+    ).toEqual([
+      { startLine: 0, endLine: 1 },
+      { startLine: 2, endLine: 3 },
+    ])
+    expect(
+      computeFoldingRanges('toml', '[a]\r\nx = 1\r\n[b]\r\ny = 2\r\n'),
+    ).toEqual([
+      { startLine: 0, endLine: 1 },
+      { startLine: 2, endLine: 3 },
+    ])
+  })
+
+  it('keeps trailing blank and comment lines out of TOML table ranges', () => {
+    const content = '[a]\nx = 1\n\n# trailing\n[b]\ny = 2\n'
+
+    expect(computeFoldingRanges('toml', content)).toEqual([
+      { startLine: 0, endLine: 1 },
+      { startLine: 4, endLine: 5 },
+    ])
+  })
+
+  it('drops TOML tables that hold no content and folds arrays of tables', () => {
+    expect(computeFoldingRanges('toml', '[a]\n[b]\nx = 1\n')).toEqual([
+      { startLine: 1, endLine: 2 },
+    ])
+    expect(computeFoldingRanges('toml', '[a]\nx = 1\n[b]\n')).toEqual([
+      { startLine: 0, endLine: 1 },
+    ])
+    expect(
+      computeFoldingRanges('toml', '[[items]]\nid = 1\n[[items]]\nid = 2\n'),
+    ).toEqual([
+      { startLine: 0, endLine: 1 },
+      { startLine: 2, endLine: 3 },
+    ])
+  })
+
+  it('ignores table-like text inside TOML multiline strings', () => {
+    const content = '[a]\ntext = """\n[not.a.table]\n"""\n[b]\nx = 1\n'
+
+    expect(computeFoldingRanges('toml', content)).toEqual([
+      { startLine: 0, endLine: 3 },
+      { startLine: 4, endLine: 5 },
+    ])
+  })
+
+  it('reports the same TOML table extents for folding and outline', () => {
+    const content =
+      '[a]\nx = 1\n\n# note\n[b]\ny = 2\n\ntext = """\n[not.a.table]\n"""\n'
+    const expected = [
+      { startLine: 0, endLine: 1 },
+      { startLine: 4, endLine: 9 },
+    ]
+
+    expect(computeFoldingRanges('toml', content)).toEqual(expected)
+    expect(
+      computeDocumentSymbols('toml', content).map(({ startLine, endLine }) => ({
+        startLine,
+        endLine,
+      })),
+    ).toEqual(expected)
+  })
+
+  it('keeps a hash-leading multiline string line inside its TOML table', () => {
+    const content = '[a]\nx = """\n#hash"""\n[b]\ny = 1\n'
+
+    expect(computeFoldingRanges('toml', content)).toEqual([
+      { startLine: 0, endLine: 2 },
+      { startLine: 3, endLine: 4 },
+    ])
+    expect(
+      computeDocumentSymbols('toml', content).map(({ endLine }) => endLine),
+    ).toEqual([2, 4])
+  })
+
   it('returns no ranges for formats without folding strategies', () => {
-    for (const id of ['tmux', 'screen', 'inputrc', 'env', 'toml', 'unknown']) {
+    for (const id of ['tmux', 'screen', 'inputrc', 'env', 'unknown']) {
       expect(computeFoldingRanges(id, 'key = value\n')).toEqual([])
     }
+  })
+
+  it('returns no TOML ranges for empty or header-free content', () => {
+    expect(computeFoldingRanges('toml', '')).toEqual([])
+    expect(computeFoldingRanges('toml', 'x = 1\n')).toEqual([])
   })
 })

@@ -2,6 +2,8 @@ import { normalizeLines } from '../formatters/shared.js'
 import { tokenizeLine } from '../tokenizers/scanner.js'
 import { caddyBlocks } from './caddy.js'
 import { maskNginxStrings } from '../tokenizers/nginx.js'
+import { tokenizeToml } from '../tokenizers/toml.js'
+import { tomlHeaders } from '../tokenizers/toml-headers.js'
 
 export interface FoldingRangeInfo {
   startLine: number
@@ -33,18 +35,23 @@ export const isSshBlockHeader: HeaderPredicate = (line) =>
  * Finds the last line at or before `before` that still holds real content,
  * skipping trailing blank and comment lines so folded regions do not
  * swallow the whitespace separating them from the next block.
+ *
+ * `alwaysContent` names lines the raw-text comment test would misjudge, such
+ * as a TOML multiline string whose last line begins with `#`.
  */
 function contentEnd(
   lines: readonly string[],
   before: number,
   comments: readonly string[],
+  alwaysContent?: ReadonlySet<number>,
 ): number {
   let end = before
   while (end >= 0) {
     const trimmed = lines[end].trim()
     if (
-      trimmed !== '' &&
-      !comments.some((comment) => trimmed.startsWith(comment))
+      alwaysContent?.has(end) === true ||
+      (trimmed !== '' &&
+        !comments.some((comment) => trimmed.startsWith(comment)))
     ) {
       break
     }
@@ -159,21 +166,108 @@ function tagFoldingRanges(content: string): FoldingRangeInfo[] {
   return ranges
 }
 
+export interface TomlTableBlock {
+  name: string
+  startLine: number
+  startCharacter: number
+  headerEndCharacter: number
+  endLine: number
+  endCharacter: number
+}
+
+/**
+ * Lines covered by a multiline string. `tomlHeaders` already ignores
+ * table-like text inside them; the end walk needs the same awareness, or a
+ * table whose last content line starts with `#` inside a string ends a line
+ * early.
+ */
+function multilineStringLines(content: string): ReadonlySet<number> {
+  const lines = new Set<number>()
+  let line = 0
+
+  for (const token of tokenizeToml(content.replace(/\r\n?/g, '\n'))) {
+    const span = token.value.split('\n').length - 1
+    if (
+      token.kind === 'multiline-basic-string' ||
+      token.kind === 'multiline-literal-string'
+    ) {
+      for (let offset = 0; offset <= span; offset += 1) lines.add(line + offset)
+    }
+    line += span
+  }
+
+  return lines
+}
+
+/**
+ * Table extents shared by folding ranges and outline symbols, so the two can
+ * never disagree about where a table ends.
+ */
+export function tomlTableBlocks(content: string): TomlTableBlock[] {
+  const { lines } = normalizeLines(content)
+  const headers = tomlHeaders(content)
+  const alwaysContent = multilineStringLines(content)
+
+  return headers.map((header, index) => {
+    const endLine = contentEnd(
+      lines,
+      (headers[index + 1]?.line ?? lines.length) - 1,
+      HASH_COMMENTS,
+      alwaysContent,
+    )
+    return {
+      name: header.name,
+      startLine: header.line,
+      startCharacter: header.start,
+      headerEndCharacter: header.end,
+      endLine,
+      endCharacter: lines[endLine].length,
+    }
+  })
+}
+
+function tomlFoldingRanges(content: string): FoldingRangeInfo[] {
+  return tomlTableBlocks(content)
+    .filter(({ startLine, endLine }) => endLine > startLine)
+    .map(({ startLine, endLine }) => ({ startLine, endLine }))
+}
+
+export type FoldingStrategy = (content: string) => FoldingRangeInfo[]
+
+const caddyFolding: FoldingStrategy = (content) =>
+  caddyBlocks(content)
+    .filter((block) => block.endLine > block.startLine)
+    .map(({ startLine, endLine }) => ({ startLine, endLine }))
+
+const sshFolding: FoldingStrategy = (content) =>
+  blockFoldingRanges(content, isSshBlockHeader, HASH_COMMENTS)
+
+const iniFolding: FoldingStrategy = (content) =>
+  blockFoldingRanges(content, isIniSectionHeader, INI_COMMENTS)
+
+// The INI family comes first so that an explicit entry below always wins:
+// Map construction is last-write-wins, and the derived id set cannot tell the
+// difference.
+const FOLDING_STRATEGIES = new Map<string, FoldingStrategy>([
+  ...Array.from(INI_SECTION_FORMATS, (id): [string, FoldingStrategy] => [
+    id,
+    iniFolding,
+  ]),
+  ['nginx', braceFoldingRanges],
+  ['caddy', caddyFolding],
+  ['apache', tagFoldingRanges],
+  ['ssh', sshFolding],
+  ['toml', tomlFoldingRanges],
+])
+
+/** Format ids with folding support, derived from the dispatch table. */
+export const FOLDING_FORMAT_IDS: ReadonlySet<string> = new Set(
+  FOLDING_STRATEGIES.keys(),
+)
+
 export function computeFoldingRanges(
   id: string,
   content: string,
 ): FoldingRangeInfo[] {
-  if (id === 'nginx') return braceFoldingRanges(content)
-  if (id === 'caddy')
-    return caddyBlocks(content)
-      .filter((block) => block.endLine > block.startLine)
-      .map(({ startLine, endLine }) => ({ startLine, endLine }))
-  if (id === 'apache') return tagFoldingRanges(content)
-  if (id === 'ssh') {
-    return blockFoldingRanges(content, isSshBlockHeader, HASH_COMMENTS)
-  }
-  if (INI_SECTION_FORMATS.has(id)) {
-    return blockFoldingRanges(content, isIniSectionHeader, INI_COMMENTS)
-  }
-  return []
+  return FOLDING_STRATEGIES.get(id)?.(content) ?? []
 }

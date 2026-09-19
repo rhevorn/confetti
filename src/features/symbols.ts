@@ -1,6 +1,5 @@
 import { normalizeLines } from '../formatters/shared.js'
 import { tokenizeLine } from '../tokenizers/scanner.js'
-import { tomlHeaders } from '../tokenizers/toml-headers.js'
 import { caddyBlocks } from './caddy.js'
 import { maskNginxStrings } from '../tokenizers/nginx.js'
 import {
@@ -10,6 +9,7 @@ import {
   headerBlocks,
   isIniSectionHeader,
   isSshBlockHeader,
+  tomlTableBlocks,
   type HeaderPredicate,
 } from './folding.js'
 
@@ -90,53 +90,62 @@ function headerSymbols(
 }
 
 function tomlSymbols(content: string): SymbolInfo[] {
-  const { lines } = normalizeLines(content)
-  const headers = tomlHeaders(content)
-  return headers.map((header, index) => {
-    let endLine = (headers[index + 1]?.line ?? lines.length) - 1
-    while (
-      endLine > header.line &&
-      (lines[endLine].trim() === '' ||
-        lines[endLine].trimStart().startsWith('#'))
-    )
-      endLine -= 1
-    return {
-      name: header.name,
-      kind: 'table',
-      startLine: header.line,
-      startCharacter: header.start,
-      headerEndCharacter: header.end,
-      endLine,
-      endCharacter: lines[endLine].length,
-    }
-  })
+  return tomlTableBlocks(content).map((block) => ({
+    name: block.name,
+    kind: 'table',
+    startLine: block.startLine,
+    startCharacter: block.startCharacter,
+    headerEndCharacter: block.headerEndCharacter,
+    endLine: block.endLine,
+    endCharacter: block.endCharacter,
+  }))
 }
+
+export type SymbolStrategy = (content: string) => SymbolInfo[]
+
+const caddySymbols: SymbolStrategy = (content) =>
+  caddyBlocks(content).filter((block) => block.name !== '')
+
+const sshSymbols: SymbolStrategy = (content) =>
+  headerSymbols(
+    content,
+    isSshBlockHeader,
+    (header) => header,
+    'host',
+    HASH_COMMENTS,
+  )
+
+const iniSymbols: SymbolStrategy = (content) =>
+  headerSymbols(
+    content,
+    isIniSectionHeader,
+    (header) => header.slice(1, -1),
+    'section',
+    INI_COMMENTS,
+  )
+
+// The INI family comes first so that an explicit entry below always wins:
+// Map construction is last-write-wins, and the derived id set cannot tell the
+// difference.
+const SYMBOL_STRATEGIES = new Map<string, SymbolStrategy>([
+  ...Array.from(INI_SECTION_FORMATS, (id): [string, SymbolStrategy] => [
+    id,
+    iniSymbols,
+  ]),
+  ['nginx', braceSymbols],
+  ['caddy', caddySymbols],
+  ['ssh', sshSymbols],
+  ['toml', tomlSymbols],
+])
+
+/** Format ids with outline symbol support, derived from the dispatch table. */
+export const SYMBOL_FORMAT_IDS: ReadonlySet<string> = new Set(
+  SYMBOL_STRATEGIES.keys(),
+)
 
 export function computeDocumentSymbols(
   id: string,
   content: string,
 ): SymbolInfo[] {
-  if (id === 'nginx') return braceSymbols(content)
-  if (id === 'caddy')
-    return caddyBlocks(content).filter((block) => block.name !== '')
-  if (id === 'ssh') {
-    return headerSymbols(
-      content,
-      isSshBlockHeader,
-      (header) => header,
-      'host',
-      HASH_COMMENTS,
-    )
-  }
-  if (id === 'toml') return tomlSymbols(content)
-  if (INI_SECTION_FORMATS.has(id)) {
-    return headerSymbols(
-      content,
-      isIniSectionHeader,
-      (header) => header.slice(1, -1),
-      'section',
-      INI_COMMENTS,
-    )
-  }
-  return []
+  return SYMBOL_STRATEGIES.get(id)?.(content) ?? []
 }

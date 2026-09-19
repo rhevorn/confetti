@@ -1,0 +1,6 @@
+[project]
+name = "confetti-host"
+version = "0.1.0"
+
+[project.urls]
+Homepage = "https://example.test"

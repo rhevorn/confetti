@@ -1,5 +1,8 @@
 import { normalizeLines } from '../formatters/shared.js'
 import { scanCaddyLines } from '../tokenizers/caddy.js'
+// Type-only on purpose: a value import here would make caddy -> symbols ->
+// folding -> caddy a runtime cycle, and the dispatch maps are built at module
+// scope.
 import type { SymbolInfo } from './symbols.js'
 
 /** Return actual lexical blocks; payload braces never reach this stack. */
