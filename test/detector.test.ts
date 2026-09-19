@@ -646,6 +646,119 @@ describe('detectConfig', () => {
     ).toBe('recursive')
   })
 
+  it('reports the structural and content signals behind each score', () => {
+    const exact = detectConfig(
+      registry,
+      '/etc/nginx/nginx.conf',
+      'server {\n  listen 80;\n}\n',
+    )
+    expect(exact?.signals).toEqual([
+      { kind: 'filename', label: 'nginx.conf', score: 100 },
+      {
+        kind: 'content',
+        label: 'Format-specific content signals',
+        score: 70,
+      },
+    ])
+
+    const extension = detectConfig(
+      registry,
+      '/srv/production.conf',
+      'server {\n  listen 80;\n}\n',
+    )
+    expect(extension?.definition.id).toBe('nginx')
+    expect(extension?.signals).toEqual([
+      { kind: 'extension', label: '.conf', score: 10 },
+      {
+        kind: 'content',
+        label: 'Format-specific content signals',
+        score: 70,
+      },
+    ])
+
+    const pattern = detectConfig(
+      registry,
+      '/etc/systemd/system/demo.service.d/override.conf',
+      '',
+    )
+    expect(pattern?.signals).toEqual([
+      {
+        kind: 'pattern',
+        label: '**/systemd/system/**',
+        score: 70,
+      },
+    ])
+  })
+
+  it('lets valid user associations override built-in detection', () => {
+    const result = detectConfig(
+      registry,
+      '/workspace/deploy/proxy.conf',
+      'server {\n  listen 80;\n}\n',
+      {
+        relativePath: 'deploy/proxy.conf',
+        associations: {
+          '**/*.conf': 'ini',
+          'deploy/proxy.conf': 'caddy',
+        },
+      },
+    )
+
+    expect(result?.definition.id).toBe('caddy')
+    expect(result?.confidence).toBe(100)
+    expect(result?.signals).toEqual([
+      { kind: 'association', label: 'deploy/proxy.conf', score: 100 },
+    ])
+    expect(result?.candidates[0]).toMatchObject({
+      definition: { id: 'caddy' },
+      confidence: 100,
+    })
+    expect(
+      result?.candidates.filter(({ definition }) => definition.id === 'caddy'),
+    ).toHaveLength(1)
+  })
+
+  it('breaks equally specific association ties by pattern', () => {
+    const result = detectConfig(registry, '/workspace/app.cfg', 'anything', {
+      associations: {
+        '*.cfg': 'nginx',
+        'app.*': 'caddy',
+      },
+    })
+    expect(result?.definition.id).toBe('nginx')
+    expect(result?.signals[0]?.label).toBe('*.cfg')
+  })
+
+  it('matches associations against basenames, relative paths, and Windows paths', () => {
+    expect(
+      detectConfig(registry, '/workspace/private.internal-env', 'anything', {
+        associations: { '*.internal-env': 'env' },
+      })?.definition.id,
+    ).toBe('env')
+    expect(
+      detectConfig(registry, String.raw`C:\repo\deploy\site.cfg`, 'anything', {
+        relativePath: String.raw`deploy\site.cfg`,
+        associations: { [String.raw`**\deploy\*.cfg`]: 'nginx' },
+      })?.definition.id,
+    ).toBe('nginx')
+  })
+
+  it('ignores invalid and non-matching associations', () => {
+    const options = {
+      associations: {
+        '**/*.conf': 'missing-format',
+        '*.yaml': 'nginx',
+      },
+    }
+    expect(
+      detectConfig(registry, '/etc/nginx/nginx.conf', 'server {\n}\n', options)
+        ?.definition.id,
+    ).toBe('nginx')
+    expect(
+      detectConfig(registry, '/app/notes.txt', 'plain text\n', options),
+    ).toBeUndefined()
+  })
+
   it('clamps detector scores and ignores zero-confidence candidates', () => {
     const scoreRegistry = new ConfigRegistry()
     scoreRegistry.register({
