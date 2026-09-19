@@ -16,8 +16,9 @@ release such as the minimum supported `1.90.0`.
 The suite verifies real extension activation, explicit detection despite an
 automatic-detection whitelist, Format Document edits and previews, workspace-
 relative associations, folding ranges, outline symbols, duplicate-key
-diagnostics, and immediate settings updates. It uses an isolated user-data and
-extensions directory, and restores every setting it changes.
+diagnostics, the supported-format list, and immediate settings updates. It uses
+an isolated user-data and extensions directory, and restores every setting it
+changes.
 
 ## Native parser comparisons
 

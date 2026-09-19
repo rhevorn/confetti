@@ -2,7 +2,7 @@
   "name": "confetti",
   "displayName": "Confetti",
   "description": "Detect and highlight TOML, YAML, ENV, INI, CONF, and 25+ config file formats; format supported files with one fast, local VS Code extension.",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "private": true,
   "publisher": "rhevorn",
   "license": "MIT",

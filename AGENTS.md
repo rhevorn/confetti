@@ -64,7 +64,7 @@ YAML, Ignore files, and tool version files are detection and highlighting only. 
 - `src/core/`: editor-independent registry, detection, formatting, and shared types
 - `src/configs/`: one `ConfigDefinition` per supported format
 - `src/formatters/`: one formatter per format with formatting support, plus carefully scoped shared helpers
-- `src/features/`: editor-independent computations for folding ranges, outline symbols, and duplicate-key diagnostics
+- `src/features/`: editor-independent computations for folding ranges, outline symbols, duplicate-key diagnostics, and the capability summary behind the supported-format list
 - `src/tokenizers/`: editor-independent token types and safe lexical scanning primitives
 - `src/extension.ts`: thin VS Code adapter, commands, providers, events, logging, and cache lifecycle
 - `syntaxes/`: self-contained TextMate grammar JSON files
@@ -103,6 +103,8 @@ Extension behavior:
 - Log formatter invocation, selected format, result, elapsed time, and path to the Confetti output channel.
 - Keep the explicit **Confetti: Format Config** command so users can distinguish Confetti from other formatters.
 - Keep **Confetti: Preview Formatting** read-only and implemented with the native VS Code diff editor, not a Webview.
+- Keep **Confetti: Show Supported Formats** the single place that documents format ids for `confetti.autoDetectFormats`, `confetti.format.formats`, and `confetti.associations`. It writes to the output channel, shows no notification, and returns the lines it rendered so the Extension Host suite can assert on them.
+- Derive a format's capabilities from the feature dispatch tables rather than storing them on `ConfigDefinition`. [`src/features/folding.ts`](src/features/folding.ts), [`src/features/symbols.ts`](src/features/symbols.ts), and [`src/features/diagnostics.ts`](src/features/diagnostics.ts) expose id sets built from the same `Map` that performs dispatch, so a capability can never drift from its implementation. Snippets are the exception: [`src/features/capabilities.ts`](src/features/capabilities.ts) holds them as a constant that [`test/manifest.test.ts`](test/manifest.test.ts) checks against the contributed files.
 - Keep exactly one event handler per VS Code event (open, save, close, active-editor change, document change); new features wire into the existing handlers instead of registering more listeners. The document-change handler must stay O(1) — it only drops stale diagnostics, and never rescans content while typing.
 - Wire folding, symbols, diagnostics, and the status bar through the existing handlers so nothing runs while typing.
 
@@ -158,7 +160,7 @@ Press `F5` in VS Code to launch the Extension Development Host. Open files under
 - The language mode is detected correctly.
 - Keys, values, sections, directives, strings, numbers, variables, and comments receive useful highlighting.
 - Folding, the outline view, the status bar indicator, and duplicate-key warnings work for the formats that support them.
-- Nginx snippets expand and insert variables such as `$host` literally.
+- Snippets expand, and literal `$` such as `$host`, `$MAINPID`, and `${APACHE_LOG_DIR}` is inserted as written rather than treated as a snippet variable.
 - **Format Document With...** lists Confetti where expected.
 - **Confetti: Format Config** applies the Confetti formatter directly.
 - **Confetti: Show Formatter Output** records the invocation.

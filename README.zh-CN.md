@@ -35,7 +35,7 @@ Confetti 不会在每次输入时持续扫描整个文档。检测、诊断和�
 
 资源占用情况：
 
-- 1.5.1 的 VSIX 约为 **209 KB**，没有运行时 npm 依赖。
+- 1.6.0 的 VSIX 约为 **219 KB**，没有运行时 npm 依赖。
 - 检测 1 MB 示例后，保留检测结果时堆内存增量约 **0.17 MB**；释放结果并执行 GC 后约为 **0.06 MB**。
 - 格式化 1 MB Nginx 示例后，立即测得的临时堆内存增量最高约 **75 MB**；释放结果并执行 GC 后，增量回到接近零。Tokenization 和格式化会处理完整文档，因此临时内存会随文件大小增长。
 - 检测缓存只保存很小的结果对象，并在文档关闭时删除。
@@ -111,21 +111,21 @@ YAML 的字面量块（`|`）和折叠块（`>`）会跨行保持字符串高亮
 
 除了识别、高亮和格式化之外，Confetti 还提供：
 
-- **代码折叠**：Nginx 和 Apache 代码块、INI 系 section、SSH `Host`/`Match` 块
-- **大纲符号**：Nginx 代码块、SSH 主机、TOML table、INI 系 section
-- **重复键警告**：dotenv、INI 系 section 和 TOML table 中的重复键会以警告标出，让悄悄覆盖前值的键一目了然
-- **Nginx snippets**：server 块、location、反向代理、upstream、HTTPS server 和跳转
+- **代码折叠**：Nginx、Caddy 和 Apache 代码块、SSH `Host`/`Match` 块、TOML table、INI 系 section
+- **大纲符号**：Nginx 和 Caddy 代码块、SSH 主机、TOML table、INI 系 section
+- **重复键警告**：dotenv、Java Properties、INI 系 section 和 TOML table 中的重复键会以警告标出，让悄悄覆盖前值的键一目了然
+- **Snippets**：Nginx、Apache、Caddy、SSH、systemd 和 TOML
 - **状态栏指示器**：显示识别的格式和置信度，点击可查看完整识别详情
 
-折叠、大纲和诊断只在打开、切换、保存文件或手动检测时计算。Provider 请求只读取缓存；编辑会使缓存失效，但不会扫描文档。保存、切回该文件或执行 **Confetti: Detect Config Type** 可刷新这些功能。Snippet 中的 Nginx 变量（如 `$host`）会原样插入。
+折叠、大纲和诊断只在打开、切换、保存文件或手动检测时计算。Provider 请求只读取缓存；编辑会使缓存失效，但不会扫描文档。保存、切回该文件或执行 **Confetti: Detect Config Type** 可刷新这些功能。Snippet 中的字面量 `$`（如 `$host`、`$MAINPID`、`${APACHE_LOG_DIR}`）会原样插入，不会被当成 snippet 变量展开。
 
-重复警告会区分格式语义：dotenv 引号内的多行值和 Python INI 续行不会被当成键；TOML 子表属于当前数组元素。systemd 只检查少量已知的单值配置项，不会对 `Environment`、`ExecStart` 等可重复指令报警。这些检查不等同于完整配置校验。
+重复警告会区分格式语义：dotenv 引号内的多行值和 Python INI 续行不会被当成键；TOML 子表属于当前数组元素；Java Properties 的 key 会在反转义后比较，因此 `a\u0041` 与 `aA` 视为同一个键，用 `\` 折到下一行的 key 也会先拼成逻辑行再比较，但警告与高亮仍显示你实际写下的 key 文本。systemd 只检查少量已知的单值配置项，不会对 `Environment`、`ExecStart` 等可重复指令报警。这些检查不等同于完整配置校验。
 
 ## 格式化
 
 保留 Caddy 引号字符串和 heredoc 正文、dotenv 多行值、Python INI 值的内容。Python INI 的 key 统一顶格、续行统一缩进 4 个空格，保留值内部的空格、注释和空行。tox 的 `[testenv]` / `[testenv:...]` 中，包含同级裸包名的明显错误 `deps` 列表可恢复缺失的续行缩进；不会仅凭合法同级赋值看起来像版本约束，就把它改成依赖项。遇到未闭合的 Caddy 字符串、heredoc 或反斜杠续行时，保持原样，不猜测其布局。
 
-包含跨行引号值的 Nginx 文档会保持原样，不执行格式化。Nginx 和 Caddy 的折叠、大纲不会把字符串正文中的大括号当成代码块；Caddy 高亮也会保留跨行字符串和 heredoc 的字面量状态。TOML 大纲会忽略多行字符串中形似表头的文本。
+包含跨行引号值的 Nginx 文档会保持原样，不执行格式化。Nginx 和 Caddy 的折叠、大纲不会把字符串正文中的大括号当成代码块；Caddy 高亮也会保留跨行字符串和 heredoc 的字面量状态。TOML 的折叠和大纲都会忽略多行字符串中形似表头的文本。
 
 在 `[flake8]` 中，`max-complexity` 等整数配置项之后误缩进的赋值行，会恢复为独立 key。此恢复规则不会应用到 `exclude`、`per-file-ignores` 等多行配置值内部。
 
@@ -147,13 +147,14 @@ Confetti 有意不为 YAML、Ignore 文件和工具版本文件注册 formatter�
 
 使用 `Ctrl+Shift+P` 或 `Cmd+Shift+P` 打开命令面板，然后搜索：
 
-| 命令                                | 说明                               |
-| ----------------------------------- | ---------------------------------- |
-| **Confetti: Detect Config Type**    | 识别当前文件并应用对应语言模式     |
-| **Confetti: Format Config**         | 直接使用 Confetti 格式化当前文件   |
-| **Confetti: Preview Formatting**    | 在只读原生 Diff 中预览格式化结果   |
-| **Confetti: Show Detection Info**   | 显示识别依据、置信度和其他候选格式 |
-| **Confetti: Show Formatter Output** | 查看 Confetti formatter 的调用日志 |
+| 命令                                 | 说明                               |
+| ------------------------------------ | ---------------------------------- |
+| **Confetti: Detect Config Type**     | 识别当前文件并应用对应语言模式     |
+| **Confetti: Format Config**          | 直接使用 Confetti 格式化当前文件   |
+| **Confetti: Preview Formatting**     | 在只读原生 Diff 中预览格式化结果   |
+| **Confetti: Show Detection Info**    | 显示识别依据、置信度和其他候选格式 |
+| **Confetti: Show Formatter Output**  | 查看 Confetti formatter 的调用日志 |
+| **Confetti: Show Supported Formats** | 列出全部格式 id 及各格式支持的能力 |
 
 ## 设置
 
@@ -168,7 +169,7 @@ Confetti 有意不为 YAML、Ignore 文件和工具版本文件注册 formatter�
 | `confetti.format.enable`      | `true` | 启用 Confetti 文档格式化                      |
 | `confetti.format.formats`     | `[]`   | 限制格式化的格式 id；空列表表示支持全部格式   |
 
-三个 `boolean` 设置可以直接在 VS Code Settings UI 中通过复选框修改；`confetti.autoDetectFormats` 和 `confetti.format.formats` 接受格式 id 列表（例如 `["nginx", "ssh"]`），空列表表示启用全部格式。
+三个 `boolean` 设置可以直接在 VS Code Settings UI 中通过复选框修改；`confetti.autoDetectFormats` 和 `confetti.format.formats` 接受格式 id 列表（例如 `["nginx", "ssh"]`），空列表表示启用全部格式。执行 **Confetti: Show Supported Formats** 可以列出所有合法的格式 id，以及各格式支持哪些能力。
 
 项目使用自定义配置文件名时，可以设置 association：
 

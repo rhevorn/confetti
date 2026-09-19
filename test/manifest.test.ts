@@ -68,7 +68,7 @@ describe('VS Code extension manifest', () => {
     expect(ssh?.filenames).not.toContain('config')
   })
   it('contains complete Marketplace metadata for the stable release', () => {
-    expect(manifest.version).toBe('1.5.1')
+    expect(manifest.version).toBe('1.6.0')
     expect(manifest.publisher).toBe('rhevorn')
     expect(manifest.repository).toEqual({
       type: 'git',

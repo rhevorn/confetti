@@ -35,7 +35,7 @@ Core benchmark results for the generated Nginx sample:
 
 Resource characteristics:
 
-- The 1.5.1 VSIX is approximately **209 KB** and has no runtime npm dependencies.
+- The 1.6.0 VSIX is approximately **219 KB** and has no runtime npm dependencies.
 - Detection retained about **0.17 MB** of additional heap for a 1 MB sample; after releasing the result and running GC, the measured delta was about **0.06 MB**.
 - Formatting a 1 MB Nginx sample temporarily increased heap usage by up to **75 MB** immediately after the operation. The measured delta returned to approximately zero after the result was released and GC ran. Tokenization and formatting work on a complete document, so temporary allocation grows with file size.
 - Detection cache entries are small and are removed when their documents close.
@@ -111,21 +111,21 @@ YAML literal (`|`) and folded (`>`) block values retain string highlighting acro
 
 Beyond detection, highlighting, and formatting, Confetti provides:
 
-- **Folding ranges** for Nginx and Apache blocks, INI-family sections, and SSH `Host`/`Match` blocks
-- **Outline symbols** for Nginx blocks, SSH hosts, TOML tables, and INI-family sections
-- **Duplicate-key warnings** for dotenv files, INI-family sections, and TOML tables, so a key that quietly overrides an earlier one is visible
-- **Nginx snippets** for server blocks, locations, reverse proxies, upstreams, HTTPS servers, and redirects
+- **Folding ranges** for Nginx, Caddy, and Apache blocks, SSH `Host`/`Match` blocks, TOML tables, and INI-family sections
+- **Outline symbols** for Nginx and Caddy blocks, SSH hosts, TOML tables, and INI-family sections
+- **Duplicate-key warnings** for dotenv files, Java Properties, INI-family sections, and TOML tables, so a key that quietly overrides an earlier one is visible
+- **Snippets** for Nginx, Apache, Caddy, SSH, systemd, and TOML
 - A **status bar indicator** showing the detected format and confidence; click it to see full detection details
 
-Folding, outlines, and diagnostics are computed when a file is opened, activated, saved, or explicitly detected. Provider requests only read cached results; editing invalidates the cache without scanning. Save, switch back to the file, or run **Confetti: Detect Config Type** to refresh these features. Nginx variables inside snippets (such as `$host`) are inserted literally.
+Folding, outlines, and diagnostics are computed when a file is opened, activated, saved, or explicitly detected. Provider requests only read cached results; editing invalidates the cache without scanning. Save, switch back to the file, or run **Confetti: Detect Config Type** to refresh these features. Literal `$` characters inside snippets (such as `$host`, `$MAINPID`, and `${APACHE_LOG_DIR}`) are inserted as written instead of being expanded as snippet variables.
 
-Duplicate warnings are format-aware: quoted dotenv values and Python INI continuations are not treated as keys; TOML subtables belong to their current array element. For systemd, only a small set of known scalar settings is checked. Repeated list directives such as `Environment` and `ExecStart` are not flagged. These checks are not full configuration validation.
+Duplicate warnings are format-aware: quoted dotenv values and Python INI continuations are not treated as keys; TOML subtables belong to their current array element; Java Properties keys are compared after unescaping, so `a\u0041` and `aA` count as one key, and a key continued onto the next line with `\` is joined before comparison, while the warning still shows the key as typed. For systemd, only a small set of known scalar settings is checked. Repeated list directives such as `Environment` and `ExecStart` are not flagged. These checks are not full configuration validation.
 
 ## Formatting
 
 Caddy quoted strings and heredoc bodies, dotenv multiline values, and Python INI value contents are preserved. Python INI keys are aligned left and continuation values use four spaces; spaces inside values, comments, and blank lines are retained. In tox `[testenv]` / `[testenv:...]` sections, clearly malformed `deps` lists with same-level bare package entries can recover their missing continuation indentation. Valid sibling assignments are not reclassified solely because they resemble version requirements. Incomplete Caddy strings/heredocs and backslash continuations are left unchanged rather than reformatted speculatively.
 
-Nginx documents containing multiline quoted values are left unchanged by the formatter. Nginx and Caddy folding/outline ranges ignore braces inside quoted payloads; Caddy highlighting also keeps multiline strings and heredocs in their literal scopes. TOML outlines ignore table-like text inside multiline strings.
+Nginx documents containing multiline quoted values are left unchanged by the formatter. Nginx and Caddy folding/outline ranges ignore braces inside quoted payloads; Caddy highlighting also keeps multiline strings and heredocs in their literal scopes. TOML folding and outlines ignore table-like text inside multiline strings.
 
 In `[flake8]`, an accidentally indented assignment after an integer option such as `max-complexity` is restored to a separate key. This recovery does not apply inside multiline options such as `exclude` or `per-file-ignores`.
 
@@ -147,13 +147,14 @@ If multiple formatters are installed, run **Format Document With...** and select
 
 Open the Command Palette with `Ctrl+Shift+P` or `Cmd+Shift+P` and search for:
 
-| Command                             | Description                                                 |
-| ----------------------------------- | ----------------------------------------------------------- |
-| **Confetti: Detect Config Type**    | Detect the active file and apply the detected language mode |
-| **Confetti: Format Config**         | Format the active file directly with Confetti               |
-| **Confetti: Preview Formatting**    | Preview Confetti formatting in a read-only native diff      |
-| **Confetti: Show Detection Info**   | Show detection evidence, confidence, and other candidates   |
-| **Confetti: Show Formatter Output** | Open logs showing when the Confetti formatter was invoked   |
+| Command                              | Description                                                    |
+| ------------------------------------ | -------------------------------------------------------------- |
+| **Confetti: Detect Config Type**     | Detect the active file and apply the detected language mode    |
+| **Confetti: Format Config**          | Format the active file directly with Confetti                  |
+| **Confetti: Preview Formatting**     | Preview Confetti formatting in a read-only native diff         |
+| **Confetti: Show Detection Info**    | Show detection evidence, confidence, and other candidates      |
+| **Confetti: Show Formatter Output**  | Open logs showing when the Confetti formatter was invoked      |
+| **Confetti: Show Supported Formats** | List every format id and the capabilities each format supports |
 
 ## Settings
 
@@ -168,7 +169,7 @@ Open VS Code Settings and search for `Confetti`.
 | `confetti.format.enable`      | `true`  | Enable Confetti document formatting                                               |
 | `confetti.format.formats`     | `[]`    | Restrict formatting to these format ids; an empty list means all formats          |
 
-The three `boolean` settings are available as checkboxes in the VS Code Settings UI; `confetti.autoDetectFormats` and `confetti.format.formats` accept format-id lists such as `["nginx", "ssh"]`, and an empty list keeps every format enabled.
+The three `boolean` settings are available as checkboxes in the VS Code Settings UI; `confetti.autoDetectFormats` and `confetti.format.formats` accept format-id lists such as `["nginx", "ssh"]`, and an empty list keeps every format enabled. Run **Confetti: Show Supported Formats** to list every valid format id and which capabilities each format supports.
 
 Use associations when a project gives a supported format a custom filename:
 

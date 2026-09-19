@@ -2,6 +2,15 @@
 
 All notable changes to Confetti are documented in this file.
 
+## 1.6.0 - 2026-09-19
+
+- Add folding ranges for TOML tables, matching the outline symbols TOML already had. Both now derive their extents from one shared implementation, and multiline string content stays inside its table even when a line starts with `#`.
+- Add duplicate-key warnings for Java Properties files. Keys are compared after unescaping, so `a\u0041` and `aA` count as the same key, while the highlighted range and message always show the raw key text. Comment lines, `#` inside a value, bare keys, quoted keys, and logical-line continuations — including a key that is split across physical lines — are handled the way `java.util.Properties` loads them.
+- Add snippets for Apache, Caddy, SSH, systemd, and TOML alongside the existing Nginx set.
+- Add **Confetti: Show Supported Formats**, listing every format id and the capabilities each format supports, so `confetti.autoDetectFormats`, `confetti.format.formats`, and `confetti.associations` no longer require guessing ids.
+- Consolidate the duplicated continuation detection in the Java Properties, Git Config, and systemd formatters into one shared helper, so a value ending in an escaped backslash is no longer mistaken for a continuation. A Java Properties comment line ending in a backslash no longer makes the line after it look like a continuation either.
+- Extend unit and real VS Code Extension Host tests for TOML folding, Java Properties diagnostics, capability reporting, and snippet validation across every contributed file.
+
 ## 1.5.1 - 2026-09-19
 
 - Explain every successful detection with its filename, path pattern, extension, content, or user-association evidence, plus up to five alternative candidates in the Confetti output channel.
