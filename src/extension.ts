@@ -1,3 +1,4 @@
+import path from 'node:path'
 import * as vscode from 'vscode'
 import { createDefaultRegistry } from './configs/index.js'
 import { detectConfig } from './core/detector.js'
@@ -24,6 +25,7 @@ interface CachedDetection {
 }
 
 const detectionCache = new Map<string, CachedDetection>()
+const FORMATTING_PREVIEW_SCHEME = 'confetti-preview'
 
 const builtinLanguageSelectors = ['ini', 'properties', 'toml', 'dotenv'].map(
   (language) => ({ language }),
@@ -58,6 +60,41 @@ function isEnabled(id: string, setting: string): boolean {
   return formats.length === 0 || formats.includes(id)
 }
 
+function configuredAssociations(): Readonly<Record<string, string>> {
+  const value = settings().get<unknown>('associations', {})
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  return Object.fromEntries(
+    Object.entries(value).filter((entry): entry is [string, string] =>
+      entry.every((item) => typeof item === 'string'),
+    ),
+  )
+}
+
+function relativeDocumentPath(
+  document: vscode.TextDocument,
+): string | undefined {
+  const folder = vscode.workspace.getWorkspaceFolder(document.uri)
+  if (!folder || !document.uri.fsPath) return undefined
+  return path.relative(folder.uri.fsPath, document.uri.fsPath)
+}
+
+function formattingPreviewUri(document: vscode.TextDocument): vscode.Uri {
+  return vscode.Uri.from({
+    scheme: FORMATTING_PREVIEW_SCHEME,
+    path: document.uri.path,
+    query: encodeURIComponent(document.uri.toString()),
+  })
+}
+
+function logInvalidAssociations(): void {
+  const invalid = Object.entries(configuredAssociations()).filter(
+    ([, id]) => !registry.get(id),
+  )
+  for (const [pattern, id] of invalid) {
+    log(`Association ignored | unknown format=${id} | pattern=${pattern}`)
+  }
+}
+
 function detect(document: vscode.TextDocument): DetectionResult | undefined {
   const cached = detectionCache.get(document.uri.toString())
   if (cached && cached.version === document.version) return cached.result
@@ -66,6 +103,10 @@ function detect(document: vscode.TextDocument): DetectionResult | undefined {
     registry,
     document.uri.fsPath || document.fileName,
     document.getText(),
+    {
+      associations: configuredAssociations(),
+      relativePath: relativeDocumentPath(document),
+    },
   )
 
   detectionCache.set(document.uri.toString(), {
@@ -73,6 +114,54 @@ function detect(document: vscode.TextDocument): DetectionResult | undefined {
     result,
   })
   return result
+}
+
+function detectionSignalLabel(
+  kind: DetectionResult['signals'][number]['kind'],
+) {
+  const labels = {
+    association: 'User association',
+    filename: 'Filename',
+    pattern: 'Path pattern',
+    extension: 'Extension',
+    content: 'Content',
+  } as const
+  return labels[kind]
+}
+
+function showDetectionDetails(
+  document: vscode.TextDocument,
+  result: DetectionResult | undefined,
+): void {
+  log(`Detection details | ${document.uri.fsPath || document.fileName}`)
+  if (!result) {
+    outputChannel?.appendLine('  No supported configuration type detected.')
+    outputChannel?.show(true)
+    return
+  }
+
+  outputChannel?.appendLine(
+    `  Detected: ${result.definition.displayName} (${result.confidence}%)`,
+  )
+  outputChannel?.appendLine('  Evidence:')
+  for (const signal of result.signals) {
+    outputChannel?.appendLine(
+      `    ${detectionSignalLabel(signal.kind)}: ${signal.label} (+${signal.score})`,
+    )
+  }
+
+  const alternatives = result.candidates.filter(
+    ({ definition }) => definition.id !== result.definition.id,
+  )
+  if (alternatives.length > 0) {
+    outputChannel?.appendLine('  Other candidates:')
+    for (const candidate of alternatives.slice(0, 5)) {
+      outputChannel?.appendLine(
+        `    ${candidate.definition.displayName}: ${candidate.confidence}%`,
+      )
+    }
+  }
+  outputChannel?.show(true)
 }
 
 function definitionForDocument(
@@ -180,7 +269,10 @@ export function activate(context: vscode.ExtensionContext): void {
   const diagnosticCollection =
     vscode.languages.createDiagnosticCollection('confetti')
   log('Extension activated')
+  logInvalidAssociations()
   const foldingChanged = new vscode.EventEmitter<void>()
+  const previewChanged = new vscode.EventEmitter<vscode.Uri>()
+  const previewContents = new Map<string, string>()
 
   const featureCache = new Map<
     string,
@@ -285,6 +377,16 @@ export function activate(context: vscode.ExtensionContext): void {
     diagnosticCollection,
     statusBarItem,
     foldingChanged,
+    previewChanged,
+    vscode.workspace.registerTextDocumentContentProvider(
+      FORMATTING_PREVIEW_SCHEME,
+      {
+        onDidChange: previewChanged.event,
+        provideTextDocumentContent(uri) {
+          return previewContents.get(uri.toString()) ?? ''
+        },
+      },
+    ),
     vscode.commands.registerCommand('confetti.detectConfigType', async () => {
       const document = vscode.window.activeTextEditor?.document
       if (document) {
@@ -298,6 +400,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const document = vscode.window.activeTextEditor?.document
       if (!document) return
       const result = detect(document)
+      showDetectionDetails(document, result)
       const message = result
         ? `Detected: ${result.definition.displayName} — Confidence: ${result.confidence}%`
         : 'No supported configuration type was detected.'
@@ -305,6 +408,64 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
     vscode.commands.registerCommand('confetti.showOutput', () => {
       outputChannel?.show(true)
+    }),
+    vscode.commands.registerCommand('confetti.previewFormatting', async () => {
+      const editor = vscode.window.activeTextEditor
+      if (!editor) return
+
+      if (!settings().get('format.enable', true)) {
+        void vscode.window.showWarningMessage(
+          'Confetti formatting is disabled by confetti.format.enable.',
+        )
+        return
+      }
+
+      const definition = definitionForDocument(editor.document)
+      if (
+        definition?.formatter &&
+        !isEnabled(definition.id, 'format.formats')
+      ) {
+        void vscode.window.showWarningMessage(
+          `Confetti formatting is not enabled for ${definition.displayName}.`,
+        )
+        return
+      }
+
+      const edits = formattingEdits(
+        editor.document,
+        'Confetti: Preview Formatting',
+      )
+      if (edits.length === 0) {
+        void vscode.window.showInformationMessage(
+          definition?.formatter
+            ? `${definition.displayName} is already formatted.`
+            : definition
+              ? `Confetti does not provide a formatter for ${definition.displayName}.`
+              : 'Confetti could not detect a supported configuration type.',
+        )
+        return
+      }
+
+      const previewUri = formattingPreviewUri(editor.document)
+      previewContents.set(previewUri.toString(), edits[0].newText)
+      previewChanged.fire(previewUri)
+      let preview = await vscode.workspace.openTextDocument(previewUri)
+      if (preview.languageId !== editor.document.languageId) {
+        preview = await vscode.languages.setTextDocumentLanguage(
+          preview,
+          editor.document.languageId,
+        )
+      }
+      await vscode.commands.executeCommand(
+        'vscode.diff',
+        editor.document.uri,
+        preview.uri,
+        `Confetti Preview: ${path.basename(editor.document.fileName)}`,
+        { preview: true },
+      )
+      log(
+        `Confetti: Preview Formatting | opened | ${editor.document.uri.fsPath}`,
+      )
     }),
     vscode.commands.registerCommand('confetti.formatConfig', async () => {
       const editor = vscode.window.activeTextEditor
@@ -384,6 +545,9 @@ export function activate(context: vscode.ExtensionContext): void {
       detectionCache.delete(document.uri.toString())
       featureCache.delete(document.uri.toString())
       diagnosticCollection.delete(document.uri)
+      if (document.uri.scheme !== FORMATTING_PREVIEW_SCHEME) {
+        previewContents.delete(formattingPreviewUri(document).toString())
+      }
       updateStatusBar(vscode.window.activeTextEditor?.document)
     }),
     // Diagnostics do not follow edits, so drop stale ranges immediately. This
@@ -396,6 +560,15 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (!event.affectsConfiguration('confetti')) return
+
+      const associationsChanged = event.affectsConfiguration(
+        'confetti.associations',
+      )
+      if (associationsChanged) {
+        detectionCache.clear()
+        featureCache.clear()
+        logInvalidAssociations()
+      }
 
       if (event.affectsConfiguration('confetti.diagnostics.enable')) {
         if (!settings().get('diagnostics.enable', true)) {
@@ -411,9 +584,14 @@ export function activate(context: vscode.ExtensionContext): void {
       if (
         activeDocument &&
         (event.affectsConfiguration('confetti.autoDetect') ||
-          event.affectsConfiguration('confetti.autoDetectFormats'))
+          event.affectsConfiguration('confetti.autoDetectFormats') ||
+          associationsChanged)
       ) {
         void autoDetect(activeDocument)
+      }
+      if (activeDocument && associationsChanged) {
+        updateFeatures(activeDocument)
+        updateDiagnostics(activeDocument)
       }
       updateStatusBar(activeDocument)
     }),

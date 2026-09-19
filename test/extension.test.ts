@@ -6,7 +6,7 @@ interface TestDocument {
   languageId: string
   fileName: string
   version: number
-  uri: { fsPath: string; scheme: string; toString(): string }
+  uri: { fsPath: string; path: string; scheme: string; toString(): string }
   getText(): string
   positionAt(offset: number): number
 }
@@ -23,6 +23,7 @@ function document(
     version: 1,
     uri: {
       fsPath: fileName,
+      path: fileName,
       scheme,
       toString: () => `${scheme}:${fileName}`,
     },
@@ -76,6 +77,7 @@ describe('VS Code extension adapter', () => {
     expect([...mockState.commandHandlers.keys()].sort()).toEqual([
       'confetti.detectConfigType',
       'confetti.formatConfig',
+      'confetti.previewFormatting',
       'confetti.showDetectionInfo',
       'confetti.showOutput',
     ])
@@ -156,6 +158,12 @@ describe('VS Code extension adapter', () => {
     expect(mockState.informationMessages.at(-1)).toBe(
       'Detected: Nginx — Confidence: 100%',
     )
+    expect(mockState.outputShown).toBe(true)
+    expect(mockState.outputLines.join('\n')).toContain(
+      'Filename: nginx.conf (+100)',
+    )
+    expect(mockState.outputLines.join('\n')).toContain('Content:')
+    expect(mockState.outputLines.join('\n')).toContain('Other candidates:')
   })
 
   it('keeps a canonical YAML language mode active', async () => {
@@ -176,8 +184,24 @@ describe('VS Code extension adapter', () => {
     activateExtension()
 
     await command('confetti.detectConfigType')()
+    command('confetti.showDetectionInfo')()
 
     expect(testDocument.languageId).toBe('confetti-env')
+    expect(mockState.outputLines.join('\n')).toContain(
+      'Detection details | /app/.env',
+    )
+  })
+
+  it('shows detection details without an alternatives section when none exist', () => {
+    const hosts = document('/etc/hosts', '127.0.0.1 localhost\n')
+    mockState.activeEditor = editor(hosts) as never
+    activateExtension()
+
+    command('confetti.showDetectionInfo')()
+
+    const details = mockState.outputLines.join('\n')
+    expect(details).toContain('Detected: Hosts')
+    expect(details).not.toContain('Other candidates:')
   })
 
   it('reports a file that cannot be detected', async () => {
@@ -319,6 +343,116 @@ describe('VS Code extension adapter', () => {
 
     expect(edits).toHaveLength(1)
     expect(edits[0]?.newText).toBe('server {\n}\n')
+  })
+
+  it('previews formatting in a native diff without changing the source', async () => {
+    const testDocument = document(
+      '/etc/nginx/nginx.conf',
+      'server{\nlisten 80 ;\n}\n',
+      'confetti-nginx',
+    )
+    mockState.activeEditor = editor(testDocument) as never
+    activateExtension()
+
+    await command('confetti.previewFormatting')()
+
+    expect(testDocument.getText()).toBe('server{\nlisten 80 ;\n}\n')
+    expect(mockState.openedDocuments[0]?.getText?.()).toBe(
+      'server {\n  listen 80;\n}\n',
+    )
+    expect(mockState.commandExecutions).toEqual([
+      {
+        command: 'vscode.diff',
+        arguments: [
+          testDocument.uri,
+          mockState.openedDocuments[0]?.uri,
+          'Confetti Preview: nginx.conf',
+          { preview: true },
+        ],
+      },
+    ])
+    expect(mockState.outputLines.join('\n')).toContain(
+      'Confetti: Preview Formatting | opened',
+    )
+
+    const provider = mockState.contentProviders.get('confetti-preview')
+    const preview = mockState.openedDocuments[0]
+    mockState.closeHandlers[0]?.(preview)
+    expect(provider?.provideTextDocumentContent(preview?.uri as never)).toBe(
+      'server {\n  listen 80;\n}\n',
+    )
+    mockState.closeHandlers[0]?.(testDocument)
+    expect(provider?.provideTextDocumentContent(preview?.uri as never)).toBe('')
+  })
+
+  it('reuses an already assigned preview language and handles missing preview content', async () => {
+    const testDocument = document(
+      '/etc/nginx/nginx.conf',
+      'server{\n}\n',
+      'confetti-nginx',
+    )
+    mockState.activeEditor = editor(testDocument) as never
+    mockState.openedDocumentLanguage = 'confetti-nginx'
+    activateExtension()
+
+    const provider = mockState.contentProviders.get('confetti-preview')
+    expect(
+      provider?.provideTextDocumentContent({
+        fsPath: '/missing',
+        path: '/missing',
+        scheme: 'confetti-preview',
+        toString: () => 'confetti-preview:/missing',
+      }),
+    ).toBe('')
+
+    await command('confetti.previewFormatting')()
+
+    expect(mockState.languageChanges).toHaveLength(0)
+  })
+
+  it('reports every preview formatting skip reason', async () => {
+    const messy = document(
+      '/etc/nginx/nginx.conf',
+      'server{\n}\n',
+      'confetti-nginx',
+    )
+    mockState.activeEditor = editor(messy) as never
+    mockState.configuration.set('format.enable', false)
+    activateExtension()
+    await command('confetti.previewFormatting')()
+    expect(mockState.warningMessages.at(-1)).toContain('formatting is disabled')
+
+    mockState.configuration.set('format.enable', true)
+    mockState.configuration.set('format.formats', ['ssh'])
+    await command('confetti.previewFormatting')()
+    expect(mockState.warningMessages.at(-1)).toBe(
+      'Confetti formatting is not enabled for Nginx.',
+    )
+
+    mockState.configuration.set('format.formats', [])
+    mockState.activeEditor = editor(
+      document('/etc/nginx/nginx.conf', 'server {\n}\n', 'confetti-nginx'),
+    ) as never
+    await command('confetti.previewFormatting')()
+    expect(mockState.informationMessages.at(-1)).toBe(
+      'Nginx is already formatted.',
+    )
+
+    mockState.activeEditor = editor(
+      document('/app/config.yaml', 'name: app\n', 'confetti-yaml'),
+    ) as never
+    await command('confetti.previewFormatting')()
+    expect(mockState.informationMessages.at(-1)).toBe(
+      'Confetti does not provide a formatter for YAML.',
+    )
+
+    mockState.activeEditor = editor(
+      document('/app/notes.txt', 'plain text\n'),
+    ) as never
+    await command('confetti.previewFormatting')()
+    expect(mockState.informationMessages.at(-1)).toBe(
+      'Confetti could not detect a supported configuration type.',
+    )
   })
 
   it('provides folding ranges for detected documents and none otherwise', () => {
@@ -585,6 +719,59 @@ describe('VS Code extension adapter', () => {
     expect(mockState.languageChanges.at(-1)?.languageId).toBe('confetti-ssh')
   })
 
+  it('applies workspace-relative associations and explains the override', async () => {
+    mockState.workspaceFolderPath = '/workspace'
+    mockState.configuration.set('associations', {
+      'deploy/proxy.conf': 'caddy',
+    })
+    const associated = document(
+      '/workspace/deploy/proxy.conf',
+      'server {\n  listen 80;\n}\n',
+    )
+    mockState.activeEditor = editor(associated) as never
+    activateExtension()
+
+    await command('confetti.detectConfigType')()
+    command('confetti.showDetectionInfo')()
+
+    expect(associated.languageId).toBe('confetti-caddy')
+    expect(mockState.outputLines.join('\n')).toContain(
+      'User association: deploy/proxy.conf (+100)',
+    )
+  })
+
+  it('logs invalid associations and refreshes detection when they change', () => {
+    mockState.configuration.set('associations', { '*.cfg': 'missing' })
+    const associated = document('/workspace/app.cfg', 'anything\n')
+    mockState.activeEditor = editor(associated) as never
+    activateExtension()
+    expect(mockState.outputLines.join('\n')).toContain(
+      'Association ignored | unknown format=missing | pattern=*.cfg',
+    )
+
+    mockState.configuration.set('associations', { '*.cfg': 'env' })
+    mockState.configurationHandlers[0]?.({
+      affectsConfiguration: (section: string) =>
+        section === 'confetti' || section === 'confetti.associations',
+    })
+    expect(associated.languageId).toBe('confetti-env')
+    expect(mockState.statusBarItem?.text).toBe(
+      '$(eye) Environment Variables 100%',
+    )
+  })
+
+  it.each([null, 'invalid', [], { '*.cfg': 42 }])(
+    'ignores a malformed association setting: %j',
+    (associations) => {
+      mockState.configuration.set('associations', associations)
+      const nginx = document('/etc/nginx/nginx.conf', 'server {\n}\n')
+      mockState.activeEditor = editor(nginx) as never
+
+      expect(() => activateExtension()).not.toThrow()
+      expect(mockState.statusBarItem?.text).toBe('$(eye) Nginx 100%')
+    },
+  )
+
   it('applies Confetti setting changes immediately', async () => {
     const duplicateDocument = document('/app/.env', 'KEY=1\nKEY=2\n')
     mockState.activeEditor = editor(duplicateDocument) as never
@@ -691,6 +878,7 @@ describe('VS Code extension adapter', () => {
     await command('confetti.detectConfigType')()
     command('confetti.showDetectionInfo')()
     await command('confetti.formatConfig')()
+    await command('confetti.previewFormatting')()
     command('confetti.showOutput')()
     await mockState.activeEditorHandlers[0]?.(undefined)
     deactivate()

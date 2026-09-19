@@ -38,7 +38,7 @@ module.exports.run = async function run() {
     await setSetting('format.enable', true)
     await setSetting('format.formats', [])
 
-    const nginx = await open('nginx.conf')
+    let nginx = await open('nginx.conf')
     assert.deepEqual(
       vscode.workspace.getConfiguration('confetti').get('autoDetectFormats'),
       ['ssh'],
@@ -67,7 +67,10 @@ module.exports.run = async function run() {
     workspaceEdit.set(nginx.uri, edits)
     assert.equal(await vscode.workspace.applyEdit(workspaceEdit), true)
     assert.equal(nginx.getText(), 'server {\n  listen 80;\n}\n')
-    await vscode.commands.executeCommand('undo')
+    await vscode.commands.executeCommand(
+      'workbench.action.revertAndCloseActiveEditor',
+    )
+    nginx = await open('nginx.conf')
     assert.equal(nginx.getText(), 'server{\nlisten 80 ;\n}\n')
     await vscode.commands.executeCommand('confetti.detectConfigType')
 
@@ -92,6 +95,32 @@ module.exports.run = async function run() {
     })
     assert.equal(symbols[0].name, 'server')
 
+    const sourceBeforePreview = nginx.getText()
+    await vscode.commands.executeCommand('confetti.previewFormatting')
+    await waitFor('read-only formatting preview', () =>
+      vscode.window.visibleTextEditors.some(
+        (editor) =>
+          editor.document.uri.scheme === 'confetti-preview' &&
+          editor.document.getText() === 'server {\n  listen 80;\n}\n',
+      ),
+    )
+    assert.equal(
+      nginx.getText(),
+      sourceBeforePreview,
+      'formatting preview does not edit the source document',
+    )
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    await vscode.commands.executeCommand('workbench.action.closeActiveEditor')
+
+    await setSetting('autoDetectFormats', [])
+    await setSetting('associations', { 'deploy/proxy.conf': 'caddy' })
+    const associated = await open('deploy/proxy.conf')
+    await waitFor(
+      'workspace-relative association',
+      () => associated.languageId === 'confetti-caddy',
+    )
+    await vscode.commands.executeCommand('confetti.showDetectionInfo')
+
     const env = await open('.env')
     await waitFor('dotenv duplicate-key diagnostic', () => {
       const diagnostics = vscode.languages.getDiagnostics(env.uri)
@@ -115,6 +144,7 @@ module.exports.run = async function run() {
   } finally {
     await setSetting('autoDetect', undefined)
     await setSetting('autoDetectFormats', undefined)
+    await setSetting('associations', undefined)
     await setSetting('diagnostics.enable', undefined)
     await setSetting('format.enable', undefined)
     await setSetting('format.formats', undefined)

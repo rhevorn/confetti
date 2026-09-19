@@ -119,6 +119,11 @@
         "category": "Confetti"
       },
       {
+        "command": "confetti.previewFormatting",
+        "title": "Preview Formatting",
+        "category": "Confetti"
+      },
+      {
         "command": "confetti.showDetectionInfo",
         "title": "Show Detection Info",
         "category": "Confetti"
@@ -145,6 +150,43 @@
           "uniqueItems": true,
           "default": [],
           "description": "Restrict automatic language detection to these format ids, such as \"nginx\" or \"ssh\". An empty list enables detection for every supported format."
+        },
+        "confetti.associations": {
+          "type": "object",
+          "default": {},
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "nginx",
+              "apache",
+              "ssh",
+              "systemd",
+              "env",
+              "ini",
+              "mysql",
+              "pip",
+              "pyini",
+              "setupcfg",
+              "properties",
+              "toml",
+              "gitconfig",
+              "npmrc",
+              "yarnrc",
+              "yaml",
+              "ignore",
+              "gitattributes",
+              "browserslist",
+              "caddy",
+              "versions",
+              "hosts",
+              "fstab",
+              "crontab",
+              "tmux",
+              "screen",
+              "inputrc"
+            ]
+          },
+          "description": "Associate project-specific filename patterns with a supported Confetti format id. More specific matching patterns take precedence."
         },
         "confetti.diagnostics.enable": {
           "type": "boolean",

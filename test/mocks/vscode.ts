@@ -2,6 +2,17 @@ type Handler = (...arguments_: unknown[]) => unknown
 
 interface MockDocument {
   languageId: string
+  fileName?: string
+  uri?: MockUri
+  getText?(): string
+}
+
+interface MockUri {
+  fsPath: string
+  path: string
+  query?: string
+  scheme: string
+  toString(): string
 }
 
 interface MockEditor {
@@ -11,6 +22,7 @@ interface MockEditor {
 export const mockState = {
   configuration: new Map<string, unknown>(),
   commandHandlers: new Map<string, Handler>(),
+  commandExecutions: [] as Array<{ command: string; arguments: unknown[] }>,
   formattingProvider: undefined as
     { provideDocumentFormattingEdits: Handler } | undefined,
   formattingSelector: undefined as unknown,
@@ -30,6 +42,13 @@ export const mockState = {
   configurationHandlers: [] as Handler[],
   activeEditorHandlers: [] as Handler[],
   textDocuments: [] as MockDocument[],
+  openedDocuments: [] as MockDocument[],
+  openedDocumentLanguage: 'plaintext',
+  contentProviders: new Map<
+    string,
+    { provideTextDocumentContent(uri: MockUri): string }
+  >(),
+  workspaceFolderPath: undefined as string | undefined,
   activeEditor: undefined as MockEditor | undefined,
   informationMessages: [] as string[],
   warningMessages: [] as string[],
@@ -53,6 +72,7 @@ interface StatusBarItem {
 export function resetMockState(): void {
   mockState.configuration.clear()
   mockState.commandHandlers.clear()
+  mockState.commandExecutions.length = 0
   mockState.formattingProvider = undefined
   mockState.formattingSelector = undefined
   mockState.foldingProvider = undefined
@@ -66,6 +86,10 @@ export function resetMockState(): void {
   mockState.configurationHandlers.length = 0
   mockState.activeEditorHandlers.length = 0
   mockState.textDocuments.length = 0
+  mockState.openedDocuments.length = 0
+  mockState.openedDocumentLanguage = 'plaintext'
+  mockState.contentProviders.clear()
+  mockState.workspaceFolderPath = undefined
   mockState.activeEditor = undefined
   mockState.informationMessages.length = 0
   mockState.warningMessages.length = 0
@@ -158,6 +182,17 @@ export const DiagnosticSeverity = {
   Hint: 3,
 }
 
+export const Uri = {
+  from(parts: { scheme: string; path: string; query?: string }): MockUri {
+    return {
+      ...parts,
+      fsPath: parts.path,
+      toString: () =>
+        `${parts.scheme}:${parts.path}${parts.query ? `?${parts.query}` : ''}`,
+    }
+  },
+}
+
 export const workspace = {
   get textDocuments(): MockDocument[] {
     return mockState.textDocuments
@@ -172,6 +207,50 @@ export const workspace = {
         ) as T
       },
     }
+  },
+  getWorkspaceFolder() {
+    return mockState.workspaceFolderPath
+      ? { uri: { fsPath: mockState.workspaceFolderPath } }
+      : undefined
+  },
+  async openTextDocument(
+    options: MockUri | { content: string; language: string },
+  ) {
+    const index = mockState.openedDocuments.length + 1
+    if ('scheme' in options) {
+      const content =
+        mockState.contentProviders
+          .get(options.scheme)
+          ?.provideTextDocumentContent(options) ?? ''
+      const preview: MockDocument = {
+        languageId: mockState.openedDocumentLanguage,
+        fileName: options.path,
+        uri: options,
+        getText: () => content,
+      }
+      mockState.openedDocuments.push(preview)
+      return preview
+    }
+    const preview: MockDocument = {
+      languageId: options.language,
+      fileName: `Untitled-${index}`,
+      uri: {
+        fsPath: '',
+        path: `Untitled-${index}`,
+        scheme: 'untitled',
+        toString: () => `untitled:Untitled-${index}`,
+      },
+      getText: () => options.content,
+    }
+    mockState.openedDocuments.push(preview)
+    return preview
+  },
+  registerTextDocumentContentProvider(
+    scheme: string,
+    provider: { provideTextDocumentContent(uri: MockUri): string },
+  ) {
+    mockState.contentProviders.set(scheme, provider)
+    return disposable()
   },
   onDidOpenTextDocument(handler: Handler) {
     mockState.openHandlers.push(handler)
@@ -247,6 +326,10 @@ export const commands = {
   registerCommand(command: string, handler: Handler) {
     mockState.commandHandlers.set(command, handler)
     return disposable()
+  },
+  executeCommand(command: string, ...arguments_: unknown[]) {
+    mockState.commandExecutions.push({ command, arguments: arguments_ })
+    return Promise.resolve(undefined)
   },
 }
 
