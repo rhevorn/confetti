@@ -1,6 +1,14 @@
-import { normalizeLines, splitAssignment } from '../formatters/shared.js'
-import { INI_SECTION_FORMATS, isIniSectionHeader } from './folding.js'
+import {
+  endsWithContinuation,
+  normalizeLines,
+  splitAssignment,
+} from '../formatters/shared.js'
+import { isIniSectionHeader } from './folding.js'
 import { envRecords } from '../tokenizers/env.js'
+import {
+  decodePropertiesKey,
+  propertiesKeyText,
+} from '../tokenizers/properties.js'
 import { tomlHeaders } from '../tokenizers/toml-headers.js'
 
 export interface DiagnosticInfo {
@@ -73,12 +81,22 @@ const SYSTEMD_SCALARS = new Set([
   'Service.UMask',
 ])
 
-function iniDiagnostics(content: string, id: string): DiagnosticInfo[] {
+interface IniRules {
+  /** Lowercase keys, and treat indented lines as continuation values. */
+  python?: boolean
+  /** Report only these `Section.Key` scalar settings. */
+  scalars?: ReadonlySet<string>
+}
+
+function iniDiagnostics(
+  content: string,
+  rules: IniRules = {},
+): DiagnosticInfo[] {
   const { lines } = normalizeLines(content)
   const diagnostics: DiagnosticInfo[] = []
   const firstSeen = new Map<string, number>()
+  const python = rules.python === true
   let section = ''
-  const python = id === 'pyini' || id === 'setupcfg' || id === 'pip'
   let keyIndent: number | undefined
 
   lines.forEach((line, index) => {
@@ -97,8 +115,8 @@ function iniDiagnostics(content: string, id: string): DiagnosticInfo[] {
     if (!assignment) return
     keyIndent = indent
     if (
-      id === 'systemd' &&
-      !SYSTEMD_SCALARS.has(`${section}.${assignment.key}`)
+      rules.scalars !== undefined &&
+      !rules.scalars.has(`${section}.${assignment.key}`)
     )
       return
     const key = python ? assignment.key.toLowerCase() : assignment.key
@@ -160,12 +178,122 @@ function tomlDiagnostics(content: string): DiagnosticInfo[] {
   return diagnostics
 }
 
+function isPropertiesIgnorable(line: string): boolean {
+  const trimmed = line.trim()
+  return trimmed === '' || trimmed.startsWith('#') || trimmed.startsWith('!')
+}
+
+function isJavaBlank(line: string): boolean {
+  return /^[ \t\f]*$/.test(line)
+}
+
+/**
+ * Joins physical lines the way `java.util.Properties.load` builds a logical
+ * line: a new record cannot start on a comment or blank line, even when that
+ * line ends with `\`, but once a record has started, a trailing odd backslash
+ * continues it, leading space/tab/form-feed on the next line are dropped, and
+ * blank physical lines in between are skipped as whitespace.
+ */
+function propertiesRecords(
+  lines: readonly string[],
+): { startLine: number; text: string }[] {
+  const records: { startLine: number; text: string }[] = []
+
+  for (let index = 0; index < lines.length;) {
+    if (isPropertiesIgnorable(lines[index])) {
+      index += 1
+      continue
+    }
+
+    const startLine = index
+    let text = lines[index]
+    index += 1
+
+    while (endsWithContinuation(text)) {
+      text = text.slice(0, -1)
+      while (index < lines.length && isJavaBlank(lines[index])) {
+        index += 1
+      }
+      if (index >= lines.length) break
+      text += lines[index].replace(/^[ \t\f]+/, '')
+      index += 1
+    }
+
+    records.push({ startLine, text })
+  }
+
+  return records
+}
+
+function propertiesDiagnostics(content: string): DiagnosticInfo[] {
+  const { lines } = normalizeLines(content)
+  const diagnostics: DiagnosticInfo[] = []
+  const firstSeen = new Map<string, number>()
+
+  for (const { startLine, text } of propertiesRecords(lines)) {
+    const raw = propertiesKeyText(text)
+    if (raw === undefined || raw === '') continue
+
+    // Identity uses the unescaped key, so `a\u0041` and `aA` collide.
+    // Malformed escapes are skipped: they can only hide a duplicate, never
+    // invent one.
+    const key = decodePropertiesKey(raw)
+    if (key === undefined) continue
+
+    const firstLine = firstSeen.get(key)
+    if (firstLine === undefined) {
+      firstSeen.set(key, startLine)
+      continue
+    }
+
+    const physical = lines[startLine]
+    const indent = physical.length - physical.trimStart().length
+    diagnostics.push(
+      duplicate(
+        `Duplicate key "${raw}"`,
+        startLine,
+        firstLine,
+        indent,
+        Math.min(indent + raw.length, physical.length),
+      ),
+    )
+  }
+
+  return diagnostics
+}
+
+export type DiagnosticStrategy = (content: string) => DiagnosticInfo[]
+
+const pythonIniDiagnostics: DiagnosticStrategy = (content) =>
+  iniDiagnostics(content, { python: true })
+
+const systemdDiagnostics: DiagnosticStrategy = (content) =>
+  iniDiagnostics(content, { scalars: SYSTEMD_SCALARS })
+
+const DIAGNOSTIC_STRATEGIES = new Map<string, DiagnosticStrategy>([
+  ['env', envDiagnostics],
+  ['toml', tomlDiagnostics],
+  ['properties', propertiesDiagnostics],
+  // INI-family formats are listed one by one: the Python tooling and systemd
+  // dialects need different rules, so a format added to INI_SECTION_FORMATS
+  // must not silently inherit the generic, false-positive-prone rule set.
+  ['ini', iniDiagnostics],
+  ['gitconfig', iniDiagnostics],
+  ['mysql', iniDiagnostics],
+  ['pip', pythonIniDiagnostics],
+  ['pyini', pythonIniDiagnostics],
+  ['setupcfg', pythonIniDiagnostics],
+  ['systemd', systemdDiagnostics],
+])
+
+/** Format ids with duplicate-key diagnostics, derived from the dispatch table. */
+export const DIAGNOSTIC_FORMAT_IDS: ReadonlySet<string> = new Set(
+  DIAGNOSTIC_STRATEGIES.keys(),
+)
+
 export function computeDiagnostics(
   id: string,
   content: string,
 ): DiagnosticInfo[] {
-  if (id === 'env') return envDiagnostics(content)
-  if (id === 'toml') return tomlDiagnostics(content)
-  if (INI_SECTION_FORMATS.has(id)) return iniDiagnostics(content, id)
-  return []
+  return DIAGNOSTIC_STRATEGIES.get(id)?.(content) ?? []
 }
