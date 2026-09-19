@@ -117,6 +117,11 @@
         "command": "confetti.showOutput",
         "title": "Show Formatter Output",
         "category": "Confetti"
+      },
+      {
+        "command": "confetti.showSupportedFormats",
+        "title": "Show Supported Formats",
+        "category": "Confetti"
       }
     ],
     "configuration": {

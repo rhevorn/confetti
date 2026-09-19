@@ -4,7 +4,14 @@ import { createDefaultRegistry } from './configs/index.js'
 import { detectConfig } from './core/detector.js'
 import { formatConfig } from './core/formatter.js'
 import type { ConfigDefinition, DetectionResult } from './core/types.js'
-import { computeDiagnostics } from './features/diagnostics.js'
+import {
+  computeFormatCapabilities,
+  type FormatCapabilities,
+} from './features/capabilities.js'
+import {
+  DIAGNOSTIC_FORMAT_IDS,
+  computeDiagnostics,
+} from './features/diagnostics.js'
 import { computeFoldingRanges } from './features/folding.js'
 import { computeDocumentSymbols, type SymbolInfo } from './features/symbols.js'
 import { isCompatibleLanguageId } from './language-compatibility.js'
@@ -46,9 +53,12 @@ const formattingSelectors = [
   ...builtinLanguageSelectors,
 ]
 
+function timestamped(message: string): string {
+  return `[${new Date().toLocaleTimeString()}] ${message}`
+}
+
 function log(message: string): void {
-  const timestamp = new Date().toLocaleTimeString()
-  outputChannel?.appendLine(`[${timestamp}] ${message}`)
+  outputChannel?.appendLine(timestamped(message))
 }
 
 function settings(): vscode.WorkspaceConfiguration {
@@ -162,6 +172,41 @@ function showDetectionDetails(
     }
   }
   outputChannel?.show(true)
+}
+
+/**
+ * Renders the format id reference. Settings accept these ids as free-form
+ * strings, so this is the only place a user can look them up.
+ */
+function supportedFormatLines(): string[] {
+  // A fixed locale keeps the reported order identical on every machine; every
+  // format id is plain lowercase ASCII, so this is codepoint order.
+  const formats = computeFormatCapabilities(registry.all()).sort(
+    (left, right) => left.id.localeCompare(right.id, 'en'),
+  )
+  const idsOf = (include: (format: FormatCapabilities) => boolean): string =>
+    formats
+      .filter(include)
+      .map(({ id }) => id)
+      .join(', ')
+
+  return [
+    timestamped(`Supported formats | ${formats.length} registered`),
+    '  Format ids for confetti.autoDetectFormats and confetti.associations:',
+    `    ${formats.map(({ id }) => id).join(', ')}`,
+    '  Format ids for confetti.format.formats:',
+    `    ${idsOf(({ formatting }) => formatting)}`,
+    '  Folding ranges:',
+    `    ${idsOf(({ folding }) => folding)}`,
+    '  Outline symbols:',
+    `    ${idsOf(({ symbols }) => symbols)}`,
+    '  Duplicate-key diagnostics:',
+    `    ${idsOf(({ diagnostics }) => diagnostics)}`,
+    '  Snippets:',
+    `    ${idsOf(({ snippets }) => snippets)}`,
+    '  Format names:',
+    ...formats.map(({ id, displayName }) => `    ${id}: ${displayName}`),
+  ]
 }
 
 function definitionForDocument(
@@ -330,7 +375,8 @@ export function activate(context: vscode.ExtensionContext): void {
     }
 
     const definition = definitionForDocument(document)
-    if (!definition) {
+    // Skip the document copy below for the formats that have no checks.
+    if (!definition || !DIAGNOSTIC_FORMAT_IDS.has(definition.id)) {
       diagnosticCollection.delete(uri)
       return
     }
@@ -408,6 +454,12 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
     vscode.commands.registerCommand('confetti.showOutput', () => {
       outputChannel?.show(true)
+    }),
+    vscode.commands.registerCommand('confetti.showSupportedFormats', () => {
+      const lines = supportedFormatLines()
+      for (const line of lines) outputChannel?.appendLine(line)
+      outputChannel?.show(true)
+      return lines
     }),
     vscode.commands.registerCommand('confetti.previewFormatting', async () => {
       const editor = vscode.window.activeTextEditor

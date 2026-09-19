@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createDefaultRegistry } from '../src/configs/index.js'
 import { activate, deactivate } from '../src/extension.js'
 import { mockState, resetMockState } from './mocks/vscode.js'
 
@@ -80,6 +81,7 @@ describe('VS Code extension adapter', () => {
       'confetti.previewFormatting',
       'confetti.showDetectionInfo',
       'confetti.showOutput',
+      'confetti.showSupportedFormats',
     ])
     expect(mockState.formattingProvider).toBeDefined()
     const selector = mockState.formattingSelector as Array<{
@@ -872,6 +874,44 @@ describe('VS Code extension adapter', () => {
     expect(mockState.statusBarShown).toBe(false)
   })
 
+  it('lists every supported format and its capabilities in the output channel', async () => {
+    activateExtension()
+
+    const lines = (await command('confetti.showSupportedFormats')()) as string[]
+
+    expect(mockState.outputShown).toBe(true)
+    expect(mockState.outputLines.slice(-lines.length)).toEqual(lines)
+    expect(lines[0]).toMatch(
+      new RegExp(
+        `^\\[.+\\] Supported formats \\| ${createDefaultRegistry().all().length} registered$`,
+      ),
+    )
+
+    const sectionOf = (heading: string): string => {
+      const index = lines.indexOf(`  ${heading}`)
+      expect(index).toBeGreaterThan(-1)
+      return lines[index + 1].trim()
+    }
+
+    expect(
+      sectionOf(
+        'Format ids for confetti.autoDetectFormats and confetti.associations:',
+      ),
+    ).toContain('yaml')
+    expect(sectionOf('Format ids for confetti.format.formats:')).toContain(
+      'nginx',
+    )
+    expect(sectionOf('Format ids for confetti.format.formats:')).not.toContain(
+      'yaml',
+    )
+    expect(sectionOf('Duplicate-key diagnostics:')).toContain('properties')
+    expect(sectionOf('Folding ranges:')).toContain('toml')
+    expect(sectionOf('Outline symbols:')).toContain('toml')
+    expect(sectionOf('Snippets:')).toBe('nginx')
+    expect(lines).toContain('    properties: Java Properties')
+    expect(lines).toContain('    toml: TOML')
+  })
+
   it('opens formatter output and handles missing active editors', async () => {
     activateExtension()
 
@@ -880,6 +920,7 @@ describe('VS Code extension adapter', () => {
     await command('confetti.formatConfig')()
     await command('confetti.previewFormatting')()
     command('confetti.showOutput')()
+    await command('confetti.showSupportedFormats')()
     await mockState.activeEditorHandlers[0]?.(undefined)
     deactivate()
 

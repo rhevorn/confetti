@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { createDefaultRegistry } from '../src/configs/index.js'
+import { SNIPPET_FORMAT_IDS } from '../src/features/capabilities.js'
 
 interface LanguageContribution {
   id: string
@@ -140,6 +141,7 @@ describe('VS Code extension manifest', () => {
       'confetti.previewFormatting',
       'confetti.showDetectionInfo',
       'confetti.showOutput',
+      'confetti.showSupportedFormats',
     ])
     expect(manifest.activationEvents).toEqual(['onStartupFinished'])
   })
@@ -318,5 +320,15 @@ describe('VS Code extension manifest', () => {
       ).not.toThrow()
     }
     expect(manifest.files).toEqual(expect.arrayContaining(['snippets']))
+  })
+
+  it('keeps the reported snippet formats in sync with the contributed files', () => {
+    const registry = createDefaultRegistry()
+
+    expect(
+      manifest.contributes.snippets.map(({ language }) => language).sort(),
+    ).toEqual(
+      SNIPPET_FORMAT_IDS.map((id) => registry.get(id)?.languageId).sort(),
+    )
   })
 })

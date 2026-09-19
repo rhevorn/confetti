@@ -121,6 +121,22 @@ module.exports.run = async function run() {
     )
     await vscode.commands.executeCommand('confetti.showDetectionInfo')
 
+    const formats = await vscode.commands.executeCommand(
+      'confetti.showSupportedFormats',
+    )
+    assert.ok(
+      Array.isArray(formats) && formats.length > 0,
+      'the format list command returns the lines it rendered',
+    )
+    assert.ok(
+      formats.some((line) => line.includes('confetti.format.formats')),
+      'the format list names the formatting setting',
+    )
+    assert.ok(
+      formats.some((line) => line.includes('Snippets:')),
+      'the format list reports snippet coverage',
+    )
+
     const env = await open('.env')
     await waitFor('dotenv duplicate-key diagnostic', () => {
       const diagnostics = vscode.languages.getDiagnostics(env.uri)
@@ -138,6 +154,55 @@ module.exports.run = async function run() {
       vscode.languages
         .getDiagnostics(env.uri)
         .some((item) => item.message.includes('Duplicate key')),
+    )
+
+    // Automatic detection is off so that resetting the language below proves
+    // the explicit command did the work, rather than detection re-applying it.
+    await setSetting('autoDetect', false)
+
+    const toml = await open('pyproject.toml')
+    await vscode.languages.setTextDocumentLanguage(toml, 'plaintext')
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    assert.equal(toml.languageId, 'plaintext')
+    await vscode.commands.executeCommand('confetti.detectConfigType')
+    assert.equal(toml.languageId, 'confetti-toml')
+
+    const tomlFolding = await waitFor('TOML table folding ranges', async () => {
+      const ranges = await vscode.commands.executeCommand(
+        'vscode.executeFoldingRangeProvider',
+        toml.uri,
+      )
+      return Array.isArray(ranges) && ranges.length > 0 ? ranges : undefined
+    })
+    assert.deepEqual(
+      tomlFolding.map(({ start, end }) => [start, end]),
+      [
+        [0, 2],
+        [4, 5],
+      ],
+    )
+
+    const properties = await open('messages.properties')
+    await vscode.commands.executeCommand('confetti.detectConfigType')
+    assert.equal(
+      properties.languageId,
+      'properties',
+      'the canonical Java Properties mode is kept when VS Code already set it',
+    )
+
+    const propertyDiagnostic = await waitFor(
+      'Java Properties duplicate-key diagnostic',
+      () => {
+        const diagnostics = vscode.languages.getDiagnostics(properties.uri)
+        return diagnostics.find((item) =>
+          item.message.includes('Duplicate key'),
+        )
+      },
+    )
+    assert.equal(propertyDiagnostic.range.start.line, 1)
+    assert.equal(
+      propertyDiagnostic.message,
+      'Duplicate key "app.name" (also defined on line 1)',
     )
 
     console.log('Confetti VS Code integration tests passed')
