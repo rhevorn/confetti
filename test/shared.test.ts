@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  endsWithContinuation,
   joinLines,
   normalizeLines,
   splitAssignment,
@@ -20,6 +21,17 @@ describe('line normalization', () => {
     expect(joinLines(['a', 'b'], true)).toBe('a\nb\n')
     expect(joinLines(['a', 'b'], false)).toBe('a\nb')
     expect(joinLines([], true)).toBe('\n')
+  })
+})
+
+describe('endsWithContinuation', () => {
+  it('is true only for an odd number of trailing backslashes', () => {
+    expect(endsWithContinuation('')).toBe(false)
+    expect(endsWithContinuation('value')).toBe(false)
+    expect(endsWithContinuation('value\\')).toBe(true)
+    expect(endsWithContinuation('value\\\\')).toBe(false)
+    expect(endsWithContinuation('value\\\\\\')).toBe(true)
+    expect(endsWithContinuation('\\')).toBe(true)
   })
 })
 

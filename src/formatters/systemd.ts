@@ -1,13 +1,9 @@
-import { joinLines, normalizeLines, splitAssignment } from './shared.js'
-
-function endsWithContinuation(value: string): boolean {
-  let backslashes = 0
-  for (let index = value.length - 1; index >= 0; index -= 1) {
-    if (value[index] !== '\\') break
-    backslashes += 1
-  }
-  return backslashes % 2 === 1
-}
+import {
+  endsWithContinuation,
+  joinLines,
+  normalizeLines,
+  splitAssignment,
+} from './shared.js'
 
 export function formatSystemd(content: string): string {
   const { lines, hasFinalNewline } = normalizeLines(content)

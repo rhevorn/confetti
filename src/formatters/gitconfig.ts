@@ -1,4 +1,9 @@
-import { joinLines, normalizeLines, splitAssignment } from './shared.js'
+import {
+  endsWithContinuation,
+  joinLines,
+  normalizeLines,
+  splitAssignment,
+} from './shared.js'
 
 export function formatGitConfig(content: string): string {
   const { lines, hasFinalNewline } = normalizeLines(content)
@@ -7,7 +12,7 @@ export function formatGitConfig(content: string): string {
 
   const formatted = lines.map((line) => {
     if (continuing) {
-      continuing = line.trimEnd().endsWith('\\')
+      continuing = endsWithContinuation(line.trimEnd())
       return line
     }
     const trimmed = line.trim()
@@ -20,7 +25,7 @@ export function formatGitConfig(content: string): string {
 
     const assignment = splitAssignment(trimmed, ['='])
     if (!assignment) return inSection ? `  ${trimmed}` : trimmed
-    continuing = assignment.value.endsWith('\\')
+    continuing = endsWithContinuation(assignment.value)
     const output = `${assignment.key} = ${assignment.value}`
     return inSection ? `  ${output}` : output
   })

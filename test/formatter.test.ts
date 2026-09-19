@@ -397,6 +397,12 @@ describe('formatProperties', () => {
       'host=localhost\npath=/tmp\n',
     )
   })
+
+  it('does not continue a comment line that ends with a backslash', () => {
+    expect(formatProperties('# c \\\nkey = value\n')).toBe(
+      '# c \\\nkey=value\n',
+    )
+  })
 })
 
 describe('formatToml', () => {
@@ -461,6 +467,12 @@ describe('formatGitConfig', () => {
     expect(
       formatGitConfig(' [core] \neditor=code --wait\nautocrlf = false\n'),
     ).toBe('[core]\n  editor = code --wait\n  autocrlf = false\n')
+  })
+
+  it('does not treat an escaped trailing backslash as a continuation', () => {
+    expect(
+      formatGitConfig('[core]\nquotepath = false\\\\\nfilemode = true\n'),
+    ).toBe('[core]\n  quotepath = false\\\\\n  filemode = true\n')
   })
 })
 

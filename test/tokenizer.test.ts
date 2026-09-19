@@ -7,6 +7,10 @@ import {
   trimTokenWhitespace,
 } from '../src/tokenizers/scanner.js'
 import { tokenizeToml, tomlTokenText } from '../src/tokenizers/toml.js'
+import {
+  decodePropertiesKey,
+  propertiesKeyText,
+} from '../src/tokenizers/properties.js'
 
 describe('shared tokenizer', () => {
   it('separates whitespace, strings, escapes, symbols, and comments', () => {
@@ -71,6 +75,34 @@ describe('shared tokenizer', () => {
     expect(split?.symbol).toBe('=')
     expect(splitOnSymbol(tokenizeLine('plain'), ['='])).toBeUndefined()
     expect(trimTokenWhitespace([])).toEqual([])
+  })
+})
+
+describe('Java Properties keys', () => {
+  it('scans keys the way java.util.Properties does', () => {
+    expect(propertiesKeyText('key=value')).toBe('key')
+    expect(propertiesKeyText('key:value')).toBe('key')
+    expect(propertiesKeyText('key value')).toBe('key')
+    expect(propertiesKeyText('   key = value')).toBe('key')
+    expect(propertiesKeyText('escaped\\:key=value')).toBe('escaped\\:key')
+    expect(propertiesKeyText('escaped\\ key=value')).toBe('escaped\\ key')
+    expect(propertiesKeyText('standalone')).toBe('standalone')
+    expect(propertiesKeyText('a"b=1')).toBe('a"b')
+    expect(propertiesKeyText('=value')).toBe('')
+    expect(propertiesKeyText('   ')).toBeUndefined()
+    expect(propertiesKeyText('')).toBeUndefined()
+  })
+
+  it('unescapes keys the way java.util.Properties does', () => {
+    expect(decodePropertiesKey('plain')).toBe('plain')
+    expect(decodePropertiesKey('a\\u0041')).toBe('aA')
+    expect(decodePropertiesKey('a\\tb')).toBe('a\tb')
+    expect(decodePropertiesKey('a\\nb')).toBe('a\nb')
+    expect(decodePropertiesKey('a\\rb')).toBe('a\rb')
+    expect(decodePropertiesKey('a\\fb')).toBe('a\fb')
+    expect(decodePropertiesKey('escaped\\:key')).toBe('escaped:key')
+    expect(decodePropertiesKey('trailing\\')).toBe('trailing')
+    expect(decodePropertiesKey('a\\u00=1')).toBeUndefined()
   })
 })
 
