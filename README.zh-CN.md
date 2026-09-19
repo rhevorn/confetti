@@ -1,12 +1,12 @@
 # Confetti
 
-为 VS Code 提供 `env`、`ini`、`toml`、`yml`、`conf`、nginx、Apache、MySQL、tmux、gitignore、SSH 等 15+ 种配置文件的智能识别、语法高亮和格式化能力，并提供代码折叠、大纲、snippets 和重复键诊断。
+一个快速、纯本地的 VS Code 插件，统一支持 **TOML、YAML、ENV、INI、CONF** 等 25+ 种常用配置文件的智能识别和语法高亮，并在安全的格式中提供专用格式化。
 
 [English documentation](https://github.com/rhevorn/confetti/blob/main/README.md)
 
 ## 安装
 
-从 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=rhevorn.confetti) 安装 **Confetti**，也可以在 VS Code 扩展视图中搜索 `Confetti`、`env`、`ini`、`toml`、`yml`、`conf`、`config formatter` 或 `nginx format`。
+从 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=rhevorn.confetti) 安装 **Confetti**，也可以在 VS Code 扩展视图中搜索 `TOML`、`YAML`、`ENV`、`config`、`conf`、`config formatter` 或 `Confetti`。
 
 ## 为什么选择 Confetti？
 
@@ -35,8 +35,8 @@ Confetti 不会在每次输入时持续扫描整个文档。检测、诊断和�
 
 资源占用情况：
 
-- 1.4.1 的 VSIX 约为 **204 KB**，没有运行时 npm 依赖。
-- 检测 1 MB 示例后，保留检测结果时堆内存增量约 **0.06 MB**；释放结果并执行 GC 后约为 **0.02 MB**。
+- 1.5.1 的 VSIX 约为 **209 KB**，没有运行时 npm 依赖。
+- 检测 1 MB 示例后，保留检测结果时堆内存增量约 **0.17 MB**；释放结果并执行 GC 后约为 **0.06 MB**。
 - 格式化 1 MB Nginx 示例后，立即测得的临时堆内存增量最高约 **75 MB**；释放结果并执行 GC 后，增量回到接近零。Tokenization 和格式化会处理完整文档，因此临时内存会随文件大小增长。
 - 检测缓存只保存很小的结果对象，并在文档关闭时删除。
 - 没有轮询任务、后台索引、网络客户端、遥测客户端、Webview 或 Language Server。
@@ -86,6 +86,8 @@ Confetti 不会在每次输入时持续扫描整个文档。检测、诊断和�
 
 对于 `production.conf` 这类有歧义的文件，Confetti 会结合路径和文件内容进行判断，而不是只依赖扩展名。
 
+点击 Confetti 状态栏项或执行 **Confetti: Show Detection Info**，可以查看文件名、路径、扩展名、内容或用户 association 等评分依据，以及其他候选格式。
+
 对于 YAML、INI 和 Java Properties，如果 VS Code 已经使用标准语言模式，Confetti 会保留它，以兼容其他扩展提供的校验、补全等语言能力。
 
 ## 语法高亮
@@ -130,6 +132,7 @@ YAML 的字面量块（`|`）和折叠块（`>`）会跨行保持字符串高亮
 可以通过以下方式使用：
 
 - 打开命令面板，执行 **Confetti: Format Config**。
+- 执行 **Confetti: Preview Formatting**，在 VS Code 原生 Diff 中预览结果，不修改原文件。
 - 执行 VS Code 标准的 **Format Document** 命令。
 
 上表中支持格式化的类型都有独立的 tokenizer formatter。Confetti 根据结构 token 进行格式化，而不是执行大范围正则替换，同时保留注释、字符串内容、转义空格和续行内容。
@@ -148,7 +151,8 @@ Confetti 有意不为 YAML、Ignore 文件和工具版本文件注册 formatter�
 | ----------------------------------- | ---------------------------------- |
 | **Confetti: Detect Config Type**    | 识别当前文件并应用对应语言模式     |
 | **Confetti: Format Config**         | 直接使用 Confetti 格式化当前文件   |
-| **Confetti: Show Detection Info**   | 显示识别类型和置信度               |
+| **Confetti: Preview Formatting**    | 在只读原生 Diff 中预览格式化结果   |
+| **Confetti: Show Detection Info**   | 显示识别依据、置信度和其他候选格式 |
 | **Confetti: Show Formatter Output** | 查看 Confetti formatter 的调用日志 |
 
 ## 设置
@@ -159,11 +163,26 @@ Confetti 有意不为 YAML、Ignore 文件和工具版本文件注册 formatter�
 | ----------------------------- | ------ | --------------------------------------------- |
 | `confetti.autoDetect`         | `true` | 打开、切换或保存文件时自动识别配置类型        |
 | `confetti.autoDetectFormats`  | `[]`   | 限制自动识别的格式 id；空列表表示支持全部格式 |
+| `confetti.associations`       | `{}`   | 将项目自定义文件名模式映射到已有格式 id       |
 | `confetti.diagnostics.enable` | `true` | 高亮重复键；只在打开、切换和保存时运行        |
 | `confetti.format.enable`      | `true` | 启用 Confetti 文档格式化                      |
 | `confetti.format.formats`     | `[]`   | 限制格式化的格式 id；空列表表示支持全部格式   |
 
 三个 `boolean` 设置可以直接在 VS Code Settings UI 中通过复选框修改；`confetti.autoDetectFormats` 和 `confetti.format.formats` 接受格式 id 列表（例如 `["nginx", "ssh"]`），空列表表示启用全部格式。
+
+项目使用自定义配置文件名时，可以设置 association：
+
+```json
+{
+  "confetti.associations": {
+    "**/deploy/*.cfg": "nginx",
+    "*.internal-env": "env",
+    "config/proxy.conf": "caddy"
+  }
+}
+```
+
+Association 的优先级高于内置检测。模式会同时匹配完整路径、工作区相对路径和文件名；多个模式同时命中时，内容最具体的模式优先。未知格式 id 会被忽略，并记录到 Confetti 输出面板。
 
 ## 确认使用了哪个 formatter
 

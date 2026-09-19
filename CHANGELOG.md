@@ -2,6 +2,15 @@
 
 All notable changes to Confetti are documented in this file.
 
+## 1.5.1 - 2026-09-19
+
+- Explain every successful detection with its filename, path pattern, extension, content, or user-association evidence, plus up to five alternative candidates in the Confetti output channel.
+- Add `confetti.associations` for mapping project-specific filename patterns to supported format ids, with workspace-relative and cross-platform path matching and more-specific patterns taking precedence.
+- Add **Confetti: Preview Formatting**, which opens a native VS Code diff without modifying the source document.
+- Refresh cached detection, folding, symbols, diagnostics, and the status indicator when associations change, while keeping document-edit handling O(1).
+- Extend unit and real VS Code Extension Host tests for detection evidence, association precedence, invalid ids, settings refresh, and formatting previews.
+- Improve Marketplace discovery metadata for TOML, YAML, ENV, config, conf, syntax-highlighting, and formatter searches while staying within the 30-keyword publishing limit.
+
 ## 1.4.1 - 2026-09-11
 
 - Let the explicit **Confetti: Detect Config Type** command apply a detected language even when that format is excluded from automatic detection.

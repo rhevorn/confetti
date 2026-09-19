@@ -10,6 +10,7 @@ Keep the product focused on:
 2. TextMate syntax highlighting
 3. Format Document support
 4. Lightweight editor features that run only on open, activate, and save: folding ranges, outline symbols, duplicate-key diagnostics, snippets, and the status bar detection indicator
+5. Explainable detection, user filename associations, and native diff-based formatting previews
 
 Do not add AI features, accounts, cloud services, telemetry, Webviews, validation, or completion unless the user explicitly expands the product scope.
 
@@ -95,11 +96,13 @@ Formatting:
 
 Extension behavior:
 
-- Keep `confetti.autoDetect`, `confetti.autoDetectFormats`, `confetti.diagnostics.enable`, `confetti.format.enable`, and `confetti.format.formats` available in the VS Code Settings UI. Empty format lists mean all formats. Do not declare a `confetti.autoDetect.formats` child key because VS Code treats it as conflicting with the boolean `confetti.autoDetect` parent key.
+- Keep `confetti.autoDetect`, `confetti.autoDetectFormats`, `confetti.associations`, `confetti.diagnostics.enable`, `confetti.format.enable`, and `confetti.format.formats` available in the VS Code Settings UI. Empty format lists mean all formats. Do not declare a `confetti.autoDetect.formats` child key because VS Code treats it as conflicting with the boolean `confetti.autoDetect` parent key.
+- User associations override built-in detection. Match them against full, workspace-relative, and basename paths; prefer the most specific matching pattern and ignore unknown format ids safely.
 - Keep the confidence threshold internal rather than user-configurable.
 - Release cached detection results when documents close, and clear diagnostics for closed documents.
 - Log formatter invocation, selected format, result, elapsed time, and path to the Confetti output channel.
 - Keep the explicit **Confetti: Format Config** command so users can distinguish Confetti from other formatters.
+- Keep **Confetti: Preview Formatting** read-only and implemented with the native VS Code diff editor, not a Webview.
 - Keep exactly one event handler per VS Code event (open, save, close, active-editor change, document change); new features wire into the existing handlers instead of registering more listeners. The document-change handler must stay O(1) — it only drops stale diagnostics, and never rescans content while typing.
 - Wire folding, symbols, diagnostics, and the status bar through the existing handlers so nothing runs while typing.
 

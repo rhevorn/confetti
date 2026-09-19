@@ -1,12 +1,12 @@
 # Confetti
 
-Smart detection, syntax highlighting, and formatting for `env`, `ini`, `toml`, `yml`, `conf`, nginx, Apache, MySQL, tmux, gitignore, SSH, and 15+ other configuration file types in VS Code — plus folding, outlines, snippets, and duplicate-key diagnostics.
+One fast, local VS Code extension for smart detection and syntax highlighting across **TOML, YAML, ENV, INI, CONF**, and 25+ common config file formats, with dedicated formatting where it is safe.
 
 [中文文档](https://github.com/rhevorn/confetti/blob/main/README.zh-CN.md)
 
 ## Install
 
-Install **Confetti** from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=rhevorn.confetti), or search in the VS Code Extensions view for `Confetti`, `env`, `ini`, `toml`, `yml`, `conf`, `config formatter`, or `nginx format`.
+Install **Confetti** from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=rhevorn.confetti), or search in the VS Code Extensions view for `TOML`, `YAML`, `ENV`, `config`, `conf`, `config formatter`, or `Confetti`.
 
 ## Why Confetti?
 
@@ -35,8 +35,8 @@ Core benchmark results for the generated Nginx sample:
 
 Resource characteristics:
 
-- The 1.4.1 VSIX is approximately **204 KB** and has no runtime npm dependencies.
-- Detection retained about **0.06 MB** of additional heap for a 1 MB sample; after releasing the result and running GC, the measured delta was about **0.02 MB**.
+- The 1.5.1 VSIX is approximately **209 KB** and has no runtime npm dependencies.
+- Detection retained about **0.17 MB** of additional heap for a 1 MB sample; after releasing the result and running GC, the measured delta was about **0.06 MB**.
 - Formatting a 1 MB Nginx sample temporarily increased heap usage by up to **75 MB** immediately after the operation. The measured delta returned to approximately zero after the result was released and GC ran. Tokenization and formatting work on a complete document, so temporary allocation grows with file size.
 - Detection cache entries are small and are removed when their documents close.
 - Confetti has no polling loop, background index, network client, telemetry client, Webview, or language server.
@@ -86,6 +86,8 @@ Method: Apple Silicon (`darwin arm64`), Node.js 24.14.1, 10 warm-up runs; 100 me
 
 For ambiguous files such as `production.conf`, Confetti examines both the path and content instead of relying only on the extension.
 
+Click the Confetti status bar item or run **Confetti: Show Detection Info** to see the filename, path, extension, content, or user-association evidence behind the result, along with other candidates.
+
 For YAML, INI, and Java Properties, Confetti keeps VS Code's canonical language mode when it is already active. This preserves compatibility with validation, completion, and other language tooling from installed extensions.
 
 ## Syntax highlighting
@@ -130,6 +132,7 @@ In `[flake8]`, an accidentally indented assignment after an integer option such 
 Use either of these methods:
 
 - Open the Command Palette and run **Confetti: Format Config**.
+- Run **Confetti: Preview Formatting** to inspect a native VS Code diff without changing the source file.
 - Run VS Code's standard **Format Document** command.
 
 Formats marked as supported above have dedicated tokenizer-backed formatters. Confetti formats structural tokens instead of applying broad regular-expression replacements, while preserving comments, quoted content, escaped spaces, and continuation lines.
@@ -148,7 +151,8 @@ Open the Command Palette with `Ctrl+Shift+P` or `Cmd+Shift+P` and search for:
 | ----------------------------------- | ----------------------------------------------------------- |
 | **Confetti: Detect Config Type**    | Detect the active file and apply the detected language mode |
 | **Confetti: Format Config**         | Format the active file directly with Confetti               |
-| **Confetti: Show Detection Info**   | Show the detected type and confidence                       |
+| **Confetti: Preview Formatting**    | Preview Confetti formatting in a read-only native diff      |
+| **Confetti: Show Detection Info**   | Show detection evidence, confidence, and other candidates   |
 | **Confetti: Show Formatter Output** | Open logs showing when the Confetti formatter was invoked   |
 
 ## Settings
@@ -159,11 +163,26 @@ Open VS Code Settings and search for `Confetti`.
 | ----------------------------- | ------- | --------------------------------------------------------------------------------- |
 | `confetti.autoDetect`         | `true`  | Detect supported files when they are opened, activated, or saved                  |
 | `confetti.autoDetectFormats`  | `[]`    | Restrict automatic detection to these format ids; an empty list means all formats |
+| `confetti.associations`       | `{}`    | Map project-specific filename patterns to supported Confetti format ids           |
 | `confetti.diagnostics.enable` | `true`  | Highlight duplicate keys; runs only on open, activate, and save                   |
 | `confetti.format.enable`      | `true`  | Enable Confetti document formatting                                               |
 | `confetti.format.formats`     | `[]`    | Restrict formatting to these format ids; an empty list means all formats          |
 
 The three `boolean` settings are available as checkboxes in the VS Code Settings UI; `confetti.autoDetectFormats` and `confetti.format.formats` accept format-id lists such as `["nginx", "ssh"]`, and an empty list keeps every format enabled.
+
+Use associations when a project gives a supported format a custom filename:
+
+```json
+{
+  "confetti.associations": {
+    "**/deploy/*.cfg": "nginx",
+    "*.internal-env": "env",
+    "config/proxy.conf": "caddy"
+  }
+}
+```
+
+Associations take priority over built-in detection. Patterns are matched against the full path, workspace-relative path, and basename; when multiple patterns match, the most specific one wins. Unknown format ids are ignored and recorded in the Confetti output channel.
 
 ## Confirm which formatter ran
 

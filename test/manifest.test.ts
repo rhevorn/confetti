@@ -27,6 +27,8 @@ interface CommandContribution {
 }
 
 interface ExtensionManifest {
+  description: string
+  keywords: string[]
   version: string
   publisher: string
   icon: string
@@ -65,7 +67,7 @@ describe('VS Code extension manifest', () => {
     expect(ssh?.filenames).not.toContain('config')
   })
   it('contains complete Marketplace metadata for the stable release', () => {
-    expect(manifest.version).toBe('1.4.1')
+    expect(manifest.version).toBe('1.5.1')
     expect(manifest.publisher).toBe('rhevorn')
     expect(manifest.repository).toEqual({
       type: 'git',
@@ -81,37 +83,40 @@ describe('VS Code extension manifest', () => {
   })
 
   it('uses Marketplace keywords that cover common config-file searches', () => {
-    const keywords = (manifest as ExtensionManifest & { keywords: string[] })
-      .keywords
+    const { keywords } = manifest
+
+    expect(keywords).toHaveLength(30)
+    expect(new Set(keywords).size).toBe(keywords.length)
 
     for (const keyword of [
+      'config',
+      'configuration',
       'config files',
-      'gitignore',
-      'dotenv',
-      'env',
-      'ini',
-      'toml',
-      'yaml',
-      'yml',
       'conf',
+      'toml',
+      'toml formatter',
+      'yaml',
+      'yaml syntax highlighting',
+      'env',
+      'dotenv',
+      'env formatter',
+      'ini',
+      'ini formatter',
       'nginx',
-      'apache',
-      'caddy',
-      'my.cnf',
-      'tox.ini',
-      'tmux',
-      'screenrc',
-      'inputrc',
-      'systemd',
-      'hosts',
-      'fstab',
-      'crontab',
+      'nginx formatter',
+      'syntax highlighting',
+      'formatter',
       'format document',
-      'snippets',
-      'yarnrc',
-      'cursorignore',
+      'language detection',
+      'config formatter',
+      'vscode config',
     ]) {
       expect(keywords).toContain(keyword)
+    }
+
+    const description = manifest.description.toLowerCase()
+    for (const searchTerm of ['toml', 'yaml', 'env', 'config', 'conf']) {
+      expect(description).toContain(searchTerm)
     }
   })
 
@@ -132,6 +137,7 @@ describe('VS Code extension manifest', () => {
     ).toEqual([
       'confetti.detectConfigType',
       'confetti.formatConfig',
+      'confetti.previewFormatting',
       'confetti.showDetectionInfo',
       'confetti.showOutput',
     ])
@@ -142,12 +148,34 @@ describe('VS Code extension manifest', () => {
     expect(
       Object.keys(manifest.contributes.configuration.properties).sort(),
     ).toEqual([
+      'confetti.associations',
       'confetti.autoDetect',
       'confetti.autoDetectFormats',
       'confetti.diagnostics.enable',
       'confetti.format.enable',
       'confetti.format.formats',
     ])
+  })
+
+  it('declares project-specific associations as a string map', () => {
+    const property = manifest.contributes.configuration.properties[
+      'confetti.associations'
+    ] as {
+      type: string
+      default: unknown
+      additionalProperties: { type: string; enum: string[] }
+    }
+    expect(property).toMatchObject({
+      type: 'object',
+      default: {},
+      additionalProperties: { type: 'string' },
+    })
+    expect(property.additionalProperties.enum.sort()).toEqual(
+      createDefaultRegistry()
+        .all()
+        .map(({ id }) => id)
+        .sort(),
+    )
   })
 
   it('registers one language and one grammar for every config definition', () => {
