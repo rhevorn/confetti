@@ -1,0 +1,71 @@
+{
+  "Service Unit": {
+    "prefix": "service",
+    "body": [
+      "[Unit]",
+      "Description=${1:My service}",
+      "After=network-online.target",
+      "Wants=network-online.target",
+      "",
+      "[Service]",
+      "Type=${2:simple}",
+      "User=${3:app}",
+      "Group=${4:app}",
+      "WorkingDirectory=${5:/srv/app}",
+      "ExecStart=${6:/usr/bin/app}",
+      "Restart=on-failure",
+      "RestartSec=5s",
+      "",
+      "[Install]",
+      "WantedBy=multi-user.target"
+    ],
+    "description": "Service unit with unit, service, and install sections"
+  },
+  "Timer Unit": {
+    "prefix": "timer",
+    "body": [
+      "[Unit]",
+      "Description=${1:Nightly job}",
+      "",
+      "[Timer]",
+      "OnCalendar=${2:*-*-* 02:30:00}",
+      "Persistent=true",
+      "RandomizedDelaySec=10m",
+      "AccuracySec=1m",
+      "Unit=${3:job.service}",
+      "",
+      "[Install]",
+      "WantedBy=timers.target"
+    ],
+    "description": "Timer unit that schedules a service"
+  },
+  "Exec Commands": {
+    "prefix": "exec",
+    "body": [
+      "ExecStartPre=${1:/usr/bin/app migrate}",
+      "ExecStart=${2:/usr/bin/app}",
+      "ExecReload=/bin/kill -HUP \\$MAINPID"
+    ],
+    "description": "Pre-start, start, and reload commands"
+  },
+  "Multiline Environment": {
+    "prefix": "environment",
+    "body": [
+      "Environment=\"${1:FIRST}=${2:1}\" \\",
+      "          \"${3:SECOND}=${4:2}\""
+    ],
+    "description": "Environment values continued onto a second line"
+  },
+  "Hardening": {
+    "prefix": "harden",
+    "body": [
+      "NoNewPrivileges=true",
+      "ProtectSystem=strict",
+      "ProtectHome=true",
+      "PrivateTmp=true",
+      "PrivateDevices=true",
+      "ReadWritePaths=${1:/srv/app/data}"
+    ],
+    "description": "Sandboxing directives for a service unit"
+  }
+}

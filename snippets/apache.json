@@ -1,0 +1,62 @@
+{
+  "Virtual Host": {
+    "prefix": "vhost",
+    "body": [
+      "<VirtualHost *:80>",
+      "    ServerName ${1:example.com}",
+      "    ServerAlias ${2:www.example.com}",
+      "    ServerAdmin ${3:webmaster@example.com}",
+      "    DocumentRoot \"${4:/var/www/html}\"",
+      "",
+      "    <Directory \"${4:/var/www/html}\">",
+      "        Options FollowSymLinks",
+      "        AllowOverride All",
+      "        Require all granted",
+      "    </Directory>",
+      "",
+      "    ErrorLog \\${APACHE_LOG_DIR}/error.log",
+      "    CustomLog \\${APACHE_LOG_DIR}/access.log combined",
+      "</VirtualHost>"
+    ],
+    "description": "Virtual host with a document root and log files"
+  },
+  "Directory Block": {
+    "prefix": "directory",
+    "body": [
+      "<Directory \"${1:/var/www/html}\">",
+      "    Options Indexes FollowSymLinks",
+      "    AllowOverride ${2:All}",
+      "    Require all ${3:granted}",
+      "</Directory>"
+    ],
+    "description": "Directory block with access rules"
+  },
+  "Files Block": {
+    "prefix": "files",
+    "body": [
+      "<Files \"${1:wp-config.php}\">",
+      "    Require all denied",
+      "</Files>"
+    ],
+    "description": "Deny access to specific files"
+  },
+  "IfModule Block": {
+    "prefix": "ifmodule",
+    "body": [
+      "<IfModule ${1:mod_deflate.c}>",
+      "    ${2:AddOutputFilterByType DEFLATE text/html text/css}",
+      "</IfModule>"
+    ],
+    "description": "Directives applied only when a module is loaded"
+  },
+  "Rewrite Rules": {
+    "prefix": "rewrite",
+    "body": [
+      "RewriteEngine On",
+      "RewriteBase /",
+      "RewriteCond %{HTTP_HOST} ^www\\.${1:example}\\.com\\$ [NC]",
+      "RewriteRule ^(.*)\\$ https://${1:example}.com/\\$1 [R=301,L]"
+    ],
+    "description": "Canonical-host redirect with rewrite conditions"
+  }
+}

@@ -8,7 +8,14 @@ import { SYMBOL_FORMAT_IDS } from './symbols.js'
  * they have no code-level source of truth; test/manifest.test.ts keeps this
  * list synchronized with the contributed files.
  */
-export const SNIPPET_FORMAT_IDS: readonly string[] = ['nginx']
+export const SNIPPET_FORMAT_IDS: readonly string[] = [
+  'apache',
+  'caddy',
+  'nginx',
+  'ssh',
+  'systemd',
+  'toml',
+]
 
 export interface FormatCapabilities {
   id: string

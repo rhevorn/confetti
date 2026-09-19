@@ -1,0 +1,57 @@
+{
+  "Site Block": {
+    "prefix": "site",
+    "body": [
+      "${1:example.com} {",
+      "    encode zstd gzip",
+      "    root * ${2:/srv/www}",
+      "",
+      "    file_server",
+      "}"
+    ],
+    "description": "Site block serving static files with compression"
+  },
+  "Handle Path": {
+    "prefix": "handle",
+    "body": [
+      "handle ${1:/api/*} {",
+      "    ${2:reverse_proxy localhost:9000}",
+      "}"
+    ],
+    "description": "Handle block scoped to a path"
+  },
+  "Named Matcher": {
+    "prefix": "matcher",
+    "body": [
+      "@${1:static} path ${2:*.css *.js *.png}",
+      "handle @${1:static} {",
+      "    ${3:file_server}",
+      "}"
+    ],
+    "description": "Named matcher reused by a handle block"
+  },
+  "Reverse Proxy": {
+    "prefix": "proxy",
+    "body": [
+      "reverse_proxy ${1:localhost:9000} {",
+      "    header_up Host {host}",
+      "    health_uri /health",
+      "}"
+    ],
+    "description": "Reverse proxy with an upstream health check"
+  },
+  "Logging Snippet": {
+    "prefix": "logging",
+    "body": [
+      "(${1:logging}) {",
+      "    header {",
+      "        -X-Server",
+      "    }",
+      "    log {",
+      "        output file ${2:/var/log/caddy/access.log}",
+      "    }",
+      "}"
+    ],
+    "description": "Reusable snippet block, imported with `import logging`"
+  }
+}

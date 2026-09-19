@@ -1,0 +1,53 @@
+{
+  "Host Block": {
+    "prefix": "host",
+    "body": [
+      "Host ${1:work}",
+      "  HostName ${2:example.com}",
+      "  User ${3:deploy}",
+      "  Port ${4:22}",
+      "  IdentityFile ${5:~/.ssh/id_ed25519}"
+    ],
+    "description": "Host block with connection details"
+  },
+  "Match Block": {
+    "prefix": "match",
+    "body": [
+      "Match host ${1:*.example.com} user ${2:deploy}",
+      "  ForwardAgent no",
+      "  SendEnv LANG LC_*"
+    ],
+    "description": "Match block applying directives to a group of hosts"
+  },
+  "Bastion Jump": {
+    "prefix": "bastion",
+    "body": [
+      "Host ${1:internal}",
+      "  HostName ${2:10.0.0.5}",
+      "  User ${3:ops}",
+      "  ProxyJump ${4:bastion}",
+      "  IdentityFile ${5:~/.ssh/id_ed25519}"
+    ],
+    "description": "Host reached through a jump host"
+  },
+  "Connection Keepalive": {
+    "prefix": "keepalive",
+    "body": [
+      "AddKeysToAgent yes",
+      "ServerAliveInterval 30",
+      "ServerAliveCountMax 3",
+      "TCPKeepAlive yes"
+    ],
+    "description": "Global keepalive and agent directives"
+  },
+  "Remote Command": {
+    "prefix": "remote",
+    "body": [
+      "Host ${1:shell}",
+      "  HostName ${2:example.com}",
+      "  RequestTTY force",
+      "  RemoteCommand cd ${3:/srv/app} && exec \\$SHELL"
+    ],
+    "description": "Host that opens an interactive remote shell"
+  }
+}

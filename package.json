@@ -201,8 +201,28 @@
     },
     "snippets": [
       {
+        "language": "confetti-apache",
+        "path": "./snippets/apache.json"
+      },
+      {
+        "language": "confetti-caddy",
+        "path": "./snippets/caddy.json"
+      },
+      {
         "language": "confetti-nginx",
         "path": "./snippets/nginx.json"
+      },
+      {
+        "language": "confetti-ssh",
+        "path": "./snippets/ssh.json"
+      },
+      {
+        "language": "confetti-systemd",
+        "path": "./snippets/systemd.json"
+      },
+      {
+        "language": "confetti-toml",
+        "path": "./snippets/toml.json"
       }
     ],
     "languages": [

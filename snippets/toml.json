@@ -1,0 +1,38 @@
+{
+  "Table": {
+    "prefix": "table",
+    "body": ["[${1:table}]", "${2:key} = ${3:value}"],
+    "description": "Table header with one key"
+  },
+  "Array of Tables": {
+    "prefix": "arraytable",
+    "body": ["[[${1:items}]]", "${2:key} = ${3:value}"],
+    "description": "Array of tables with one key"
+  },
+  "Project Table": {
+    "prefix": "project",
+    "body": [
+      "[project]",
+      "name = \"${1:package-name}\"",
+      "version = \"${2:0.1.0}\"",
+      "description = \"${3:A short description}\"",
+      "requires-python = \">=${4:3.12}\""
+    ],
+    "description": "PEP 621 project table for pyproject.toml"
+  },
+  "Tool Table": {
+    "prefix": "tool",
+    "body": ["[tool.${1:name}]", "${2:enabled} = ${3:true}"],
+    "description": "Tool configuration table"
+  },
+  "Multiline String": {
+    "prefix": "multiline",
+    "body": [
+      "${1:key} = \"\"\"",
+      "${2:First line}",
+      "${3:Second line}",
+      "\"\"\""
+    ],
+    "description": "Multiline basic string"
+  }
+}

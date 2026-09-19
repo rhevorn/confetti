@@ -907,7 +907,9 @@ describe('VS Code extension adapter', () => {
     expect(sectionOf('Duplicate-key diagnostics:')).toContain('properties')
     expect(sectionOf('Folding ranges:')).toContain('toml')
     expect(sectionOf('Outline symbols:')).toContain('toml')
-    expect(sectionOf('Snippets:')).toBe('nginx')
+    expect(sectionOf('Snippets:')).toBe(
+      'apache, caddy, nginx, ssh, systemd, toml',
+    )
     expect(lines).toContain('    properties: Java Properties')
     expect(lines).toContain('    toml: TOML')
   })
